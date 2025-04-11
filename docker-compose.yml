@@ -1,0 +1,81 @@
+services:
+  frontend:
+    container_name: vue-movies
+    build:
+      context: ./vue-movies
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./vue-movies:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - HOST=0.0.0.0
+      - NUXT_HOST=0.0.0.0
+      - API_BASE_URL=http://backend:8080
+      - NPM_CONFIG_REGISTRY=https://registry.npmmirror.com
+    dns:
+      - 8.8.8.8  # DNS Google
+      - 1.1.1.1  # DNS Cloudflare
+    user: "node"
+    command: yarn dev
+    depends_on:
+      - backend  # Removed 'condition: service_healthy'
+    restart: unless-stopped
+    networks:
+      - cinema-network
+
+  backend:
+    container_name: cinema-system
+    build:
+      context: ./cinema-system
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/cinema_db?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+      - SPRING_JPA_PROPERTIES_HIBERNATE_JDBC_TIME_ZONE=UTC
+      - SPRING_JPA_PROPERTIES_HIBERNATE_ORDER_UPDATES=true
+      - SPRING_JPA_PROPERTIES_HIBERNATE_BATCH_VERSIONED_DATA=true
+      - SPRING_MAIN_LAZY_INITIALIZATION=true
+    depends_on:
+      mysql-db:
+        condition: service_healthy  # Kept this since mysql-db has a healthcheck
+    volumes:
+      - ./cinema-system:/app
+    networks:
+      - cinema-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+
+  mysql-db:
+    image: mysql:8.0
+    container_name: cinema-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=crystal2001
+      - MYSQL_DATABASE=cinema_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - cinema-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+
+networks:
+  cinema-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
