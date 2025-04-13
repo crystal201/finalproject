@@ -33,6 +33,7 @@
         Chưa có tài khoản? 
         <nuxt-link to="/register" class="register-link">Đăng ký ngay</nuxt-link>
       </p>
+      <p v-if="error" class="error-text">{{ error }}</p>
     </form>
   </div>
 </template>
@@ -44,21 +45,26 @@ export default {
       form: {
         username: '',
         password: ''
-      }
-    }
+      },
+      error: ''
+    };
   },
   methods: {
     async handleLogin() {
+      this.error = ''; // Reset lỗi trước khi thử
       try {
-        const response = await this.$axios.$post('/api/auth/login', this.form)
-        localStorage.setItem('authToken', response.token)
-        this.$router.push('/')
+        const success = await this.$store.dispatch('login', this.form);
+        if (success) {
+          this.$router.push('/');
+        } else {
+          this.error = 'Tài khoản hoặc mật khẩu không đúng';
+        }
       } catch (error) {
-        console.error('Login failed:', error)
+        this.error = 'Đăng nhập thất bại, vui lòng thử lại';
       }
     }
   }
-}
+};
 </script>
 
 <style scoped>
@@ -67,14 +73,14 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #121212; /* Màu nền tối */
+  background-color: #121212;
   padding: 20px;
 }
 
 .login-form {
   width: 100%;
   max-width: 400px;
-  background-color: #1E1E1E; /* Màu form tối */
+  background-color: #1E1E1E;
   padding: 40px 30px;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -108,7 +114,7 @@ export default {
   width: 100%;
   padding: 12px 15px;
   background-color: #2D2D2D;
-  border: 1px solid #3B82F6; /* Viền xanh */
+  border: 1px solid #3B82F6;
   border-radius: 6px;
   color: white;
   font-size: 15px;
@@ -128,7 +134,7 @@ export default {
 .login-button {
   width: 100%;
   padding: 14px;
-  background-color: #3B82F6; /* Màu xanh chủ đạo */
+  background-color: #3B82F6;
   color: white;
   border: none;
   border-radius: 6px;
@@ -140,7 +146,7 @@ export default {
 }
 
 .login-button:hover {
-  background-color: #2563EB; /* Màu xanh đậm hơn khi hover */
+  background-color: #2563EB;
 }
 
 .register-text {
@@ -160,5 +166,12 @@ export default {
 .register-link:hover {
   color: #60A5FA;
   text-decoration: underline;
+}
+
+.error-text {
+  color: #EF4444;
+  text-align: center;
+  margin-top: 15px;
+  font-size: 14px;
 }
 </style>

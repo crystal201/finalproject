@@ -3,6 +3,7 @@ package com.example.cinema.security;
 import java.security.Key;
 import java.util.Date;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.JwtException;
@@ -14,6 +15,11 @@ import io.jsonwebtoken.security.Keys;
 @SuppressWarnings("deprecation")
 
 public class JwtUtil {
+    @Value("${jwt.secret}")
+    private String secret;
+    @Value("${jwt.expiration}")
+    private long expiration;
+
     private static final String SECRET_KEY = "your_secret_key_your_secret_key_32char";
     private static final long EXPIRATION_TIME = 86400000;
 
