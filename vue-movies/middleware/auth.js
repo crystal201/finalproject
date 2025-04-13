@@ -1,5 +1,6 @@
-export default function ({ store, redirect }) {
-    // if (!store.state.auth.token) {
-    //   return redirect('/login')
-    // }
+export default function ({ store, redirect, route }) {
+  if (route.path === '/login' || route.path === '/register') return;
+  if (!store.state.isAuthenticated) {
+    return redirect('/login');
   }
+}

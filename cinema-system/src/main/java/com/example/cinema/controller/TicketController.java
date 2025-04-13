@@ -3,6 +3,7 @@ package com.example.cinema.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/tickets")
 @RequiredArgsConstructor
 public class TicketController {
+
     private final TicketService ticketService;
 
     @GetMapping
@@ -25,7 +27,8 @@ public class TicketController {
         return ticketService.getAllTickets();
     }
 
-    @PostMapping
+    @PostMapping("/book")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Ticket> bookTicket(@RequestBody Ticket ticket) {
         return ResponseEntity.ok(ticketService.bookTicket(ticket));
     }

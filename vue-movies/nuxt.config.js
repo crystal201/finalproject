@@ -94,6 +94,7 @@ export default {
     "~/plugins/lazyload.js",
     "~/plugins/filters.js",
     "~/plugins/axios.js",
+    '~/plugins/auth.js',
     { src: "~/plugins/ga.js", ssr: false },
   ],
 
