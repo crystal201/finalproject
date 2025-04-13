@@ -25,5 +25,11 @@ module.exports = {
     'semi': ['error', 'always'],
     'space-before-function-paren': ['error', 'always'],
     'no-console': ['warn'],
+    'vue/multi-word-component-names': 'off',
+    'space-before-function-paren': 'off',
+    'comma-dangle': 'off',
+    'eol-last': 'off',
+    'indent': 'off',
+    'no-trailing-spaces': 'off'
   }
 }
