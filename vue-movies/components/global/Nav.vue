@@ -40,11 +40,18 @@
       </li>
       <li>
         <nuxt-link
+          v-if="!$store.state.isAuthenticated"
           :to="{ name: 'login' }"
           aria-label="Login">
-          <!-- eslint-disable-next-line -->
-           Login
+          Đăng nhập
         </nuxt-link>
+        <button
+          v-else
+          class="logout-button"
+          @click="logout"
+          aria-label="Logout">
+          Đăng xuất
+        </button>
       </li>
     </ul>
   </nav>
@@ -61,11 +68,15 @@ export default {
   },
 
   methods: {
-    toggleSearch () {
+    toggleSearch() {
       if (this.$route.name !== 'search') {
         this.$store.commit('search/toggleSearch');
       }
     },
+    logout() {
+      this.$store.dispatch('logout');
+      this.$router.push('/login');
+    }
   },
 };
 </script>
@@ -124,6 +135,8 @@ export default {
     height: 100%;
     outline: 0;
     transition: all 0.2s;
+    color: white;
+    font-size: 16px;
 
     &:hover,
     &:focus {
@@ -145,5 +158,12 @@ a.nuxt-link-active {
   svg g {
     stroke: $primary-color;
   }
+}
+
+.logout-button {
+  color: white;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 </style>

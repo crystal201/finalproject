@@ -1,30 +1,32 @@
 export const state = () => ({
-    isAuthenticated: false
-});
-
-export const mutations = {
+    isAuthenticated: false,
+  });
+  
+  export const mutations = {
     setAuthenticated(state, value) {
-        state.isAuthenticated = value;
-    }
-};
-
-export const actions = {
-    checkAuth({ commit }) {
-        const token = localStorage.getItem('token');
-        commit('setAuthenticated', !!token);
+      state.isAuthenticated = value;
     },
-    async login({ commit }, { username, password }) {
-        try {
-            const response = await this.$axios.post('/api/auth/login', { username, password });
-            localStorage.setItem('token', response.data.token);
-            commit('setAuthenticated', true);
-            return true;
-        } catch (error) {
-            return false;
-        }
+  };
+  
+  export const actions = {
+    checkAuth ({ commit }) {
+      const token = localStorage.getItem('authToken');
+      commit('setAuthenticated', !!token);
     },
-    logout({ commit }) {
-        localStorage.removeItem('token');
+    async login ({ commit }, { username, password }) {
+      try {
+        const response = await this.$axios.post('/api/auth/login', { username, password });
+        localStorage.setItem('authToken', response.data.token);
+        commit('setAuthenticated', true);
+        return true;
+      } catch (error) {
+        localStorage.removeItem('authToken');
         commit('setAuthenticated', false);
-    }
-};
+        return false;
+      }
+    },
+    logout ({ commit }) {
+      localStorage.removeItem('authToken');
+      commit('setAuthenticated', false);
+    },
+  };
