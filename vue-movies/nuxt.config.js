@@ -15,6 +15,14 @@ export default {
       }
     }
   },
+  loaders: {
+    sass: {
+      implementation: require('sass')
+    },
+    scss: {
+      implementation: require('sass')
+    }
+  },
   server: {
     host: '0.0.0.0',
     port: 3000,
