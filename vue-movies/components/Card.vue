@@ -19,7 +19,9 @@
       <h2 class="card__name">
         {{ name }}
       </h2>
-
+      <nuxt-link :to="{ path: '/booking', query: { movieId: item.id } }">
+        Đặt vé
+      </nuxt-link>
       <div
         v-if="media !== 'person' && (stars || item.vote_average)"
         class="card__rating">

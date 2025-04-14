@@ -35,7 +35,7 @@ export default {
     }
   },
   router: {
-    middleware: ['auth'],
+    middleware: [],
     // extendRoutes(routes, resolve) {
     //   routes.push({
     //     name: 'login',

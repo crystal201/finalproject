@@ -51,18 +51,17 @@ export default {
   },
   methods: {
     async handleLogin() {
-      this.error = ''; // Reset lỗi trước khi thử
-      try {
-        const success = await this.$store.dispatch('login', this.form);
-        if (success) {
-          this.$router.push('/');
-        } else {
-          this.error = 'Tài khoản hoặc mật khẩu không đúng';
-        }
-      } catch (error) {
-        this.error = 'Đăng nhập thất bại, vui lòng thử lại';
-      }
+    this.error = '';
+    try {
+      const response = await this.$axios.post('/api/auth/login', this.form)
+      localStorage.setItem('token', response.data.token)
+      this.$axios.setToken(response.data.token, 'Bearer')
+      
+      this.$router.push('/')
+    } catch (error) {
+      this.error = 'Đăng nhập thất bại';
     }
+  }
   }
 };
 </script>
