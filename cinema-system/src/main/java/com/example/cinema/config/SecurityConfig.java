@@ -65,6 +65,7 @@ public class SecurityConfig {
                     "/configuration/security"
                 ).permitAll() // Cho phép truy cập công khai
                 .anyRequest().authenticated() // Yêu cầu xác thực cho các yêu cầu khác
+                
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // Thêm JWT filter
 
