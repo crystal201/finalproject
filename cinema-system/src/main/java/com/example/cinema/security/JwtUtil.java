@@ -1,3 +1,4 @@
+// cinema-system/src/main/java/com/example/cinema/security/JwtUtil.java
 package com.example.cinema.security;
 
 import java.security.Key;
@@ -23,6 +24,7 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
+    @SuppressWarnings("deprecation")
     public String generateToken(String username) {
         return Jwts.builder()
                 .setSubject(username)
@@ -32,6 +34,7 @@ public class JwtUtil {
                 .compact();
     }
 
+    @SuppressWarnings("deprecation")
     public String extractUsername(String token) {
         return Jwts.parser()
                 .setSigningKey(getSigningKey())
@@ -41,6 +44,7 @@ public class JwtUtil {
                 .getSubject();
     }
 
+    @SuppressWarnings("deprecation")
     public boolean validateToken(String token) {
         try {
             Jwts.parser()
