@@ -50,19 +50,25 @@ export default {
     };
   },
   methods: {
-    async handleLogin() {
-    this.error = '';
+  async handleLogin() {
+    this.error = ''
     try {
-      const response = await this.$axios.post('/api/auth/login', this.form)
-      localStorage.setItem('token', response.data.token)
-      this.$axios.setToken(response.data.token, 'Bearer')
+      // Cách 1: Nếu dùng namespaced module
+      const success = await this.$store.dispatch('auth/login', this.form)      
+      // Cách 2: Nếu không dùng namespace
+      // const success = await this.$store.dispatch('login', this.form)
       
-      this.$router.push('/')
+      if (success) {
+        this.$router.push('/')
+      } else {
+        this.error = 'Sai tài khoản hoặc mật khẩu'
+      }
     } catch (error) {
-      this.error = 'Đăng nhập thất bại';
+      console.error('Login error:', error)
+      this.error = 'Lỗi kết nối máy chủ'
     }
   }
-  }
+}
 };
 </script>
 

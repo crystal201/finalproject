@@ -44,13 +44,6 @@ export default {
     //   })
     // }
   },
-  '/api': {
-    target: process.env.NODE_ENV === 'development' 
-      ? 'http://localhost:8080' 
-      : 'http://backend:8080',
-    pathRewrite: { '^/api': '' },
-    changeOrigin: true
-  },
   // Headers of the page
   head: {
     title: "Browse Movies, TV Shows and People",
@@ -123,11 +116,16 @@ export default {
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
-    baseURL: process.env.NODE_ENV === 'development' 
-      ? 'http://localhost:8080' // Khi chạy standalone
-      : 'http://cinema-system:8080', // Khi chạy trong Docker
+    baseURL: '/',
     credentials: true,
     proxy: true
+  },
+  proxy: {
+    '/api/': {
+      target: 'http://backend:8080',
+      pathRewrite: { '^/api': '' },
+      changeOrigin: true
+    }
   },
   // PWA module configuration: https://go.nuxtjs.dev/pwa
   pwa: {

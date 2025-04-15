@@ -1,16 +1,7 @@
-export default function ({ $axios, store }) {
-    store.dispatch('checkAuth');
-    $axios.onRequest(config => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-    });
-    $axios.onError(error => {
-        if (error.response && error.response.status === 401) {
-            localStorage.removeItem('token');
-            store.commit('setAuthenticated', false);
-            return redirect('/login');
-        }
-    });
-}
+export default function ({ store }) {
+    try {
+      store.dispatch('auth/checkAuth')
+    } catch (error) {
+      console.error('Auth check failed:', error)
+    }
+  }
