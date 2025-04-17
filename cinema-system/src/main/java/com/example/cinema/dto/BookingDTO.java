@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class BookingDTO {
-    private String id;
+    private Long id;
     private String movieId;
     private String movieTitle;
     private String showtime;
@@ -14,8 +14,8 @@ public class BookingDTO {
     private String userId;
 
     // Getters and setters
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     public String getMovieId() { return movieId; }
     public void setMovieId(String movieId) { this.movieId = movieId; }
     public String getMovieTitle() { return movieTitle; }

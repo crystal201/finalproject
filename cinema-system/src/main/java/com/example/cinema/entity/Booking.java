@@ -19,7 +19,7 @@ import jakarta.persistence.Table;
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String id;
+    private Long id;
 
     @Column(nullable = false)
     private String movieId;
@@ -48,8 +48,8 @@ public class Booking {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     // Getters and setters
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     public String getMovieId() { return movieId; }
     public void setMovieId(String movieId) { this.movieId = movieId; }
     public String getMovieTitle() { return movieTitle; }

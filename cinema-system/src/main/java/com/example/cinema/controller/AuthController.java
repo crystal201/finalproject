@@ -43,22 +43,21 @@ public class AuthController {
     @ApiResponse(responseCode = "200", description = "Login successful")
     @ApiResponse(responseCode = "401", description = "Invalid credentials")
     public ResponseEntity<?> login(@RequestBody UserLoginRequest request) {
+        System.out.println("Login attempt: username=" + request.getUsername());
         try {
-            // Xác thực người dùng
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
-
-            // Lấy thông tin người dùng từ đối tượng authentication
             String username = authentication.getName();
-
-            // Tạo token JWT
+            System.out.println("Authentication successful for: " + username);
             String token = jwtUtil.generateToken(username);
             return ResponseEntity.ok(Map.of("token", token));
         } catch (BadCredentialsException e) {
+            System.out.println("Bad credentials for: " + request.getUsername());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
+            System.out.println("Login error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
         }
     }
 
