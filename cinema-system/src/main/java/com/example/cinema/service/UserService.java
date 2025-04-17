@@ -48,9 +48,13 @@ public class UserService implements UserDetailsService {
     // Triển khai phương thức loadUserByUsername từ UserDetailsService
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        System.out.println("Loading user: " + username);
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
-
-        return user; // Trả về đối tượng User (đã triển khai UserDetails)
+                .orElseThrow(() -> {
+                    System.out.println("User not found: " + username);
+                    return new UsernameNotFoundException("User not found with username: " + username);
+                });
+        System.out.println("User found: " + user.getUsername());
+        return user;
     }
 }
