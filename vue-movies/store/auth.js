@@ -30,12 +30,17 @@ export const actions = {
                 headers: { 'Content-Type': 'application/json' }
             });
             const token = response.data.token;
-            localStorage.setItem('authToken', token);
-            commit('SET_TOKEN', token);
-            this.$axios.setToken(token, 'Bearer');
+            if (token) {
+                localStorage.setItem('authToken', token);
+                commit('SET_TOKEN', token);
+                this.$axios.setToken(token, 'Bearer');
+                return true;
+            } else {
+                return false;
+            }
         } catch (error) {
             console.error('Login error:', error);
-            throw error;
+            return false;
         }
     },
 

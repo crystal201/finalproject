@@ -50,24 +50,15 @@ export default {
     };
   },
   methods: {
-  async handleLogin() {
-    this.error = ''
-    try {
-      // Cách 1: Nếu dùng namespaced module
-      const success = await this.$store.dispatch('auth/login', this.form)      
-      // Cách 2: Nếu không dùng namespace
-      // const success = await this.$store.dispatch('login', this.form)
-      
-      if (success) {
-        this.$router.push('/')
-      } else {
-        this.error = 'Sai tài khoản hoặc mật khẩu'
-      }
-    } catch (error) {
-      console.error('Login error:', error)
-      this.error = 'Lỗi kết nối máy chủ'
+    async handleLogin() {
+    this.error = '';
+    const success = await this.$store.dispatch('auth/login', this.form);
+    if (success) {
+        this.$router.push('/');
+    } else {
+        this.error = 'Sai tài khoản hoặc mật khẩu';
     }
-  }
+}
 }
 };
 </script>
