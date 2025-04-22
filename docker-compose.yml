@@ -10,6 +10,7 @@ services:
       - ./vue-movies:/app
       - /app/node_modules
     environment:
+      - NODE_OPTIONS=--max_old_space_size=4096
       - NODE_ENV=development
       - NUXT_PORT=3000
       - CHOKIDAR_USEPOLLING=true

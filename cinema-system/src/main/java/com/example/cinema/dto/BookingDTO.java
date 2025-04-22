@@ -1,6 +1,7 @@
 package com.example.cinema.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class BookingDTO {
@@ -12,6 +13,7 @@ public class BookingDTO {
     private List<String> seats;
     private double total;
     private String userId;
+    private LocalDateTime createdAt;
 
     // Getters and setters
     public Long getId() { return id; }
@@ -30,4 +32,6 @@ public class BookingDTO {
     public void setTotal(double total) { this.total = total; }
     public String getUserId() { return userId; }
     public void setUserId(String userId) { this.userId = userId; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

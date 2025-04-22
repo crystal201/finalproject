@@ -1,9 +1,9 @@
 package com.example.cinema.service;
 
 import com.example.cinema.dto.BookingDTO;
+import com.example.cinema.dto.MovieDTO;
 import com.example.cinema.entity.Booking;
 import com.example.cinema.repository.BookingRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,9 +11,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class BookingService {
-    @Autowired
-    private BookingRepository bookingRepository;
-
+    private final BookingRepository bookingRepository;    
+    private final MovieService movieService;
     public BookingDTO createBooking(BookingDTO bookingDTO) {
         Booking booking = new Booking();
         booking.setMovieId(bookingDTO.getMovieId());
@@ -27,6 +26,7 @@ public class BookingService {
         Booking savedBooking = bookingRepository.save(booking);
 
         bookingDTO.setId(savedBooking.getId());
+        bookingDTO.setCreatedAt(savedBooking.getCreatedAt());
         return bookingDTO;
     }
 
@@ -41,7 +41,18 @@ public class BookingService {
             dto.setSeats(booking.getSeats());
             dto.setTotal(booking.getTotal());
             dto.setUserId(booking.getUserId());
+            dto.setCreatedAt(booking.getCreatedAt());
             return dto;
         }).collect(Collectors.toList());
+    }
+
+    public BookingService(BookingRepository bookingRepository, MovieService movieService) {
+        this.bookingRepository = bookingRepository;
+        this.movieService = movieService;
+    }
+
+    public List<MovieDTO> getBookedMovies(String userId) {
+        List<String> movieIds = bookingRepository.findDistinctMovieIdsByUserId(userId);
+        return movieService.getMoviesByIds(movieIds);
     }
 }

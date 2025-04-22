@@ -3,34 +3,47 @@
     <form @submit.prevent="handleLogin" class="login-form">
       <div class="logo">
         <!-- Có thể thay bằng logo của bạn -->
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2L3 7L12 12L21 7L12 2Z" fill="#3B82F6"/>
-          <path d="M3 17L12 22L21 17" stroke="#3B82F6" stroke-width="2"/>
-          <path d="M3 12L12 17L21 12" stroke="#3B82F6" stroke-width="2"/>
+        <svg
+          width="40"
+          height="40"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M12 2L3 7L12 12L21 7L12 2Z" fill="#3B82F6" />
+          <path d="M3 17L12 22L21 17" stroke="#3B82F6" stroke-width="2" />
+          <path d="M3 12L12 17L21 12" stroke="#3B82F6" stroke-width="2" />
         </svg>
       </div>
       <h2 class="title">Đăng nhập</h2>
       <div class="form-group">
         <label class="input-label">Tài khoản</label>
-        <input 
-          v-model="form.username" 
-          type="text" 
+        <input
+          v-model="form.username"
+          type="text"
           required
           class="input-field"
-          placeholder="Nhập tài khoản">
+          placeholder="Nhập tài khoản"
+        />
       </div>
       <div class="form-group">
         <label class="input-label">Mật khẩu</label>
-        <input 
-          v-model="form.password" 
-          type="password" 
+        <input
+          v-model="form.password"
+          type="password"
           required
           class="input-field"
-          placeholder="Nhập mật khẩu">
+          placeholder="Nhập mật khẩu"
+        />
       </div>
-      <button type="submit" class="login-button">Đăng nhập</button>
+      <button type="submit" class="login-button" :disabled="loading">
+        <span v-if="loading">
+          <i class="fas fa-spinner fa-spin"></i> Đang đăng nhập...
+        </span>
+        <span v-else>Đăng nhập</span>
+      </button>
       <p class="register-text">
-        Chưa có tài khoản? 
+        Chưa có tài khoản?
         <nuxt-link to="/register" class="register-link">Đăng ký ngay</nuxt-link>
       </p>
       <p v-if="error" class="error-text">{{ error }}</p>
@@ -43,23 +56,31 @@ export default {
   data() {
     return {
       form: {
-        username: '',
-        password: ''
+        username: "",
+        password: "",
       },
-      error: ''
+      error: "",
+      loading: false,
     };
   },
   methods: {
     async handleLogin() {
-    this.error = '';
-    const success = await this.$store.dispatch('auth/login', this.form);
-    if (success) {
-        this.$router.push('/');
-    } else {
-        this.error = 'Sai tài khoản hoặc mật khẩu';
-    }
-}
-}
+      this.error = "";
+      this.loading = true;
+      try {
+        const success = await this.$store.dispatch("auth/login", this.form);
+        if (success) {
+          this.$router.push("/");
+        } else {
+          this.error = "Sai tài khoản hoặc mật khẩu";
+        }
+      } catch (err) {
+        this.error = "Có lỗi xảy ra, vui lòng thử lại!";
+      } finally {
+        this.loading = false;
+      }
+    },
+  },
 };
 </script>
 
@@ -76,7 +97,7 @@ export default {
 .login-form {
   width: 100%;
   max-width: 400px;
-  background-color: #1E1E1E;
+  background-color: #1e1e1e;
   padding: 40px 30px;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -101,7 +122,7 @@ export default {
 
 .input-label {
   display: block;
-  color: #E0E0E0;
+  color: #e0e0e0;
   margin-bottom: 8px;
   font-size: 14px;
 }
@@ -109,8 +130,8 @@ export default {
 .input-field {
   width: 100%;
   padding: 12px 15px;
-  background-color: #2D2D2D;
-  border: 1px solid #3B82F6;
+  background-color: #2d2d2d;
+  border: 1px solid #3b82f6;
   border-radius: 6px;
   color: white;
   font-size: 15px;
@@ -119,18 +140,18 @@ export default {
 
 .input-field:focus {
   outline: none;
-  border-color: #60A5FA;
+  border-color: #60a5fa;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
 }
 
 .input-field::placeholder {
-  color: #9CA3AF;
+  color: #9ca3af;
 }
 
 .login-button {
   width: 100%;
   padding: 14px;
-  background-color: #3B82F6;
+  background-color: #3b82f6;
   color: white;
   border: none;
   border-radius: 6px;
@@ -142,30 +163,30 @@ export default {
 }
 
 .login-button:hover {
-  background-color: #2563EB;
+  background-color: #2563eb;
 }
 
 .register-text {
   text-align: center;
-  color: #9CA3AF;
+  color: #9ca3af;
   margin-top: 20px;
   font-size: 14px;
 }
 
 .register-link {
-  color: #3B82F6;
+  color: #3b82f6;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s;
 }
 
 .register-link:hover {
-  color: #60A5FA;
+  color: #60a5fa;
   text-decoration: underline;
 }
 
 .error-text {
-  color: #EF4444;
+  color: #ef4444;
   text-align: center;
   margin-top: 15px;
   font-size: 14px;
