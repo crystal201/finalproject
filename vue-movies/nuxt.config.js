@@ -116,14 +116,14 @@ export default {
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
-    baseURL: process.env.API_BASE_URL || '/',
+    baseURL: process.env.API_BASE_URL || 'http://backend:8080',
     credentials: true,
     proxy: true
   },
   proxy: {
     '/api/': {
       target: 'http://backend:8080',
-      changeOrigin: true
+      changeOrigin: true,
     }
   },
   // PWA module configuration: https://go.nuxtjs.dev/pwa
@@ -160,6 +160,12 @@ export default {
     API_COUNTRY: process.env.API_COUNTRY || "GB",
     API_YOUTUBE_KEY: process.env.API_YOUTUBE_KEY || "",
     GA: process.env.GA || "",
+  },
+  publicRuntimeConfig: {
+    tmdbApiKey: process.env.API_KEY,
+  },
+  privateRuntimeConfig: {
+    tmdbApiKey: process.env.API_KEY,
   },
 
   // Customize the progress bar color

@@ -9,6 +9,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -68,5 +70,22 @@ public class AuthController {
         // Đăng ký người dùng mới từ UserRegistrationRequest
         User registeredUser = userService.register(request);
         return Map.of("message", "User registered successfully with username: " + registeredUser.getUsername());
+    }
+    @GetMapping("/user")
+    @Operation(summary = "Get user information", description = "Retrieve authenticated user's information")
+    @ApiResponse(responseCode = "200", description = "User information retrieved")
+    @ApiResponse(responseCode = "404", description = "User not found")
+    public ResponseEntity<User> getUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        System.out.println("Fetching user info for: " + username);
+        return userService.findByUsername(username)
+                .map(user -> {
+                    System.out.println("User found: " + user.getUsername());
+                    return ResponseEntity.ok(user);
+                })
+                .orElseGet(() -> {
+                    System.out.println("User not found: " + username);
+                    return ResponseEntity.notFound().build();
+                });
     }
 }

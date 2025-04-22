@@ -1,4 +1,3 @@
-<!-- vue-movies/pages/booking.vue -->
 <template>
   <div class="booking-page">
     <h2 v-if="movie">Đặt vé cho {{ movie.title }}</h2>
@@ -9,7 +8,7 @@
         <div class="showtime-list">
           <button
             v-for="showtime in showtimes"
-            :key="showtime.time"
+            :key="`${showtime.date}-${showtime.time}`"
             :class="{ selected: selectedShowtime === showtime.time }"
             @click="selectShowtime(showtime)"
           >
@@ -44,9 +43,11 @@
         <p v-if="selectedShowtime">
           Suất chiếu: {{ selectedShowtime }} ngày {{ selectedDate }}
         </p>
-        <p>Ghế: {{ selectedSeats.join(', ') || 'Chưa chọn' }}</p>
+        <p>Ghế: {{ selectedSeats.join(", ") || "Chưa chọn" }}</p>
         <p>Tổng cộng: ${{ selectedSeats.length * ticketPrice }}</p>
-        <button :disabled="!canBook" @click="confirmBooking">Xác nhận đặt vé</button>
+        <button :disabled="!canBook" @click="confirmBooking">
+          Xác nhận đặt vé
+        </button>
       </section>
     </div>
     <p v-else>Đang tải thông tin phim...</p>
@@ -54,9 +55,8 @@
 </template>
 
 <script>
-
 export default {
-  middleware: ['auth'],
+  middleware: ["auth"],
   data() {
     return {
       movie: null,
@@ -81,34 +81,48 @@ export default {
     async fetchMovieDetails() {
       const movieId = this.$route.query.movieId;
       if (!movieId) {
-        this.$nuxt.error({ statusCode: 404, message: 'Phim không tìm thấy' });
+        this.$nuxt.error({ statusCode: 404, message: "Phim không tìm thấy" });
         return;
       }
       try {
-        const response = await this.$axios.get(`/api/movies/${movieId}`);
-        this.movie = response.data;
+        const response = await this.$axios.get(
+          `https://api.themoviedb.org/3/movie/${movieId}`,
+          {
+            params: {
+              api_key: this.$config.tmdbApiKey,
+            },
+          }
+        );
+        this.movie = {
+          id: response.data.id,
+          title: response.data.title,
+          runtime: response.data.runtime || 120, // Mặc định 120 phút nếu không có
+        };
         this.generateShowtimes();
       } catch (error) {
-        console.error('Lỗi khi lấy thông tin phim:', error);
-        this.$nuxt.error({ statusCode: 500, message: 'Lỗi server' });
+        console.error("Lỗi khi lấy thông tin phim từ TMDB:", error);
+        this.$nuxt.error({
+          statusCode: 500,
+          message: "Lỗi khi tải thông tin phim",
+        });
       }
     },
     generateSeats() {
-      const rows = ['A', 'B', 'C', 'D', 'E'];
+      const rows = ["A", "B", "C", "D", "E"];
       const seatsPerRow = 10;
       this.seats = [];
       rows.forEach((row) => {
         for (let i = 1; i <= seatsPerRow; i++) {
           this.seats.push({
             id: `${row}${i}`,
-            taken: Math.random() < 0.3, // Simulate taken seats
+            taken: Math.random() < 0.3,
           });
         }
       });
     },
     generateShowtimes() {
       if (!this.movie || !this.movie.runtime) {
-        console.warn('No runtime, defaulting to 120 minutes');
+        console.warn("No runtime, defaulting to 120 minutes");
         this.movie = { ...this.movie, runtime: 120 };
       }
       const today = new Date();
@@ -119,7 +133,7 @@ export default {
       for (let i = 0; i < days; i++) {
         const date = new Date(today);
         date.setDate(today.getDate() + i);
-        const dateString = date.toISOString().split('T')[0];
+        const dateString = date.toISOString().split("T")[0];
 
         const numShowtimes = Math.floor(Math.random() * 3) + 2;
         const selectedHours = hours
@@ -132,7 +146,10 @@ export default {
           const endTime = new Date(showtime);
           endTime.setMinutes(endTime.getMinutes() + this.movie.runtime);
 
-          if (endTime.getHours() < 23 || (endTime.getHours() === 23 && endTime.getMinutes() <= 30)) {
+          if (
+            endTime.getHours() < 23 ||
+            (endTime.getHours() === 23 && endTime.getMinutes() <= 30)
+          ) {
             showtimes.push({
               date: dateString,
               time: showtime.toTimeString().slice(0, 5),
@@ -143,7 +160,7 @@ export default {
       this.showtimes = showtimes;
     },
     selectShowtime(showtime) {
-      this.selectedShowtime = showtime.time; // Select only one showtime
+      this.selectedShowtime = showtime.time;
       this.selectedDate = showtime.date;
     },
     toggleSeat(seatId) {
@@ -158,7 +175,7 @@ export default {
     },
     async confirmBooking() {
       const booking = {
-        movieId: this.movie.id,
+        movieId: this.movie.id.toString(),
         movieTitle: this.movie.title,
         showtime: this.selectedShowtime,
         date: this.selectedDate,
@@ -167,16 +184,17 @@ export default {
       };
 
       try {
-        await this.$axios.post('/api/bookings', booking, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`, // JWT token for auth only
-          },
-        });
-        alert('Đặt vé thành công! Dữ liệu đã được lưu vào cơ sở dữ liệu.');
-        this.$router.push('/booking-history');
+        const response = await this.$axios.post("/api/bookings", booking);
+        alert("Đặt vé thành công! Dữ liệu đã được lưu vào cơ sở dữ liệu.");
+        this.$router.push("/booking-history");
       } catch (error) {
-        console.error('Lỗi khi đặt vé:', error);
-        alert('Đặt vé thất bại.');
+        console.error("Lỗi khi đặt vé:", error);
+        if (error.message.includes("Phiên đăng nhập hết hạn")) {
+          alert("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
+          this.$router.push("/login");
+        } else {
+          alert("Đặt vé thất bại: " + error.message);
+        }
       }
     },
   },

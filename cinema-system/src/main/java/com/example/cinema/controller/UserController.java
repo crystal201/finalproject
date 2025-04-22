@@ -12,13 +12,13 @@ import com.example.cinema.dto.UserRegistrationRequest;
 import com.example.cinema.entity.User;
 import com.example.cinema.service.UserService;
 
-import lombok.RequiredArgsConstructor;
-
 @RestController
 @RequestMapping("/api/users")
-@RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody UserRegistrationRequest request) {
