@@ -100,6 +100,7 @@ export default {
     "~/plugins/filters.js",
     "~/plugins/axios.js",
     '~/plugins/auth.js',
+    '~/plugins/toast.js',
     { src: "~/plugins/ga.js", ssr: false },
   ],
 
