@@ -41,7 +41,7 @@ public class AuthController {
     private UserService userService;
 
     @PostMapping("/login")
-    @Operation(summary = "User login", description = "Authenticate user and return JWT token")
+    @Operation(summary = "User login", description = "Authenticate user and return JWT token and user ID")
     @ApiResponse(responseCode = "200", description = "Login successful")
     @ApiResponse(responseCode = "401", description = "Invalid credentials")
     public ResponseEntity<?> login(@RequestBody UserLoginRequest request) {
@@ -52,8 +52,20 @@ public class AuthController {
             );
             String username = authentication.getName();
             System.out.println("Authentication successful for: " + username);
+
+            // Tạo token
             String token = jwtUtil.generateToken(username);
-            return ResponseEntity.ok(Map.of("token", token));
+
+            // Lấy userId từ UserService
+            User user = userService.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found after authentication"));
+            Long userId = user.getId(); // Giữ kiểu Long
+
+            // Trả về token và userId
+            return ResponseEntity.ok(Map.of(
+                "token", token,
+                "userId", userId
+            ));
         } catch (BadCredentialsException e) {
             System.out.println("Bad credentials for: " + request.getUsername());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
@@ -67,10 +79,10 @@ public class AuthController {
     @Operation(summary = "User registration", description = "Register a new user")
     @ApiResponse(responseCode = "200", description = "User registered successfully")
     public Map<String, String> register(@RequestBody UserRegistrationRequest request) {
-        // Đăng ký người dùng mới từ UserRegistrationRequest
         User registeredUser = userService.register(request);
         return Map.of("message", "User registered successfully with username: " + registeredUser.getUsername());
     }
+
     @GetMapping("/user")
     @Operation(summary = "Get user information", description = "Retrieve authenticated user's information")
     @ApiResponse(responseCode = "200", description = "User information retrieved")

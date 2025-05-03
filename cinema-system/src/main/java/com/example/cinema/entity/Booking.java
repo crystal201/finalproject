@@ -1,18 +1,8 @@
 package com.example.cinema.entity;
 
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "bookings")
@@ -32,11 +22,6 @@ public class Booking {
 
     @Column(nullable = false)
     private LocalDate date;
-
-    @ElementCollection
-    @CollectionTable(name = "booking_seats", joinColumns = @JoinColumn(name = "booking_id"))
-    @Column(name = "seat")
-    private List<String> seats;
 
     @Column(nullable = false)
     private double total;
@@ -58,8 +43,6 @@ public class Booking {
     public void setShowtime(String showtime) { this.showtime = showtime; }
     public LocalDate getDate() { return date; }
     public void setDate(LocalDate date) { this.date = date; }
-    public List<String> getSeats() { return seats; }
-    public void setSeats(List<String> seats) { this.seats = seats; }
     public double getTotal() { return total; }
     public void setTotal(double total) { this.total = total; }
     public String getUserId() { return userId; }

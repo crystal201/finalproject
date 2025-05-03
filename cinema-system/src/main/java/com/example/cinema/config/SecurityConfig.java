@@ -71,7 +71,7 @@ public class SecurityConfig {
                     "/configuration/ui",
                     "/configuration/security"
                 ).permitAll()
-                .requestMatchers("/api/auth/user", "/api/bookings/**").authenticated()
+                .requestMatchers("/api/auth/user", "/api/bookings/**", "/api/recommendations/**").authenticated()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

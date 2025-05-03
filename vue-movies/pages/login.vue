@@ -46,7 +46,6 @@
         Chưa có tài khoản?
         <nuxt-link to="/register" class="register-link">Đăng ký ngay</nuxt-link>
       </p>
-      <p v-if="error" class="error-text">{{ error }}</p>
     </form>
   </div>
 </template>
@@ -59,23 +58,25 @@ export default {
         username: "",
         password: "",
       },
-      error: "",
       loading: false,
     };
   },
   methods: {
     async handleLogin() {
-      this.error = "";
       this.loading = true;
       try {
         const success = await this.$store.dispatch("auth/login", this.form);
         if (success) {
-          this.$router.push("/");
+          this.$toast.success('Đăng nhập thành công!');
+          const redirectTo = this.$route.query.redirect || '/';
+          setTimeout(() => {
+            this.$router.push(redirectTo);
+          }, 1500);
         } else {
-          this.error = "Sai tài khoản hoặc mật khẩu";
+          this.$toast.error('Sai tài khoản hoặc mật khẩu');
         }
       } catch (err) {
-        this.error = "Có lỗi xảy ra, vui lòng thử lại!";
+        this.$toast.error('Có lỗi xảy ra, vui lòng thử lại!');
       } finally {
         this.loading = false;
       }
@@ -183,12 +184,5 @@ export default {
 .register-link:hover {
   color: #60a5fa;
   text-decoration: underline;
-}
-
-.error-text {
-  color: #ef4444;
-  text-align: center;
-  margin-top: 15px;
-  font-size: 14px;
 }
 </style>

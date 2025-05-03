@@ -8,7 +8,7 @@ services:
       - "3000:3000"
     volumes:
       - ./vue-movies:/app
-      - /app/node_modules
+      - node_modules:/app/node_modules
     environment:
       - NODE_OPTIONS=--max_old_space_size=4096
       - NODE_ENV=development
@@ -19,12 +19,12 @@ services:
       - NUXT_HOST=0.0.0.0
       - NPM_CONFIG_REGISTRY=https://registry.npmmirror.com
     dns:
-      - 8.8.8.8  # DNS Google
-      - 1.1.1.1  # DNS Cloudflare
+      - 8.8.8.8
+      - 1.1.1.1
     user: "node"
     command: yarn dev
     depends_on:
-      - backend  # Removed 'condition: service_healthy'
+      - backend
     restart: unless-stopped
     networks:
       - cinema-network
@@ -38,15 +38,22 @@ services:
       - "8080:8080"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/cinema_db?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=crystal2001
       - SPRING_JPA_PROPERTIES_HIBERNATE_JDBC_TIME_ZONE=UTC
       - SPRING_JPA_PROPERTIES_HIBERNATE_ORDER_UPDATES=true
       - SPRING_JPA_PROPERTIES_HIBERNATE_BATCH_VERSIONED_DATA=true
       - SPRING_MAIN_LAZY_INITIALIZATION=true
     depends_on:
       mysql-db:
-        condition: service_healthy  # Kept this since mysql-db has a healthcheck
+        condition: service_healthy
+      recommendation-api:
+        condition: service_started
     volumes:
       - ./cinema-system:/app
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     networks:
       - cinema-network
     deploy:
@@ -54,6 +61,7 @@ services:
         limits:
           cpus: '2'
           memory: 2G
+    restart: unless-stopped
 
   mysql-db:
     image: mysql:8.0
@@ -72,6 +80,32 @@ services:
       interval: 5s
       timeout: 10s
       retries: 10
+    restart: unless-stopped
+
+  recommendation-api:
+    build:
+      context: ./recommendation-api
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    volumes:
+      - ./recommendation-api:/app
+    environment:
+      - MYSQL_HOST=mysql-db
+      - MYSQL_PORT=3306
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=crystal2001
+      - MYSQL_DATABASE=cinema_db
+      - TMDB_API_KEY=770653f0e946b9c775be9a0439b1c4aa
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    networks:
+      - cinema-network
+    restart: unless-stopped
 
 networks:
   cinema-network:
@@ -79,3 +113,4 @@ networks:
 
 volumes:
   mysql_data:
+  node_modules:

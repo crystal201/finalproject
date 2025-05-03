@@ -19,9 +19,15 @@
       <h2 class="card__name">
         {{ name }}
       </h2>
-      <nuxt-link :to="{ path: '/booking', query: { movieId: item.id } }">
-        Đặt vé
-      </nuxt-link>
+      
+      <div class="card__actions">
+        <nuxt-link 
+          :to="{ path: '/booking', query: { movieId: item.id } }"
+          class="booking-btn">
+          Đặt vé ngay
+        </nuxt-link>
+      </div>
+
       <div
         v-if="media !== 'person' && (stars || item.vote_average)"
         class="card__rating">
@@ -81,3 +87,31 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+/* Thêm các style mới cho nút đặt vé */
+.card__actions {
+  margin: 10px 0;
+}
+
+.booking-btn {
+  display: inline-block;
+  padding: 8px 16px;
+  background-color: #e50914;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: 400;
+  font-size: 10px;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.booking-btn:hover {
+  background-color: #f40612;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+</style>

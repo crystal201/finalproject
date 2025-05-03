@@ -28,8 +28,8 @@ export default {
     emitWarning: false
   },
   server: {
-    host: '0.0.0.0',
-    port: 3000,
+    host: process.env.NUXT_HOST || '0.0.0.0',
+    port: process.env.NUXT_PORT || 3000,
     watch: {
       usePolling: true
     }
@@ -101,6 +101,7 @@ export default {
     "~/plugins/axios.js",
     '~/plugins/auth.js',
     '~/plugins/toast.js',
+    '~/plugins/auth-check.js',
     { src: "~/plugins/ga.js", ssr: false },
   ],
 
