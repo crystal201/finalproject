@@ -1,6 +1,6 @@
 <template>
   <footer :class="$style.footer">
-    <p>&copy; {{ new Date().getFullYear() }} Jason Ujma-Alvis. All rights reserved. <a target="_blank" href="https://jason.codes/cookie-policy" rel="noopener">Cookie Policy</a>.</p>
+    <p>&copy; {{ new Date().getFullYear() }} TienDung. All rights reserved. <a target="_blank" href="https://jason.codes/cookie-policy" rel="noopener">Cookie Policy</a>.</p>
     <p>Designed and built by me, data provided by <a target="_blank" href="https://www.themoviedb.org/" rel="noopener">TMDb</a>.</p>
 
     <ul class="nolist">

@@ -9,7 +9,7 @@
       <img
         :src="avatarUrl"
         alt="User avatar"
-        class="w-10 h-10 rounded-full object-cover"
+        class="user-avatar"
         :class="{ 'border-2 border-blue-500': isDropdownOpen }"
       />
     </button>
@@ -25,20 +25,20 @@
     >
       <div
         v-if="isDropdownOpen"
-        class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10"
+        class="dropdown-selection"
       >
         <nuxt-link
           to="/user/profile"
-          class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          class="profile-slc"
           @click="closeDropdown"
         >
-          Thông tin cá nhân
+          Profile
         </nuxt-link>
         <button
           @click="logout"
-          class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          class="logout-slc"
         >
-          Đăng xuất
+          Logout
         </button>
       </div>
     </transition>
@@ -57,7 +57,6 @@ export default {
   computed: {
     ...mapState('auth', ['user']),
     avatarUrl() {
-      // Nếu có avatar trong user, dùng nó; nếu không, dùng ảnh mặc định từ ui-avatars
       return this.user?.avatar || `https://ui-avatars.com/api/?name=${this.user?.username || 'User'}&background=0D8ABC&color=fff`;
     },
   },
@@ -95,6 +94,23 @@ export default {
 };
 </script>
 
-<style scoped>
-/* Tailwind xử lý hầu hết style, thêm scoped style nếu cần */
+<style scoped lang="scss">
+.relative {
+  padding: 20px 0;
+}
+.user-avatar {
+  border-radius: 100%;
+  width: 50px;
+}
+.dropdown-selection{
+  
+  .profile-slc{
+   font-size: 12px;
+   padding: 4px 6px;
+  }
+  .logout-slc{
+   font-size: 12px;
+   padding: 4px 6px;
+  }
+}
 </style>

@@ -76,6 +76,19 @@
               <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M3 22v-20l18 10-18 10z"/></svg></span>
               <span class="txt">Watch Trailer</span>
             </button>
+            <button class="button button--icon ticket-now-button">
+    <nuxt-link :to="{ path: '/booking', query: { movieId: item.id } }" class="ticket-link">
+      <span class="ticket-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" height="24" width="24">
+          <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"></path>
+          <path d="M13 5v2"></path>
+          <path d="M13 17v2"></path>
+          <path d="M13 11v2"></path>
+        </svg>
+      </span>
+      <span class="ticket-text">Ticket Now</span>
+    </nuxt-link>
+  </button>
           </div>
         </transition>
       </div>
@@ -141,7 +154,122 @@ export default {
 
 <style lang="scss" module>
 @import '~/assets/css/utilities/variables.scss';
+.ticket-now-button {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  border: none;
+  background: linear-gradient(45deg, #ff4d4d, #f9cb28);
+  color: white;
+  font-weight: bold;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(249, 203, 40, 0.3);
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(249, 203, 40, 0.4);
+    
+    .ticket-link {
+      background-position: 100% 0;
+    }
+    
+    .ticket-icon {
+      transform: rotate(10deg);
+    }
+    
+    .ticket-arrow {
+      transform: translateX(5px);
+      opacity: 1;
+    }
+  }
+  
+  &:active {
+    transform: translateY(1px);
+  }
+}
 
+.ticket-link {
+  display: flex;
+  align-items: center;
+  padding: 12px 25px;
+  color: white;
+  text-decoration: none;
+  background: linear-gradient(45deg, #ff4d4d, #f9cb28);
+  background-size: 200% 100%;
+  transition: all 0.3s ease;
+  border-radius: 50px;
+}
+
+.ticket-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  transition: transform 0.3s ease;
+}
+
+.ticket-text {
+  position: relative;
+  z-index: 1;
+}
+
+.ticket-arrow {
+  margin-left: 8px;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+/* Animation pulse */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.ticket-now-button {
+  animation: pulse 2s infinite;
+  
+  &:hover {
+    animation: none;
+  }
+}
+
+/* Ripple effect */
+.ticket-now-button::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%, -50%);
+  transform-origin: 50% 50%;
+}
+
+.ticket-now-button:focus:not(:active)::after {
+  animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(20, 20);
+    opacity: 0;
+  }
+}
 .hero {
   display: flex;
   flex-direction: column;

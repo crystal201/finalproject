@@ -1,8 +1,8 @@
 export default function ({ store, redirect, route }) {
-  const protectedRoutes = ['/book', '/history', '/order'];
+  const protectedRoutes = ['/booking', '/history', '/order'];
   if (protectedRoutes.includes(route.path)) {
-    if (!store.state.isAuthenticated) {
-      return redirect('/login');
-    }
+      if (!store.state.auth.token) {
+          return redirect('/login');
+      }
   }
 }
