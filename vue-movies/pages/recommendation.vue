@@ -2,7 +2,8 @@
   <div class="movie-recommendation-container">
     <h1>Recommended Movies</h1>
     <div v-if="!isLoggedIn" class="login-message">
-      Please <a href="/login">log in</a> to view personalized movie
+      Please  <nuxt-link to="/login" class="login-link">Login</nuxt-link>
+      to view personalized movie
       recommendations.
     </div>
     <div v-else>
@@ -156,6 +157,9 @@ export default {
 </script>
 
 <style scoped>
+.login-link {
+  cursor: pointer;
+}
 /* Base container styles */
 .movie-recommendation-container {
   max-width: 1200px;
