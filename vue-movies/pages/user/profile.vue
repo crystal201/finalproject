@@ -448,6 +448,7 @@ export default {
 }
 
 .user-card {
+  height: 500px;
   padding: 25px;
   position: relative;
 }
@@ -583,6 +584,8 @@ export default {
 
 .booking-history {
   padding: 25px;
+  height: 650px;
+  overflow-y: auto;
 }
 
 .section-header {

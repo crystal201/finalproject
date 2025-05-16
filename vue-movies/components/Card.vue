@@ -24,7 +24,7 @@
         <nuxt-link 
           :to="{ path: '/booking', query: { movieId: item.id } }"
           class="booking-btn">
-          Đặt vé ngay
+          Ticket Now 
         </nuxt-link>
       </div>
 

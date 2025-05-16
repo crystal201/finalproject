@@ -8,7 +8,7 @@
     <h3>Phim đã đặt</h3>
     <div class="movie-list">
       <div v-for="movie in bookedMovies" :key="movie.id" class="movie-card">
-        <img :src="'https://image.tmdb.org/t/p/w200' + movie.posterPath" :alt="movie.title" />
+        <img :src="'https://image.tmdb.org/t/p/w200' + movie.poster_path" :alt="movie.title" />
         <div class="movie-info">
           <h4>{{ movie.title }}</h4>
           <p><strong>Thể loại:</strong> {{ movie.genreIds.join(', ') }}</p>
