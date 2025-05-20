@@ -10,6 +10,25 @@
 
     <!-- Booking Sections -->
     <div class="booking-sections">
+      <!-- Room Selection -->
+      <section class="booking-section room-section">
+        <h3 class="section-title">
+          <i class="fas fa-door-open"></i> Chọn phòng
+          <span v-if="selectedRoom" class="selected-info">({{ rooms.find(r => r.id === selectedRoom).name }})</span>
+        </h3>
+        <div class="room-grid">
+          <button
+            v-for="room in rooms"
+            :key="room.id"
+            class="room-btn"
+            :class="{ selected: selectedRoom === room.id }"
+            @click="selectRoom(room.id)"
+          >
+            {{ room.name }}
+          </button>
+        </div>
+      </section>
+
       <!-- Showtime Selection -->
       <section class="booking-section showtime-section">
         <h3 class="section-title">
@@ -79,9 +98,13 @@
             <span class="value">{{ movie?.title || '--' }}</span>
           </div>
           <div class="summary-item">
+            <span class="label">Phòng:</span>
+            <span class="value">{{ selectedRoom ? rooms.find(r => r.id === selectedRoom).name : '--' }}</span>
+          </div>
+          <div class="summary-item">
             <span class="label">Suất chiếu:</span>
             <span class="value">
-              {{ selectedShowtime || '--' }} 
+              {{ selectedShowtime || '--' }}
               <span v-if="selectedDate">({{ selectedDate }})</span>
             </span>
           </div>
@@ -99,8 +122,8 @@
             <span>Một số ghế bạn chọn đã được đặt rồi</span>
           </div>
 
-          <button 
-            class="confirm-btn" 
+          <button
+            class="confirm-btn"
             :disabled="!canBook"
             @click="openConfirmModal"
           >
@@ -139,6 +162,13 @@ export default {
   data() {
     return {
       movie: null,
+      rooms: [
+        { id: 1, name: 'Room 1' },
+        { id: 2, name: 'Room 2' },
+        { id: 3, name: 'Room 3' },
+        { id: 4, name: 'Room 4' },
+      ],
+      selectedRoom: 1,
       showtimes: [],
       selectedShowtime: null,
       selectedDate: null,
@@ -148,8 +178,8 @@ export default {
       ticketPrice: 10,
       seatsKey: 0,
       loading: false,
-      showConfirmModal: false, // Thêm để kiểm soát modal xác nhận
-      bookingSummary: {}, // Lưu thông tin tóm tắt đặt vé
+      showConfirmModal: false,
+      bookingSummary: {},
     };
   },
   computed: {
@@ -158,6 +188,7 @@ export default {
         this.bookedSeats.includes(seatId)
       );
       return (
+        this.selectedRoom &&
         this.selectedShowtime &&
         this.selectedSeats.length > 0 &&
         !hasBookedSeats
@@ -241,6 +272,11 @@ export default {
       this.showtimes = showtimes;
       console.log("Generated showtimes:", JSON.stringify(this.showtimes, null, 2));
     },
+    selectRoom(roomId) {
+      this.selectedRoom = roomId;
+      this.selectedSeats = [];
+      this.fetchBookedSeats();
+    },
     async selectShowtime(showtime) {
       this.selectedShowtime = showtime.time;
       this.selectedDate = showtime.date;
@@ -249,11 +285,12 @@ export default {
       await this.fetchBookedSeats();
     },
     async fetchBookedSeats() {
-      if (!this.movie?.id || !this.selectedDate || !this.selectedShowtime) {
+      if (!this.movie?.id || !this.selectedDate || !this.selectedShowtime || !this.selectedRoom) {
         console.warn("Thiếu thông tin để lấy ghế đã đặt:", {
           movieId: this.movie?.id,
           date: this.selectedDate,
           showtime: this.selectedShowtime,
+          roomId: this.selectedRoom,
         });
         return;
       }
@@ -263,6 +300,7 @@ export default {
             movieId: this.movie.id,
             date: this.selectedDate,
             showtime: this.selectedShowtime,
+            roomId: this.selectedRoom,
           },
           headers: { Authorization: `Bearer ${this.$store.state.auth.token}` },
         });
@@ -307,6 +345,7 @@ export default {
       if (!this.canBook) return;
       this.bookingSummary = {
         movieTitle: this.movie?.title || '--',
+        room: this.rooms.find(r => r.id === this.selectedRoom)?.name || '--',
         showtime: this.selectedShowtime || '--',
         date: this.selectedDate,
         seats: [...this.selectedSeats],
@@ -324,6 +363,7 @@ export default {
         date: this.selectedDate,
         seats: this.selectedSeats,
         total: this.selectedSeats.length * this.ticketPrice,
+        roomId: this.selectedRoom,
       };
 
       try {
@@ -352,323 +392,352 @@ export default {
   },
 };
 </script>
-  
-  <style scoped>
+
+<style scoped>
+.modern-booking-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  color: #333;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.movie-header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.movie-title {
+  font-size: 1.8rem;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.movie-title span {
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.movie-meta {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.booking-sections {
+  display: grid;
+  gap: 2rem;
+}
+
+.booking-section {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.section-title {
+  font-size: 1.2rem;
+  color: #2d3748;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-title i {
+  color: #3b82f6;
+}
+
+.selected-info {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-left: 0.5rem;
+}
+
+/* Room Section */
+.room-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.8rem;
+}
+
+.room-btn {
+  padding: 0.8rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.room-btn:hover {
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+}
+
+.room-btn.selected {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+/* Showtime Section */
+.showtime-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.8rem;
+}
+
+.showtime-btn {
+  padding: 0.8rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.showtime-btn:hover {
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+}
+
+.showtime-btn.selected {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.showtime-btn .time {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.showtime-btn .date {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+/* Seat Section */
+.cinema-screen {
+  text-align: center;
+  margin: 1rem 0 2rem;
+  padding: 0.5rem;
+  background: #f1f5f9;
+  color: #475569;
+  font-weight: 600;
+  letter-spacing: 1px;
+  position: relative;
+}
+
+.cinema-screen:before,
+.cinema-screen:after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 30%;
+  height: 2px;
+  background: linear-gradient(to right, transparent, #cbd5e1, transparent);
+}
+
+.cinema-screen:before {
+  left: 0;
+}
+
+.cinema-screen:after {
+  right: 0;
+}
+
+.seat-map {
+  margin: 0 auto;
+  max-width: 600px;
+}
+
+.seat-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.seat {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: #e2e8f0;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.seat:hover {
+  transform: scale(1.05);
+}
+
+.seat.taken {
+  background: #fecaca;
+  color: #dc2626;
+  cursor: not-allowed;
+  position: relative;
+}
+
+.seat.taken:after {
+  content: "✗";
+  position: absolute;
+  font-size: 1rem;
+}
+
+.seat.selected {
+  background: #3b82f6;
+  color: white;
+}
+
+.seat-legend {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.seat-sample {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+}
+
+.seat-sample.available {
+  background: #e2e8f0;
+}
+
+.seat-sample.selected {
+  background: #3b82f6;
+}
+
+.seat-sample.taken {
+  background: #fecaca;
+}
+
+/* Summary Section */
+.summary-content {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.summary-item .label {
+  color: #64748b;
+}
+
+.summary-item .value {
+  font-weight: 500;
+}
+
+.summary-item.total {
+  margin-top: 1.5rem;
+}
+
+.summary-item.total .value {
+  color: #3b82f6;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem;
+  background: #fef2f2;
+  color: #dc2626;
+  border-radius: 6px;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+}
+
+.error-message i {
+  font-size: 1rem;
+}
+
+.confirm-btn {
+  width: 100%;
+  padding: 1rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.confirm-btn:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5), 0 2px 4px -1px rgba(59, 130, 246, 0.06);
+}
+
+.confirm-btn:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.loading-message {
+  text-align: center;
+  padding: 2rem;
+  color: #64748b;
+  font-size: 1.1rem;
+}
+
+.loading-message i {
+  margin-right: 0.5rem;
+}
+
+@media (max-width: 768px) {
   .modern-booking-page {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-    color: #333;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
-  
-  .movie-header {
-    margin-bottom: 2.5rem;
-    text-align: center;
-  }
-  
-  .movie-title {
-    font-size: 1.8rem;
-    color: #2d3748;
-    margin-bottom: 0.5rem;
-  }
-  
-  .movie-title span {
-    color: #3b82f6;
-    font-weight: 600;
-  }
-  
-  .movie-meta {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    color: #64748b;
-    font-size: 0.9rem;
-  }
-  
-  .booking-sections {
-    display: grid;
-    gap: 2rem;
-  }
-  
-  .booking-section {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  }
-  
-  .section-title {
-    font-size: 1.2rem;
-    color: #2d3748;
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  
-  .section-title i {
-    color: #3b82f6;
-  }
-  
-  .selected-info {
-    font-size: 0.9rem;
-    color: #64748b;
-    margin-left: 0.5rem;
-  }
-  
-  /* Showtime Section */
-  .showtime-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 0.8rem;
-  }
-  
-  .showtime-btn {
-    padding: 0.8rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    background: white;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .showtime-btn:hover {
-    border-color: #3b82f6;
-    transform: translateY(-2px);
-  }
-  
-  .showtime-btn.selected {
-    background: #3b82f6;
-    color: white;
-    border-color: #3b82f6;
-  }
-  
-  .showtime-btn .time {
-    font-weight: 600;
-    font-size: 1rem;
-  }
-  
-  .showtime-btn .date {
-    font-size: 0.8rem;
-    opacity: 0.8;
-  }
-  
-  /* Seat Section */
-  .cinema-screen {
-    text-align: center;
-    margin: 1rem 0 2rem;
-    padding: 0.5rem;
-    background: #f1f5f9;
-    color: #475569;
-    font-weight: 600;
-    letter-spacing: 1px;
-    position: relative;
-  }
-  
-  .cinema-screen:before,
-  .cinema-screen:after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    width: 30%;
-    height: 2px;
-    background: linear-gradient(to right, transparent, #cbd5e1, transparent);
-  }
-  
-  .cinema-screen:before {
-    left: 0;
-  }
-  
-  .cinema-screen:after {
-    right: 0;
-  }
-  
-  .seat-map {
-    margin: 0 auto;
-    max-width: 600px;
-  }
-  
-  .seat-grid {
-    display: grid;
-    grid-template-columns: repeat(10, 1fr);
-    gap: 0.5rem;
-    margin-bottom: 2rem;
-  }
-  
-  .seat {
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 6px;
-    background: #e2e8f0;
-    cursor: pointer;
-    font-size: 0.7rem;
-    font-weight: 600;
-    transition: all 0.2s;
-  }
-  
-  .seat:hover {
-    transform: scale(1.05);
-  }
-  
-  .seat.taken {
-    background: #fecaca;
-    color: #dc2626;
-    cursor: not-allowed;
-    position: relative;
-  }
-  
-  .seat.taken:after {
-    content: "✗";
-    position: absolute;
-    font-size: 1rem;
-  }
-  
-  .seat.selected {
-    background: #3b82f6;
-    color: white;
-  }
-  
-  .seat-legend {
-    display: flex;
-    justify-content: center;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-  }
-  
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-    color: #64748b;
-  }
-  
-  .seat-sample {
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
-  }
-  
-  .seat-sample.available {
-    background: #e2e8f0;
-  }
-  
-  .seat-sample.selected {
-    background: #3b82f6;
-  }
-  
-  .seat-sample.taken {
-    background: #fecaca;
-  }
-  
-  /* Summary Section */
-  .summary-content {
-    max-width: 400px;
-    margin: 0 auto;
-  }
-  
-  .summary-item {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px dashed #e2e8f0;
-  }
-  
-  .summary-item .label {
-    color: #64748b;
-  }
-  
-  .summary-item .value {
-    font-weight: 500;
-  }
-  
-  .summary-item.total {
-    margin-top: 1.5rem;
-  }
-  
-  .summary-item.total .value {
-    color: #3b82f6;
-    font-weight: 600;
-    font-size: 1.1rem;
-  }
-  
-  .error-message {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.8rem;
-    background: #fef2f2;
-    color: #dc2626;
-    border-radius: 6px;
-    margin: 1.5rem 0;
-    font-size: 0.9rem;
-  }
-  
-  .error-message i {
-    font-size: 1rem;
-  }
-  
-  .confirm-btn {
-    width: 100%;
     padding: 1rem;
-    background: #3b82f6;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
   }
-  
-  .confirm-btn:hover {
-    background: #2563eb;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5), 0 2px 4px -1px rgba(59, 130, 246, 0.06);
+
+  .room-grid,
+  .showtime-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   }
-  
-  .confirm-btn:disabled {
-    background: #cbd5e1;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
+
+  .seat {
+    font-size: 0.6rem;
   }
-  
-  .loading-message {
-    text-align: center;
-    padding: 2rem;
-    color: #64748b;
-    font-size: 1.1rem;
+
+  .seat-legend {
+    gap: 1rem;
   }
-  
-  .loading-message i {
-    margin-right: 0.5rem;
-  }
-  
-  @media (max-width: 768px) {
-    .modern-booking-page {
-      padding: 1rem;
-    }
-    
-    .showtime-grid {
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    }
-    
-    .seat {
-      font-size: 0.6rem;
-    }
-    
-    .seat-legend {
-      gap: 1rem;
-    }
-  }
-  </style>
+}
+</style>

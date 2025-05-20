@@ -127,6 +127,10 @@
                   <i class="fas fa-chair"></i>
                   <span>{{ formatSeats(booking.seats) }}</span>
                 </div>
+                <div class="meta-item">
+                  <i class="fas fa-building"></i>
+                  <span>{{ getRoomName(booking.roomId) || '--' }}</span>
+                </div>
               </div>
               <div class="booking-footer">
                 <div class="booking-total">
@@ -178,7 +182,13 @@ export default {
       ],
       activeFilter: 'all',
       defaultAvatar: 'https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff&bold=true&size=128',
-      defaultPoster: '/images/default-poster.jpg'
+      defaultPoster: '/images/default-poster.jpg',
+      rooms: [
+        { id: 1, name: 'Room 1' },
+        { id: 2, name: 'Room 2' },
+        { id: 3, name: 'Room 3' },
+        { id: 4, name: 'Room 4' },
+      ],
     };
   },
   computed: {
@@ -234,6 +244,11 @@ export default {
     
     retryLoading() {
       this.loadData();
+    },
+    
+    getRoomName(roomId) {
+      const room = this.rooms.find(r => r.id === roomId);
+      return room ? room.name : 'Chưa rõ';
     },
     
     getRoleClass(role) {

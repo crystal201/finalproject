@@ -72,6 +72,15 @@
                 <p>Ghế: {{ booking.seats?.join(', ') || 'Chưa chọn ghế' }}</p>
               </div>
             </div>
+
+            <div class="info-row">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#6366F1">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a2 2 0 012-2h2a2 2 0 012 2v5m-4 0h4" />
+              </svg>
+              <div>
+                <p>Phòng: {{ getRoomName(booking.roomId) || 'Chưa rõ' }}</p>
+              </div>
+            </div>
           </div>
           
           <div class="payment-info">
@@ -113,7 +122,13 @@ export default {
   data() {
     return {
       bookings: [],
-      loading: true
+      loading: true,
+      rooms: [
+        { id: 1, name: 'Room 1' },
+        { id: 2, name: 'Room 2' },
+        { id: 3, name: 'Room 3' },
+        { id: 4, name: 'Room 4' },
+      ],
     };
   },
   created() {
@@ -138,6 +153,10 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+    getRoomName(roomId) {
+      const room = this.rooms.find(r => r.id === roomId);
+      return room ? room.name : 'Chưa rõ';
     },
     formatDateTime(dateTime) {
       if (!dateTime) return 'Chưa rõ';
@@ -260,7 +279,7 @@ export default {
 
 .booking-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0 ki, 0.3);
   border-color: #4F46E5;
 }
 
