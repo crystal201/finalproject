@@ -66,11 +66,11 @@ public class BookingController {
 
     @GetMapping("/check-seats")
     public ResponseEntity<List<String>> getBookedSeats(
-        @RequestParam String movieId,
-        @RequestParam String date,
-        @RequestParam String showtime
-    ) {
-        List<String> bookedSeats = bookingService.getBookedSeats(movieId, LocalDate.parse(date), showtime);
+            @RequestParam String movieId,
+            @RequestParam String date,
+            @RequestParam String showtime,
+            @RequestParam Integer roomId) { // Thêm room_id
+        List<String> bookedSeats = bookingService.getBookedSeats(movieId, LocalDate.parse(date), showtime, roomId);
         return ResponseEntity.ok(bookedSeats);
     }
 }

@@ -8,6 +8,10 @@
             <span class="value">{{ bookingSummary.movieTitle || '--' }}</span>
           </div>
           <div class="summary-item">
+            <span class="label">Phòng:</span>
+            <span class="value">{{ bookingSummary.room || '--' }}</span>
+          </div>
+          <div class="summary-item">
             <span class="label">Suất chiếu:</span>
             <span class="value">
               {{ bookingSummary.showtime || '--' }} 

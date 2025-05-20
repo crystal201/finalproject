@@ -10,5 +10,8 @@ public interface BookingSeatRepository extends JpaRepository<BookingSeat, Long> 
     @Query("SELECT bs.seat FROM BookingSeat bs WHERE bs.movieId = :movieId AND bs.date = :date AND bs.showtime = :showtime")
     List<String> findSeatsByMovieIdAndDateAndShowtime(String movieId, LocalDate date, String showtime);
 
+    @Query("SELECT bs.seat FROM BookingSeat bs WHERE bs.movieId = :movieId AND bs.date = :date AND bs.showtime = :showtime AND bs.roomId = :roomId")
+    List<String> findSeatsByMovieIdAndDateAndShowtimeAndRoomId(String movieId, LocalDate date, String showtime, Integer roomId);
+
     List<BookingSeat> findByBookingId(Long bookingId);
 }

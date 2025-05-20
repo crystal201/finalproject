@@ -18,18 +18,18 @@ public class BookingSeatService {
         this.bookingSeatRepository = bookingSeatRepository;
     }
 
-    public List<String> getBookedSeats(String movieId, LocalDate date, String showtime) {
+    public List<String> getBookedSeats(String movieId, LocalDate date, String showtime, Integer roomId) {
         try {
-            return bookingSeatRepository.findSeatsByMovieIdAndDateAndShowtime(movieId, date, showtime);
+            return bookingSeatRepository.findSeatsByMovieIdAndDateAndShowtimeAndRoomId(movieId, date, showtime, roomId);
         } catch (Exception e) {
-            logger.error("Lỗi khi lấy ghế đã đặt: movieId={}, date={}, showtime={}", movieId, date, showtime, e);
+            logger.error("Lỗi khi lấy ghế đã đặt: movieId={}, date={}, showtime={}, roomId={}", movieId, date, showtime, roomId, e);
             throw new RuntimeException("Không thể lấy danh sách ghế: " + e.getMessage());
         }
     }
 
-    public void saveSeats(Long bookingId, List<String> seats, String movieId, LocalDate date, String showtime) {
+    public void saveSeats(Long bookingId, List<String> seats, String movieId, LocalDate date, String showtime, Integer roomId) {
         try {
-            List<String> bookedSeats = getBookedSeats(movieId, date, showtime);
+            List<String> bookedSeats = getBookedSeats(movieId, date, showtime, roomId);
             if (seats.stream().anyMatch(bookedSeats::contains)) {
                 throw new RuntimeException("Một số ghế đã được đặt: " + seats.stream().filter(bookedSeats::contains).collect(Collectors.joining(", ")));
             }
@@ -41,10 +41,11 @@ public class BookingSeatService {
                 bookingSeat.setMovieId(movieId);
                 bookingSeat.setDate(date);
                 bookingSeat.setShowtime(showtime);
+                bookingSeat.setRoomId(roomId); // Thêm roomId
                 bookingSeatRepository.save(bookingSeat);
             }
         } catch (Exception e) {
-            logger.error("Lỗi khi lưu ghế: bookingId={}, seats={}", bookingId, seats, e);
+            logger.error("Lỗi khi lưu ghế: bookingId={}, seats={}, roomId={}", bookingId, seats, roomId, e);
             throw new RuntimeException("Không thể lưu ghế: " + e.getMessage());
         }
     }
