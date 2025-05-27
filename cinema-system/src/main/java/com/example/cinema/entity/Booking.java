@@ -35,6 +35,14 @@ public class Booking {
     @Column(name = "room_id", nullable = false)
     private Integer roomId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status = Status.ACTIVE;
+
+    public enum Status {
+        ACTIVE, CANCELLED, EXPIRED
+    }
+
     // Getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -54,4 +62,6 @@ public class Booking {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public Integer getRoomId() { return roomId; }
     public void setRoomId(Integer roomId) { this.roomId = roomId; }
+    public Status getStatus() { return status; }
+    public void setStatus(Status status) { this.status = status; }
 }

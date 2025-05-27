@@ -2,26 +2,26 @@
   <div class="profile-container">
     <!-- Header Section -->
     <div class="profile-header">
-      <h1 class="profile-title">Hồ sơ cá nhân</h1>
+      <h1 class="profile-title">Personal Profile</h1>
       <div class="profile-breadcrumb">
-        <nuxt-link to="/" class="breadcrumb-link">Trang chủ</nuxt-link>
+        <nuxt-link to="/" class="breadcrumb-link">Home</nuxt-link>
         <span class="breadcrumb-separator">/</span>
-        <span class="breadcrumb-current">Hồ sơ</span>
+        <span class="breadcrumb-current">Profile</span>
       </div>
     </div>
 
     <!-- Main Content -->
     <div v-if="loading" class="loading-container">
       <i class="fas fa-spinner fa-spin"></i>
-      <p>Đang tải thông tin...</p>
+      <p>Loading information...</p>
     </div>
 
     <div v-else-if="error" class="error-container">
       <i class="fas fa-exclamation-triangle"></i>
-      <h3>Có lỗi xảy ra</h3>
+      <h3>An error occurred</h3>
       <p>{{ error }}</p>
       <button @click="retryLoading" class="retry-btn">
-        <i class="fas fa-sync-alt"></i> Thử lại
+        <i class="fas fa-sync-alt"></i> Try again
       </button>
     </div>
 
@@ -42,7 +42,7 @@
         
         <div class="user-info">
           <div class="user-meta">
-            <h2 class="username">{{ user.username || 'Khách' }}</h2>
+            <h2 class="username">{{ user.username || 'Guest' }}</h2>
             <span v-if="user.role" class="user-badge" :class="getRoleClass(user.role)">
               {{ user.role }}
             </span>
@@ -53,37 +53,30 @@
               <i class="fas fa-envelope"></i>
               <div>
                 <label>Email</label>
-                <p>{{ user.email || 'Chưa cập nhật' }}</p>
+                <p>{{ user.email || 'Not updated' }}</p>
               </div>
             </div>
             
             <div class="detail-item">
               <i class="fas fa-phone"></i>
               <div>
-                <label>Số điện thoại</label>
-                <p>{{ user.phone || 'Chưa cập nhật' }}</p>
+                <label>Phone number</label>
+                <p>{{ user.phone || 'Not updated' }}</p>
               </div>
             </div>
             
-            <div class="detail-item">
-              <i class="fas fa-calendar-alt"></i>
-              <div>
-                <label>Thành viên từ</label>
-                <p>{{ formatJoinDate(user.createdAt) }}</p>
-              </div>
-            </div>
           </div>
         </div>
         
-        <button class="edit-profile-btn" @click="editProfile">
-          <i class="fas fa-edit"></i> Chỉnh sửa hồ sơ
-        </button>
+        <!-- <button class="edit-profile-btn" @click="editProfile">
+          <i class="fas fa-edit"></i> Edit profile
+        </button> -->
       </div>
 
       <!-- Booking History Section -->
       <div class="profile-card booking-history">
         <div class="section-header">
-          <h3><i class="fas fa-ticket-alt"></i> Lịch sử đặt vé</h3>
+          <h3><i class="fas fa-ticket-alt"></i> Booking History</h3>
           <div class="history-filter">
             <button 
               v-for="filter in filters" 
@@ -102,22 +95,22 @@
             v-for="booking in filteredBookings" 
             :key="booking.id" 
             class="booking-item"
-            @click="viewBookingDetail(booking.id)"
+            :class="{ 'expired': booking.status === 'EXPIRED' }"
           >
             <div class="booking-poster">
               <img 
-                :src="getMoviePoster(booking.moviePoster)" 
-                :alt="booking.movieTitle"
+                :src="getMoviePoster(booking.movie?.poster_path)"
+                :alt="booking.movieTitle || 'Unknown movie'"
                 @error="handlePosterError"
               />
             </div>
             
             <div class="booking-info">
-              <h4 class="movie-title">{{ booking.movieTitle || 'Phim không xác định' }}</h4>
+              <h4 class="movie-title">{{ booking.movieTitle || 'Unknown movie' }}</h4>
               <div class="booking-meta">
                 <div class="meta-item">
                   <i class="fas fa-calendar-day"></i>
-                  <span>{{ booking.date || '--' }}</span>
+                  <span>{{ formatDate(booking.date) }}</span>
                 </div>
                 <div class="meta-item">
                   <i class="fas fa-clock"></i>
@@ -134,13 +127,23 @@
               </div>
               <div class="booking-footer">
                 <div class="booking-total">
-                  <span>Tổng cộng:</span>
+                  <span>Total:</span>
                   <span class="price">{{ formatCurrency(booking.total) }}</span>
                 </div>
-                <div class="booking-date">
-                  <i class="fas fa-clock"></i>
-                  <span>{{ formatDateTime(booking.createdAt) }}</span>
+                <div class="booking-status">
+                  <span :class="{
+                    'status-active': booking.status === 'ACTIVE',
+                    'status-cancelled': booking.status === 'CANCELLED',
+                    'status-expired': booking.status === 'EXPIRED'
+                  }">
+                    {{ getStatusLabel(booking.status) }}
+                  </span>
                 </div>
+              </div>
+              <div class="booking-actions" v-if="canCancel(booking)">
+                <button class="cancel-btn" @click="cancelBooking(booking.id)">
+                  <i class="fas fa-times"></i> Cancel ticket
+                </button>
               </div>
             </div>
           </div>
@@ -148,19 +151,10 @@
         
         <div v-else class="empty-history">
           <i class="fas fa-ticket-alt"></i>
-          <p>{{ activeFilter === 'all' ? 'Bạn chưa có vé nào' : 'Không tìm thấy vé phù hợp' }}</p>
-          <nuxt-link to="/movies" class="explore-btn">Khám phá phim mới</nuxt-link>
+          <p>{{ activeFilter === 'all' ? 'You have no tickets yet' : 'No matching tickets found' }}</p>
+          <nuxt-link to="/" class="explore-btn">Explore new movies</nuxt-link>
         </div>
       </div>
-    </div>
-
-    <div v-else class="not-found">
-      <i class="fas fa-user-slash"></i>
-      <h3>Không tìm thấy người dùng</h3>
-      <p>Tài khoản không tồn tại hoặc đã bị xóa</p>
-      <nuxt-link to="/" class="home-link">
-        <i class="fas fa-home"></i> Về trang chủ
-      </nuxt-link>
     </div>
   </div>
 </template>
@@ -176,9 +170,9 @@ export default {
       error: null,
       bookings: [],
       filters: [
-        { value: 'all', label: 'Tất cả' },
-        { value: 'upcoming', label: 'Sắp chiếu' },
-        { value: 'watched', label: 'Đã xem' }
+        { value: 'all', label: 'All' },
+        { value: 'cancelled', label: 'Cancelled' },
+        { value: 'expired', label: 'Expired' }
       ],
       activeFilter: 'all',
       defaultAvatar: 'https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff&bold=true&size=128',
@@ -203,15 +197,12 @@ export default {
     filteredBookings() {
       if (!this.bookings.length) return [];
       
-      const now = new Date();
       return this.bookings.filter(booking => {
-        if (this.activeFilter === 'upcoming') {
-          const showDate = new Date(booking.date);
-          return showDate > now;
+        if (this.activeFilter === 'cancelled') {
+          return booking.status === 'CANCELLED';
         }
-        if (this.activeFilter === 'watched') {
-          const showDate = new Date(booking.date);
-          return showDate <= now;
+        if (this.activeFilter === 'expired') {
+          return booking.status === 'EXPIRED';
         }
         return true;
       });
@@ -226,20 +217,49 @@ export default {
         this.loading = true;
         this.error = null;
         
-        // Load bookings if user exists
         if (this.user) {
-          const response = await this.$axios.get('/api/bookings');
-          this.bookings = response.data.map(booking => ({
-            ...booking,
-            moviePoster: booking.moviePoster || null
-          }));
+          const response = await this.$axios.get('/api/bookings', {
+            params: { filter: this.activeFilter }
+          });
+          this.bookings = await Promise.all(
+            response.data.map(async (booking) => {
+              try {
+                const movieResponse = await this.$axios.get(
+                  `https://api.themoviedb.org/3/movie/${booking.movieId}`,
+                  { params: { api_key: this.$config.tmdbApiKey } }
+                );
+                return { ...booking, movie: movieResponse.data };
+              } catch (err) {
+                console.warn(`Failed to fetch movie data for movieId ${booking.movieId}:`, err);
+                return { ...booking, movie: { poster_path: null, title: booking.movieTitle } };
+              }
+            })
+          );
         }
       } catch (err) {
-        console.error('Lỗi khi tải dữ liệu:', err);
-        this.error = err.response?.data?.message || 'Không thể tải thông tin. Vui lòng thử lại sau.';
+        console.error('Error loading data:', err);
+        this.error = err.response?.data?.message || 'Failed to load information. Please try again later.';
       } finally {
         this.loading = false;
       }
+    },
+    
+    async cancelBooking(bookingId) {
+      if (!confirm('Are you sure you want to cancel this ticket?')) return;
+      try {
+        const response = await this.$axios.post(`/api/bookings/cancel/${bookingId}`);
+        this.$toast.success(response.data.message || 'Ticket cancelled successfully!');
+        await this.loadData();
+      } catch (err) {
+        console.error('Error cancelling ticket:', err);
+        this.$toast.error(err.response?.data?.message || 'Failed to cancel ticket.');
+      }
+    },
+    
+    canCancel(booking) {
+      if (!booking || booking.status !== 'ACTIVE') return false;
+      const showDateTime = new Date(`${booking.date} ${booking.showtime}`);
+      return showDateTime > new Date();
     },
     
     retryLoading() {
@@ -248,7 +268,7 @@ export default {
     
     getRoomName(roomId) {
       const room = this.rooms.find(r => r.id === roomId);
-      return room ? room.name : 'Chưa rõ';
+      return room ? room.name : 'Unknown';
     },
     
     getRoleClass(role) {
@@ -265,11 +285,28 @@ export default {
       try {
         const date = new Date(dateTime);
         return date.toLocaleString('vi-VN', {
-          dateStyle: 'medium',
-          timeStyle: 'short',
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
         });
       } catch {
         return 'N/A';
+      }
+    },
+    
+    formatDate(date) {
+      if (!date) return '--';
+      try {
+        const d = new Date(date);
+        return d.toLocaleDateString('vi-VN', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        });
+      } catch {
+        return '--';
       }
     },
     
@@ -287,14 +324,14 @@ export default {
     },
     
     formatCurrency(amount) {
-      if (!amount) return '--';
+      if (!amount) return '0 ₫';
       try {
         return new Intl.NumberFormat('vi-VN', {
           style: 'currency',
-          currency: 'VND'
+          currency: 'VND',
         }).format(amount * 1000);
       } catch {
-        return amount + ' VND';
+        return amount + ' ₫';
       }
     },
     
@@ -314,6 +351,7 @@ export default {
     
     changeFilter(filter) {
       this.activeFilter = filter;
+      this.loadData();
     },
     
     editProfile() {
@@ -321,13 +359,17 @@ export default {
     },
     
     openAvatarEditor() {
-      // TODO: Implement avatar editor
-      this.$toast.info('Tính năng đang phát triển');
+      this.$toast.info('Feature under development');
     },
     
-    viewBookingDetail(bookingId) {
-      this.$router.push(`/bookings/${bookingId}`);
-    }
+    getStatusLabel(status) {
+      switch (status) {
+        case 'ACTIVE': return 'Đang hoạt động';
+        case 'CANCELLED': return 'Đã hủy';
+        case 'EXPIRED': return 'Hết hiệu lực';
+        default: return 'Không xác định';
+      }
+    },
   }
 };
 </script>
@@ -348,7 +390,7 @@ export default {
 .profile-title {
   font-size: 28px;
   font-weight: 700;
-  color: #2d3748;
+  color: #c3d9fe;
   margin-bottom: 10px;
 }
 
@@ -360,7 +402,7 @@ export default {
 }
 
 .breadcrumb-link {
-  color: #4299e1;
+  color: #4a5568;
   text-decoration: none;
   transition: color 0.2s;
 }
@@ -376,7 +418,7 @@ export default {
 }
 
 .breadcrumb-current {
-  color: #4a5568;
+  color: #4299e1;
 }
 
 .loading-container,
@@ -463,7 +505,6 @@ export default {
 }
 
 .user-card {
-  height: 500px;
   padding: 25px;
   position: relative;
 }
@@ -599,7 +640,6 @@ export default {
 
 .booking-history {
   padding: 25px;
-  height: 650px;
   overflow-y: auto;
 }
 
@@ -666,7 +706,6 @@ export default {
   border-radius: 8px;
   border: 1px solid #e2e8f0;
   transition: all 0.2s;
-  cursor: pointer;
 }
 
 .booking-item:hover {
@@ -688,17 +727,6 @@ export default {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.poster-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #e2e8f0;
-  color: #a0aec0;
-  font-size: 24px;
 }
 
 .booking-info {
@@ -758,12 +786,42 @@ export default {
   color: #2f855a;
 }
 
-.booking-date {
+.booking-status {
   font-size: 12px;
-  color: #718096;
-  display: flex;
+}
+
+.status-active {
+  color: #2f855a;
+  font-weight: 600;
+}
+
+.status-cancelled {
+  color: #e53e3e;
+  font-weight: 600;
+}
+
+.booking-actions {
+  margin-top: 10px;
+  text-align: right;
+}
+
+.cancel-btn {
+  padding: 6px 12px;
+  background: #e53e3e;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
   align-items: center;
   gap: 5px;
+}
+
+.cancel-btn:hover {
+  background: #c53030;
 }
 
 .empty-history {

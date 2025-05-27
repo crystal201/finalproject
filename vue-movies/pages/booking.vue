@@ -2,9 +2,9 @@
   <div class="modern-booking-page">
     <!-- Movie Header -->
     <div class="movie-header" v-if="movie">
-      <h2 class="movie-title">Đặt vé cho <span>{{ movie.title }}</span></h2>
+      <h2 class="movie-title">Booking ticket for <span>{{ movie.title }}</span></h2>
       <div class="movie-meta">
-        <span class="runtime">{{ movie.runtime }} phút</span>
+        <span class="runtime">{{ movie.runtime }} minute</span>
       </div>
     </div>
 
@@ -13,7 +13,7 @@
       <!-- Room Selection -->
       <section class="booking-section room-section">
         <h3 class="section-title">
-          <i class="fas fa-door-open"></i> Chọn phòng
+          <i class="fas fa-door-open"></i> Pick a room
           <span v-if="selectedRoom" class="selected-info">({{ rooms.find(r => r.id === selectedRoom).name }})</span>
         </h3>
         <div class="room-grid">
@@ -32,7 +32,7 @@
       <!-- Showtime Selection -->
       <section class="booking-section showtime-section">
         <h3 class="section-title">
-          <i class="fas fa-clock"></i> Chọn suất chiếu
+          <i class="fas fa-clock"></i> Select showtime
           <span v-if="selectedDate && selectedShowtime" class="selected-info">
             ({{ selectedDate }} - {{ selectedShowtime }})
           </span>
@@ -55,8 +55,8 @@
 
       <!-- Seat Selection -->
       <section class="booking-section seat-section" :key="seatsKey">
-        <h3 class="section-title"><i class="fas fa-chair"></i> Chọn ghế</h3>
-        <div class="cinema-screen">MÀN HÌNH</div>
+        <h3 class="section-title"><i class="fas fa-chair"></i> Choose seats</h3>
+        <div class="cinema-screen">MAIN SCREEN</div>
         <div class="seat-map">
           <div class="seat-grid">
             <div
@@ -76,25 +76,25 @@
         <div class="seat-legend">
           <div class="legend-item">
             <div class="seat-sample available"></div>
-            <span>Có sẵn</span>
+            <span>Availble</span>
           </div>
           <div class="legend-item">
             <div class="seat-sample selected"></div>
-            <span>Đã chọn</span>
+            <span>Choosed</span>
           </div>
           <div class="legend-item">
             <div class="seat-sample taken"></div>
-            <span>Đã đặt</span>
+            <span>Booked</span>
           </div>
         </div>
       </section>
 
       <!-- Booking Summary -->
       <section class="booking-section summary-section">
-        <h3 class="section-title"><i class="fas fa-receipt"></i> Tóm tắt đặt vé</h3>
+        <h3 class="section-title"><i class="fas fa-receipt"></i> Booking information</h3>
         <div class="summary-content">
           <div class="summary-item">
-            <span class="label">Phim:</span>
+            <span class="label">Movie:</span>
             <span class="value">{{ movie?.title || '--' }}</span>
           </div>
           <div class="summary-item">
@@ -102,24 +102,24 @@
             <span class="value">{{ selectedRoom ? rooms.find(r => r.id === selectedRoom).name : '--' }}</span>
           </div>
           <div class="summary-item">
-            <span class="label">Suất chiếu:</span>
+            <span class="label">Show time:</span>
             <span class="value">
               {{ selectedShowtime || '--' }}
               <span v-if="selectedDate">({{ selectedDate }})</span>
             </span>
           </div>
           <div class="summary-item">
-            <span class="label">Ghế:</span>
-            <span class="value">{{ selectedSeats.join(", ") || "Chưa chọn" }}</span>
+            <span class="label">Seat:</span>
+            <span class="value">{{ selectedSeats.join(", ") || "No seat choosen" }}</span>
           </div>
           <div class="summary-item total">
-            <span class="label">Tổng cộng:</span>
+            <span class="label">Total price:</span>
             <span class="value">{{ selectedSeats.length * ticketPrice }}.000đ</span>
           </div>
 
           <div v-if="selectedSeats.some((seatId) => bookedSeats.includes(seatId))" class="error-message">
             <i class="fas fa-exclamation-triangle"></i>
-            <span>Một số ghế bạn chọn đã được đặt rồi</span>
+            <span>Some seats have been booked...</span>
           </div>
 
           <button
@@ -128,16 +128,16 @@
             @click="openConfirmModal"
           >
             <span v-if="loading">
-              <i class="fas fa-spinner fa-spin"></i> Đang xử lý...
+              <i class="fas fa-spinner fa-spin"></i> Processing...
             </span>
-            <span v-else>XÁC NHẬN ĐẶT VÉ</span>
+            <span v-else>CONFIRM BOOKING</span>
           </button>
         </div>
       </section>
     </div>
 
     <div v-if="!movie" class="loading-message">
-      <i class="fas fa-spinner fa-spin"></i> Đang tải thông tin phim...
+      <i class="fas fa-spinner fa-spin"></i> Loading movie information...
     </div>
 
     <ConfirmBookingModal
@@ -175,7 +175,7 @@ export default {
       seats: [],
       bookedSeats: [],
       selectedSeats: [],
-      ticketPrice: 10,
+      ticketPrice: 55,
       seatsKey: 0,
       loading: false,
       showConfirmModal: false,
@@ -211,7 +211,7 @@ export default {
     async fetchMovieDetails() {
       const movieId = this.$route.query.movieId;
       if (!movieId) {
-        this.$nuxt.error({ statusCode: 404, message: "Phim không tìm thấy" });
+        this.$nuxt.error({ statusCode: 404, message: "Movie not found!" });
         return;
       }
       try {
@@ -230,10 +230,10 @@ export default {
         };
         this.generateShowtimes();
       } catch (error) {
-        console.error("Lỗi khi lấy thông tin phim từ TMDB:", error);
+        console.error("Error while processing film from database ", error);
         this.$nuxt.error({
           statusCode: 500,
-          message: "Lỗi khi tải thông tin phim",
+          message: "Error while loading movie information",
         });
       }
     },
@@ -320,19 +320,19 @@ export default {
         this.seatsKey++;
         console.log("Seats after update:", JSON.stringify(this.seats, null, 2));
       } catch (error) {
-        console.error("Lỗi lấy ghế đã đặt:", error);
+        console.error(error);
         this.$set(this, "bookedSeats", []);
         this.$set(this, "seats", this.seats.map((seat) => ({ ...seat, taken: false })));
         console.log("Seats after error:", JSON.stringify(this.seats, null, 2));
         this.$toast.error(
-          "Không thể tải danh sách ghế: " +
+          "Error while loading seats: " +
           (error.response?.data?.message || error.message)
         );
       }
     },
     toggleSeat(seatId) {
       if (this.bookedSeats.includes(seatId)) {
-        this.$toast.warning("Ghế này đã được đặt rồi");
+        this.$toast.warning("This seat has been booked");
         return;
       }
       if (this.selectedSeats.includes(seatId)) {
@@ -370,17 +370,17 @@ export default {
         const response = await this.$axios.post("/api/bookings", booking, {
           headers: { Authorization: `Bearer ${this.$store.state.auth.token}` },
         });
-        this.$toast.success(response.data.message || "Đặt vé thành công!");
+        this.$toast.success(response.data.message || "Booking ticket successfuly!");
         this.selectedSeats = [];
         await this.fetchBookedSeats();
         this.$router.push("/booking-history");
       } catch (error) {
-        console.error("Lỗi khi đặt vé:", error);
+        console.error("Error while booking seats:", error);
         const errorMessage =
           error.response?.data?.message ||
           error.message ||
-          "Lỗi không xác định khi đặt vé";
-        this.$toast.error("Đặt vé thất bại: " + errorMessage);
+          "Non qualified error while booking movie";
+        this.$toast.error("Failed to booking tiket: " + errorMessage);
         await this.fetchBookedSeats();
       } finally {
         this.loading = false;
@@ -409,7 +409,7 @@ export default {
 
 .movie-title {
   font-size: 1.8rem;
-  color: #2d3748;
+  color: #c5daff;
   margin-bottom: 0.5rem;
 }
 

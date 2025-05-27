@@ -8,12 +8,11 @@
       :title="trendingMoviesTitle"
       :view-all-url="trendingMoviesUrl"
       :items="trendingMovies" />
-
-    <ListingCarousel
+    <!-- <ListingCarousel
       v-if="trendingTv && trendingTv.results.length"
       :title="trendingTvTitle"
       :view-all-url="trendingTvUrl"
-      :items="trendingTv" />
+      :items="trendingTv" /> -->
   </main>
 </template>
 
@@ -37,13 +36,13 @@ export default {
       return { name: 'movie-category-name', params: { name: 'trending' } };
     },
 
-    trendingTvTitle () {
-      return getListItem('tv', 'trending').title;
-    },
+    // trendingTvTitle () {
+    //   return getListItem('tv', 'trending').title;
+    // },
 
-    trendingTvUrl () {
-      return { name: 'tv-category-name', params: { name: 'trending' } };
-    },
+    // trendingTvUrl () {
+    //   return { name: 'tv-category-name', params: { name: 'trending' } };
+    // },
   },
 
   async asyncData ({ error }) {
