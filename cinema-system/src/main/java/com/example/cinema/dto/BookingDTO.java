@@ -14,6 +14,7 @@ public class BookingDTO {
     private String userId;
     private Integer roomId;
     private LocalDateTime createdAt;
+    private String status;
 
     // Getters and setters
     public Long getId() { return id; }
@@ -36,4 +37,11 @@ public class BookingDTO {
     public void setUserId(String userId) { this.userId = userId; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }

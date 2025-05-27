@@ -1,7 +1,6 @@
 package com.example.cinema.controller;
 
 import com.example.cinema.dto.BookingDTO;
-import com.example.cinema.dto.MovieDTO;
 import com.example.cinema.service.BookingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,23 +44,45 @@ public class BookingController {
     }
 
     @GetMapping
-    public ResponseEntity<List<BookingDTO>> getUserBookings(Authentication authentication) {
+    public ResponseEntity<List<BookingDTO>> getUserBookings(
+            Authentication authentication,
+            @RequestParam(defaultValue = "all") String filter) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         String userId = authentication.getName();
-        List<BookingDTO> bookings = bookingService.getBookingsByUserId(userId);
+        List<BookingDTO> bookings = bookingService.getBookingsByUserId(userId, filter);
         return ResponseEntity.ok(bookings);
     }
 
-    @GetMapping("/movies")
-    public ResponseEntity<List<MovieDTO>> getBookedMovies(Authentication authentication) {
+    @PostMapping("/cancel/{id}")
+    public ResponseEntity<Map<String, Object>> cancelBooking(
+            @PathVariable Long id,
+            Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Chưa đăng nhập");
+            return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
         }
-        String userId = authentication.getName();
-        List<MovieDTO> movies = bookingService.getBookedMovies(userId);
-        return ResponseEntity.ok(movies);
+        try {
+            String userId = authentication.getName();
+            bookingService.cancelBooking(id, userId);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Hủy vé thành công");
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException | SecurityException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        } catch (IllegalStateException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Lỗi khi hủy vé: " + e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/check-seats")
@@ -69,7 +90,7 @@ public class BookingController {
             @RequestParam String movieId,
             @RequestParam String date,
             @RequestParam String showtime,
-            @RequestParam Integer roomId) { // Thêm room_id
+            @RequestParam Integer roomId) {
         List<String> bookedSeats = bookingService.getBookedSeats(movieId, LocalDate.parse(date), showtime, roomId);
         return ResponseEntity.ok(bookedSeats);
     }

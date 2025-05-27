@@ -18,14 +18,18 @@ public class BookingSeatService {
         this.bookingSeatRepository = bookingSeatRepository;
     }
 
-    public List<String> getBookedSeats(String movieId, LocalDate date, String showtime, Integer roomId) {
-        try {
-            return bookingSeatRepository.findSeatsByMovieIdAndDateAndShowtimeAndRoomId(movieId, date, showtime, roomId);
-        } catch (Exception e) {
-            logger.error("Lỗi khi lấy ghế đã đặt: movieId={}, date={}, showtime={}, roomId={}", movieId, date, showtime, roomId, e);
-            throw new RuntimeException("Không thể lấy danh sách ghế: " + e.getMessage());
-        }
+public List<String> getBookedSeats(String movieId, LocalDate date, String showtime, Integer roomId) {
+    try {
+        List<String> bookedSeats = bookingSeatRepository.findSeatsByMovieIdAndDateAndShowtimeAndRoomId(movieId, date, showtime, roomId);
+        logger.info("Retrieved booked seats for movieId={}, date={}, showtime={}, roomId={}: {}", 
+                    movieId, date, showtime, roomId, bookedSeats);
+        return bookedSeats;
+    } catch (Exception e) {
+        logger.error("Lỗi khi lấy ghế đã đặt: movieId={}, date={}, showtime={}, roomId={}", 
+                     movieId, date, showtime, roomId, e);
+        throw new RuntimeException("Không thể lấy danh sách ghế: " + e.getMessage());
     }
+}
 
     public void saveSeats(Long bookingId, List<String> seats, String movieId, LocalDate date, String showtime, Integer roomId) {
         try {
@@ -41,7 +45,7 @@ public class BookingSeatService {
                 bookingSeat.setMovieId(movieId);
                 bookingSeat.setDate(date);
                 bookingSeat.setShowtime(showtime);
-                bookingSeat.setRoomId(roomId); // Thêm roomId
+                bookingSeat.setRoomId(roomId);
                 bookingSeatRepository.save(bookingSeat);
             }
         } catch (Exception e) {

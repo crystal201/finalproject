@@ -69,9 +69,8 @@
           </svg>
         </nuxt-link>
       </li>
-      <li>
+      <!-- <li>
         <nuxt-link :to="{ name: 'tv' }" aria-label="TV Shows">
-          <!-- eslint-disable-next-line -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -91,7 +90,7 @@
             </g>
           </svg>
         </nuxt-link>
-      </li>
+      </li> -->
       <li>
         <nuxt-link :to="{ name: 'recommendation' }" aria-label="Recommendation">
           <!-- eslint-disable-next-line -->
@@ -127,10 +126,8 @@
           </svg>
         </button>
       </li>
-      <span v-if="$store.state.auth.isAuthenticated" class="nav-welcome">
-      Welcome, {{ $store.state.auth.user?.username }}
-    </span>
     </ul>
+    <TypingWelcome v-if="$store.state.auth.isAuthenticated" />
 
   </nav>
 </template>
@@ -138,6 +135,7 @@
 <script>
 import { mapState } from "vuex";
 import UserDropdown from "../../components/user/UserDropdown.vue";
+import TypingWelcome from "./TypingWelcome.vue";
 
 export default {
   computed: {
