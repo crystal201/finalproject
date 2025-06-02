@@ -1,35 +1,35 @@
 <template>
     <div v-if="isOpen" class="modal-overlay">
       <div class="modal-content">
-        <h2 class="modal-title">Xác nhận đặt vé</h2>
+        <h2 class="modal-title">Confirm Booking</h2>
         <div class="modal-body">
           <div class="summary-item">
-            <span class="label">Phim:</span>
+            <span class="label">Movie:</span>
             <span class="value">{{ bookingSummary.movieTitle || '--' }}</span>
           </div>
           <div class="summary-item">
-            <span class="label">Phòng:</span>
+            <span class="label">Room:</span>
             <span class="value">{{ bookingSummary.room || '--' }}</span>
           </div>
           <div class="summary-item">
-            <span class="label">Suất chiếu:</span>
+            <span class="label">Showtime:</span>
             <span class="value">
               {{ bookingSummary.showtime || '--' }} 
               <span v-if="bookingSummary.date">({{ bookingSummary.date }})</span>
             </span>
           </div>
           <div class="summary-item">
-            <span class="label">Ghế:</span>
+            <span class="label">Seats:</span>
             <span class="value">{{ bookingSummary.seats.join(", ") || "Chưa chọn" }}</span>
           </div>
           <div class="summary-item total">
-            <span class="label">Tổng cộng:</span>
+            <span class="label">Total Price:</span>
             <span class="value">{{ bookingSummary.total }}.000đ</span>
           </div>
         </div>
         <div class="modal-actions">
-          <button @click="confirm" class="modal-button primary">Xác nhận</button>
-          <button @click="cancel" class="modal-button secondary">Hủy</button>
+          <button @click="confirm" class="modal-button primary">Confirm</button>
+          <button @click="cancel" class="modal-button secondary">Cancel</button>
         </div>
       </div>
     </div>

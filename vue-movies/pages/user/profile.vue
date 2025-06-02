@@ -507,6 +507,7 @@ export default {
 .user-card {
   padding: 25px;
   position: relative;
+  height: 450px;
 }
 
 .user-avatar-section {
@@ -639,6 +640,7 @@ export default {
 }
 
 .booking-history {
+  height: 500px;
   padding: 25px;
   overflow-y: auto;
 }

@@ -54,7 +54,15 @@ public class BookingController {
         List<BookingDTO> bookings = bookingService.getBookingsByUserId(userId, filter);
         return ResponseEntity.ok(bookings);
     }
-
+    @GetMapping("/latest")
+    public ResponseEntity<BookingDTO> getLatestBooking(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String userId = authentication.getName();
+        BookingDTO booking = bookingService.getLatestBookingByUserId(userId);
+        return booking != null ? ResponseEntity.ok(booking) : ResponseEntity.noContent().build();
+    }
     @PostMapping("/cancel/{id}")
     public ResponseEntity<Map<String, Object>> cancelBooking(
             @PathVariable Long id,
