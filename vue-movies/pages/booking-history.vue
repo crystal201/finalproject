@@ -1,64 +1,64 @@
 <template>
   <div class="dark-booking-history">
     <div class="history-header">
-      <h1>Lịch sử đặt vé</h1>
-      <p>Thông tin vé phim bạn đã đặt sẽ hiển thị tại đây</p>
+      <h1>Booked Movie Ticket</h1>
+      <p>Your latest booked movie ticket displayed here</p>
     </div>
 
     <div v-if="loading" class="loading-container">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#9CA3AF">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
       </svg>
-      <p>Đang tải thông tin vé...</p>
+      <p>Loading ticket information...</p>
     </div>
 
-    <div v-else-if="bookings.length === 0" class="empty-history">
+    <div v-else-if="!bookings.length" class="empty-history">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#9CA3AF">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
-      <p>Bạn chưa có vé nào</p>
-      <router-link to="/movies" class="discover-btn">Khám phá phim mới</router-link>
+      <p>you don't have any booked ticket</p>
+      <router-link to="/" class="discover-btn">Discover movies</router-link>
     </div>
 
     <div v-else class="booking-list">
-      <div v-for="booking in bookings" :key="booking.id" class="booking-card" :class="{ 'expired': booking.status === 'EXPIRED' }">
+      <div class="booking-card" :class="{ 'expired': bookings[0].status === 'EXPIRED' }">
         <div class="movie-section">
           <img
-            :src="'https://image.tmdb.org/t/p/w300' + (booking.movie.poster_path || '/placeholder-dark.jpg')"
-            :alt="booking.movie.title || 'Không có tiêu đề'"
+            :src="'https://image.tmdb.org/t/p/w300' + (bookings[0].movie.poster_path || '/placeholder-dark.jpg')"
+            :alt="bookings[0].movie.title || 'Non title'"
             class="movie-poster"
             @error="handleImageError"
           />
           <div class="movie-info">
             <div class="title-rating">
-              <h3>{{ booking.movie.title || 'Không có tiêu đề' }}</h3>
+              <h3>{{ bookings[0].movie.title || 'Non title' }}</h3>
             </div>
             <div class="genres">
-              <span v-for="genre in booking.movie.genres" :key="genre.id" class="genre">
+              <span v-for="genre in bookings[0].movie.genres" :key="genre.id" class="genre">
                 {{ genre.name }}
               </span>
             </div>
-            <p class="overview">{{ truncateOverview(booking.movie.overview) }}</p>
-            <div class="meta">
+            <p class="overview">{{ truncateOverview(bookings[0].movie.overview) }}</p>
+            <!-- <div class="meta">
               <div class="meta-item">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#9CA3AF">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span>{{ booking.movie.releaseDate || 'Chưa rõ' }}</span>
+                <span>{{ bookings[0].movie.releaseDate || 'Chưa rõ' }}</span>
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
         <div class="ticket-section">
           <div class="ticket-info">
-            <h4>Thông tin vé</h4>
+            <h4>Movie information</h4>
             <div class="info-row">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#6366F1">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div>
-                <p>{{ booking.showtime || 'Chưa rõ' }}</p>
-                <p class="date">{{ formatDate(booking.date) }}</p>
+                <p>{{ bookings[0].showtime || 'No information' }}</p>
+                <p class="date">{{ formatDate(bookings[0].date) }}</p>
               </div>
             </div>
             <div class="info-row">
@@ -66,7 +66,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
               </svg>
               <div>
-                <p>Ghế: {{ booking.seats?.join(', ') || 'Chưa chọn ghế' }}</p>
+                <p>Seats: {{ bookings[0].seats?.join(', ') || 'No seat booked' }}</p>
               </div>
             </div>
             <div class="info-row">
@@ -74,36 +74,38 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a2 2 0 012-2h2a2 2 0 012 2v5m-4 0h4" />
               </svg>
               <div>
-                <p>Phòng: {{ getRoomName(booking.roomId) || 'Chưa rõ' }}</p>
+                <p>Room: {{ getRoomName(bookings[0].roomId) || 'No information' }}</p>
               </div>
             </div>
           </div>
           <div class="payment-info">
-            <h4>Thanh toán</h4>
-            <div class="info-row">
+            <h4>Total Payment</h4>
+            <div class="info-row" style="display: flex; flex-direction: column;">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#6366F1">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
               <div>
-                <p class="total">{{ formatCurrency(booking.total) }}</p>
-                <p class="time">Đặt lúc: {{ formatDateTime(booking.createdAt) }}</p>
+                <p class="total">{{ formatCurrency(bookings[0].total) }}</p>
+
+              </div>
+              <div>
                 <p class="status" :class="{
-                    'status-active': booking.status === 'ACTIVE',
-                    'status-cancelled': booking.status === 'CANCELLED',
-                    'status-expired': booking.status === 'EXPIRED'
+                    'status-active': bookings[0].status === 'ACTIVE',
+                    'status-cancelled': bookings[0].status === 'CANCELLED',
+                    'status-expired': bookings[0].status === 'EXPIRED'
                   }">
-                  Trạng thái: {{ getStatusLabel(booking.status) }}
+                  Status: {{ bookings[0].status }}
                 </p>
               </div>
             </div>
           </div>
         </div>
         <div class="action-buttons">
-          <button v-if="canCancel(booking)" class="cancel-btn" @click="cancelBooking(booking.id)">
+          <button v-if="canCancel(bookings[0])" class="cancel-btn" @click="cancelBooking(bookings[0].id)">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#FFF">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
-            Hủy vé
+            Cancel Booking
           </button>
         </div>
       </div>
@@ -117,8 +119,7 @@ export default {
   data() {
     return {
       bookings: [],
-      latestBooking: null,
-      loading: true,
+      loading: false,
       rooms: [
         { id: 1, name: 'Room 1' },
         { id: 2, name: 'Room 2' },
@@ -134,22 +135,36 @@ export default {
     async fetchBookings() {
       try {
         this.loading = true;
-        const response = await this.$axios.get('/api/bookings');
-        const bookings = await Promise.all(
-          response.data.map(async (booking) => {
-            const movieResponse = await this.$axios.get(
-              `https://api.themoviedb.org/3/movie/${booking.movieId}`,
-              { params: { api_key: this.$config.tmdbApiKey } }
-            );
-            return { ...booking, movie: movieResponse.data };
-          })
-        );
-        // Sort by createdAt descending
-        this.bookings = bookings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        this.latestBooking = bookings.length > 0 ? bookings[0] : null;
-        console.log('Selected latestBooking:', this.latestBooking);
+        const movieCache = JSON.parse(localStorage.getItem('movieCache') || '{}');
+        const response = await this.$axios.get('/api/bookings/latest');
+        if (!response.data) {
+          this.bookings = [];
+          return;
+        }
+        const booking = response.data;
+        const showDateTime = new Date(`${booking.date} ${booking.showtime}`);
+        const now = new Date();
+        if (booking.status === 'ACTIVE' && showDateTime < now) {
+          console.warn(`Booking ${booking.id} is ACTIVE but past due: ${showDateTime}`);
+        }
+        if (movieCache[booking.movieId]) {
+          this.bookings = [{ ...booking, movie: movieCache[booking.movieId] }];
+          return;
+        }
+        try {
+          const movieResponse = await this.$axios.get(
+            `https://api.themoviedb.org/3/movie/${booking.movieId}`,
+            { params: { api_key: this.$config.tmdbApiKey } }
+          );
+          movieCache[booking.movieId] = movieResponse.data;
+          localStorage.setItem('movieCache', JSON.stringify(movieCache));
+          this.bookings = [{ ...booking, movie: movieResponse.data }];
+        } catch (err) {
+          console.warn(`Failed to fetch movie data for movieId ${booking.movieId}:`, err);
+          this.bookings = [{ ...booking, movie: { poster_path: '', title: booking.movieTitle, genres: [], overview: '', releaseDate: '' } }];
+        }
       } catch (error) {
-        console.error('Lỗi khi lấy lịch sử:', error);
+        console.error('Error fetching booking:', error);
         this.$toast.error('Không thể tải thông tin vé.');
       } finally {
         this.loading = false;
@@ -162,7 +177,7 @@ export default {
         this.$toast.success(response.data.message || 'Hủy vé thành công!');
         await this.fetchBookings();
       } catch (err) {
-        console.error('Lỗi khi hủy vé:', err);
+        console.error('Error cancelling booking:', err);
         this.$toast.error(err.response?.data?.message || 'Không thể hủy vé.');
       }
     },
@@ -172,379 +187,223 @@ export default {
       return showDateTime > new Date();
     },
     getRoomName(roomId) {
-      const room = this.rooms.find((r) => r.id === roomId);
+      const room = this.rooms.find(r => r.id === roomId);
       return room ? room.name : 'Chưa rõ';
     },
     formatDateTime(dateTime) {
-      if (!dateTime) return 'Chưa rõ';
-      const options = {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      };
-      return new Date(dateTime).toLocaleString('vi-VN', options);
+      if (!dateTime) return 'N/A';
+      try {
+        const date = new Date(dateTime);
+        return date.toLocaleString('vi-VN', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+      } catch {
+        return 'N/A';
+      }
     },
     formatDate(date) {
-      if (!date) return 'Chưa rõ';
-      const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
-      return new Date(date).toLocaleDateString('vi-VN', options);
+      if (!date) return '--';
+      try {
+        const d = new Date(date);
+        return d.toLocaleDateString('vi-VN', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        });
+      } catch {
+        return '--';
+      }
     },
     formatCurrency(amount) {
       if (!amount) return '0 ₫';
-      return new Intl.NumberFormat('vi-VN', {
-        style: 'currency',
-        currency: 'VND',
-      }).format(amount * 1000);
+      try {
+        return new Intl.NumberFormat('vi-VN', {
+          style: 'currency',
+          currency: 'VND',
+        }).format(amount * 1000);
+      } catch {
+        return amount + ' ₫';
+      }
     },
     truncateOverview(text, maxLength = 120) {
       if (!text) return 'Không có mô tả';
-      return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+      return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
     },
     handleImageError(event) {
       event.target.src = '/placeholder-dark.jpg';
-    },
-    getStatusLabel(status) {
-      switch (status) {
-        case 'ACTIVE': return 'Đang hoạt động';
-        case 'CANCELLED': return 'Đã hủy';
-        case 'EXPIRED': return 'Hết hiệu lực';
-        default: return 'Không xác định';
-      }
     },
   },
 };
 </script>
 
 <style scoped>
-.dark-booking-history {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-  font-family: 'Inter', sans-serif;
-  background-color: #111827;
-  min-height: 100vh;
-  color: #E5E7EB;
+.history-header{
+  padding: 10px 20px;
 }
-
-.history-header {
-  text-align: center;
-  margin-bottom: 3rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #374151;
-}
-
 .history-header h1 {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #F3F4F6;
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #e5e7eb;
   margin-bottom: 0.5rem;
 }
-
 .history-header p {
-  font-size: 1.1rem;
-  color: #9CA3AF;
-}
-
-.empty-history {
-  text-align: center;
-  padding: 3rem 1rem;
-  background-color: #1F2937;
-  border-radius: 0.5rem;
-  margin-top: 2rem;
-  border: 1px dashed #374151;
-}
-
-.empty-history svg {
-  width: 4rem;
-  height: 4rem;
+  color: #9ca3af;
   margin-bottom: 1rem;
 }
-
-.empty-history p {
-  font-size: 1.2rem;
-  color: #9CA3AF;
-  margin-bottom: 1.5rem;
+.loading-container, .empty-history {
+  text-align: center;
+  padding: 2rem;
+  color: #9ca3af;
 }
-
+.loading-container svg, .empty-history svg {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 1rem;
+}
 .discover-btn {
   display: inline-block;
-  padding: 0.75rem 1.5rem;
-  background-color: #4F46E5;
-  color: white;
-  border-radius: 0.375rem;
+  padding: 0.5rem 1rem;
+  background-color: #6366f1;
+  color: #fff;
+  border-radius: 0.25rem;
   text-decoration: none;
-  font-weight: 600;
-  transition: background-color 0.2s;
+  margin-top: 1rem;
 }
-
 .discover-btn:hover {
-  background-color: #4338CA;
+  background-color: #4f46e5;
 }
-
 .booking-list {
+  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
-
 .booking-card {
-  background-color: #1F2937;
+  background-color: #374151;
   border-radius: 0.5rem;
-  border: 1px solid #374151;
   overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-
-.booking-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-  border-color: #4F46E5;
+.booking-card.expired {
+  opacity: 0.7;
+  border: 1px solid #dc2626;
 }
-
 .movie-section {
   display: flex;
-  padding: 1.5rem;
-  gap: 1.5rem;
-  border-bottom: 1px solid #374151;
+  gap: 1rem;
+  padding: 1rem;
 }
-
 .movie-poster {
-  width: 150px;
-  height: 225px;
-  object-fit: cover;
-  border-radius: 0.375rem;
-  border: 1px solid #374151;
+  width: 120px;
+  height: auto;
+  border-radius: 0.25rem;
 }
-
 .movie-info {
   flex: 1;
 }
-
-.title-rating {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 0.75rem;
+.movie-info h3 {
+  color: #e5e7eb;
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
 }
-
-.title-rating h3 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #F9FAFB;
-  margin: 0;
-}
-
-.rating {
-  display: flex;
-  align-items: center;
-  background-color: #1E40AF;
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.25rem;
-  color: #EFF6FF;
-}
-
-.star {
-  color: #FBBF24;
-  margin-right: 0.25rem;
-}
-
 .genres {
   display: flex;
-  flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
-
 .genre {
-  background-color: #374151;
-  color: #E5E7EB;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 500;
+  background-color: #4b5563;
+  color: #e5e7eb;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
 }
-
 .overview {
-  color: #9CA3AF;
-  line-height: 1.5;
-  margin-bottom: 1rem;
+  color: #9ca3af;
+  margin-bottom: 0.5rem;
 }
-
 .meta {
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
+  color: #9ca3af;
 }
-
 .meta-item {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
-  font-size: 0.875rem;
-  color: #9CA3AF;
+  gap: 0.25rem;
 }
-
 .meta-item svg {
-  width: 1rem;
-  height: 1rem;
+  width: 16px;
+  height: 16px;
 }
-
 .ticket-section {
   display: flex;
-  padding: 1.5rem;
   gap: 2rem;
-  border-bottom: 1px solid #374151;
+  padding: 1rem;
+  border-top: 1px solid #4b5563;
 }
-
-.ticket-info,
-.payment-info {
+.ticket-info, .payment-info {
   flex: 1;
 }
-
-.ticket-info h4,
-.payment-info h4 {
+.ticket-info h4, .payment-info h4 {
+  color: #e5e7eb;
   font-size: 1.125rem;
-  font-weight: 600;
-  color: #F3F4F6;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #374151;
+  margin-bottom: 0.5rem;
 }
-
 .info-row {
   display: flex;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  color: #9ca3af;
 }
-
 .info-row svg {
-  width: 1.25rem;
-  height: 1.25rem;
-  color: #6366F1;
-  flex-shrink: 0;
-  margin-top: 0.125rem;
+  width: 20px;
+  height: 20px;
 }
-
-.date {
-  font-size: 0.875rem;
-  color: #9CA3AF;
+.info-row p {
+  margin: 0;
 }
-
+.date, .time {
+  color: #d1d5db;
+}
 .total {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #818CF8;
+  color: #e5e7eb;
+  font-weight: bold;
 }
-
-.time {
-  font-size: 0.875rem;
-  color: #9CA3AF;
+.status.status-active {
+  color: #22c55e;
 }
-
-.status {
-  font-size: 0.875rem;
+.status.status-cancelled {
+  color: #ef4444;
 }
-
-.status-active {
-  color: #10B981;
-  font-weight: 600;
+.status.status-expired {
+  color: #f59e0b;
 }
-
-.status-cancelled {
-  color: #EF4444;
-  font-weight: 600;
-}
-
 .action-buttons {
-  display: flex;
-  padding: 1rem 1.5rem;
-  gap: 1rem;
-  justify-content: flex-end;
+  padding: 1rem;
+  border-top: 1px solid #4b5563;
+  text-align: right;
 }
-
-.print-btn,
-.rate-btn,
 .cancel-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1.25rem;
-  border-radius: 0.375rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.print-btn,
-.rate-btn {
-  background-color: rgba(99, 102, 241, 0.1);
-  color: #818CF8;
-  border: 1px solid #4F46E5;
-}
-
-.cancel-btn {
-  background-color: #EF4444;
-  color: white;
+  padding: 0.5rem 1rem;
+  background-color: #ef4444;
+  color: #fff;
   border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
 }
-
-.print-btn:hover,
-.rate-btn:hover {
-  background-color: rgba(99, 102, 241, 0.2);
-}
-
 .cancel-btn:hover {
-  background-color: #DC2626;
+  background-color: #dc2626;
 }
-
-.print-btn svg,
-.rate-btn svg,
 .cancel-btn svg {
-  width: 1rem;
-  height: 1rem;
-}
-
-@media (max-width: 768px) {
-  .movie-section {
-    flex-direction: column;
-  }
-  
-  .movie-poster {
-    width: 100%;
-    height: auto;
-    max-height: 400px;
-  }
-  
-  .ticket-section {
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-  
-  .action-buttons {
-    justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .title-rating {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .meta {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .action-buttons {
-    flex-direction: column;
-  }
-  
-  .print-btn,
-  .rate-btn,
-  .cancel-btn {
-    justify-content: center;
-  }
+  width: 16px;
+  height: 16px;
 }
 </style>
