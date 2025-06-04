@@ -87,16 +87,17 @@ export default {
   },
   methods: {
     async handleRegister() {
-      this.error = ''
-      this.loading = true
+      this.error = '';
+      this.loading = true;
       try {
-        await this.$axios.$post('/api/auth/register', this.form)
-        this.$router.push('/login')
+        const response = await this.$axios.post('/api/auth/register', this.form);
+        this.$toast.success(response.data.message || 'Đăng ký thành công! Vui lòng đăng nhập.');
+        this.$router.push('/login');
       } catch (error) {
-        console.error('Registration failed:', error)
-        this.error = error.response?.data?.message || 'Đăng ký thất bại, vui lòng thử lại!'
+        console.error('Registration failed:', error);
+        this.error = error.response?.data || 'Đăng ký thất bại, vui lòng thử lại!';
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     }
   }

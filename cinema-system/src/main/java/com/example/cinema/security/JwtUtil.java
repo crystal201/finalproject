@@ -1,16 +1,18 @@
 package com.example.cinema.security;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import javax.crypto.SecretKey;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 public class JwtUtil {
@@ -19,6 +21,8 @@ public class JwtUtil {
 
     @Value("${jwt.expiration}")
     private long expiration;
+
+    private final Set<String> blacklistedTokens = new HashSet<>();
 
     @PostConstruct
     public void init() {
@@ -37,10 +41,10 @@ public class JwtUtil {
     public String generateToken(String username) {
         System.out.println("Generating token for: " + username);
         String token = Jwts.builder()
-                .subject(username)
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS384)
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(getSigningKey())
                 .compact();
         System.out.println("Generated token: " + token);
         return token;
@@ -50,10 +54,10 @@ public class JwtUtil {
         System.out.println("Extracting username from token: " + token);
         try {
             Claims claims = Jwts.parser()
-                    .verifyWith(getSigningKey())
+                    .setSigningKey(getSigningKey())
                     .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
+                    .parseClaimsJws(token)
+                    .getBody();
             String username = claims.getSubject();
             System.out.println("Extracted username: " + username);
             return username;
@@ -67,14 +71,27 @@ public class JwtUtil {
         System.out.println("Validating token: " + token);
         try {
             Jwts.parser()
-                    .verifyWith(getSigningKey())
+                    .setSigningKey(getSigningKey())
                     .build()
-                    .parseSignedClaims(token);
+                    .parseClaimsJws(token);
+            if (isTokenBlacklisted(token)) {
+                System.out.println("Token is blacklisted");
+                return false;
+            }
             System.out.println("Token valid");
             return true;
         } catch (JwtException e) {
             System.err.println("Token validation failed: " + e.getMessage());
             return false;
         }
+    }
+
+    public void blacklistToken(String token) {
+        System.out.println("Blacklisting token: " + token);
+        blacklistedTokens.add(token);
+    }
+
+    public boolean isTokenBlacklisted(String token) {
+        return blacklistedTokens.contains(token);
     }
 }

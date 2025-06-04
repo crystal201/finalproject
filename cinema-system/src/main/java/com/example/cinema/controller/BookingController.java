@@ -63,6 +63,11 @@ public class BookingController {
         BookingDTO booking = bookingService.getLatestBookingByUserId(userId);
         return booking != null ? ResponseEntity.ok(booking) : ResponseEntity.noContent().build();
     }
+    @GetMapping("/count")
+    public ResponseEntity<Long> getBookingCount(@RequestParam("user_id") String userId) {
+        long count = bookingService.getBookingsByUserId(userId, null).size();
+        return ResponseEntity.ok(count);
+    }
     @PostMapping("/cancel/{id}")
     public ResponseEntity<Map<String, Object>> cancelBooking(
             @PathVariable Long id,
