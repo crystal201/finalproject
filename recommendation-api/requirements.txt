@@ -7,3 +7,4 @@ scikit-learn==0.24.2
 transformers==4.9.1
 mysql-connector-python==8.0.26
 requests==2.26.0
+redis

@@ -4,6 +4,7 @@ export const state = () => ({
     user: null,
     token: typeof window !== 'undefined' ? localStorage.getItem('authToken') : null,
     isAuthenticated: typeof window !== 'undefined' ? !!localStorage.getItem('authToken') : false,
+    userId: typeof window !== 'undefined' ? localStorage.getItem('userId') : null,
 });
 
 export const mutations = {
@@ -31,6 +32,8 @@ export const mutations = {
         if (typeof window !== 'undefined') {
             localStorage.removeItem('authToken');
             localStorage.removeItem('userId');
+            localStorage.removeItem('movieCache');
+            localStorage.removeItem('recommendations');
         }
     },
 };
@@ -54,10 +57,10 @@ export const actions = {
     async login({ commit, dispatch }, { username, password }) {
         try {
             const response = await this.$axios.post('/api/auth/login', { username, password });
-            const { token, userId } = response.data; // Lấy cả token và userId
+            const { token, userId } = response.data;
             if (token) {
                 commit('SET_TOKEN', token);
-                commit('SET_USER_ID', userId); // Lưu userId vào state và localStorage
+                commit('SET_USER_ID', userId);
                 this.$axios.setToken(token, 'Bearer');
                 await dispatch('fetchUser');
                 return true;
@@ -68,15 +71,24 @@ export const actions = {
             throw error;
         }
     },
-    logout({ commit }) {
-        commit('CLEAR_AUTH');
-        this.$axios.setToken(false);
+    async logout({ commit }) {
+        try {
+            await this.$axios.post('/api/auth/logout', {}, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            commit('CLEAR_AUTH');
+            this.$axios.setToken(false);
+        } catch (error) {
+            console.error('Đăng xuất thất bại:', error);
+            commit('CLEAR_AUTH');
+            this.$axios.setToken(false);
+        }
     },
     async fetchUser({ commit }) {
         try {
             const response = await this.$axios.get('/api/auth/user');
             commit('SET_USER', response.data);
-            commit('SET_USER_ID', response.data.id); // Cập nhật userId từ /api/auth/user
+            commit('SET_USER_ID', response.data.id);
             return response.data;
         } catch (error) {
             console.error('Lỗi lấy thông tin user:', error);

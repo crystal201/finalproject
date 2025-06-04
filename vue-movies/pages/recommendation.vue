@@ -2,9 +2,8 @@
   <div class="movie-recommendation-container">
     <h1>Recommended Movies</h1>
     <div v-if="!isLoggedIn" class="login-message">
-      Please  <nuxt-link to="/login" class="login-link">Login</nuxt-link>
-      to view personalized movie
-      recommendations.
+      Please <nuxt-link to="/login" class="login-link">Login</nuxt-link>
+      to view personalized movie recommendations.
     </div>
     <div v-else>
       <div v-if="loading" class="loading-state">
@@ -75,25 +74,32 @@
         </p>
       </div>
       <div v-else>
+        <div class="log-section">
+          <h3>Recommendation Logs</h3>
+          <ul>
+            <li v-for="(log, index) in logs" :key="index">{{ log }}</li>
+          </ul>
+        </div>
         <p class="recommendation-description">
           Based on your viewing history, we think you'll love these movies:
         </p>
         <div class="movie-grid">
-  <div v-for="movie in recommendedMovies" :key="movie.movieId" class="movie-card">
-    <nuxt-link :to="`/movie/${movie.movieId}`" class="movie-link">
-      <img 
-        :src="movie.posterPath ? `https://image.tmdb.org/t/p/w500${movie.posterPath}` : '/placeholder-movie.jpg'" 
-        alt="Movie poster" 
-        class="movie-poster"
-        @error="handleImageError"
-      >
-      <div class="movie-info">
-        <h2 class="movie-title">{{ movie.title }}</h2>
-        <p class="movie-genres">{{ movie.genres }}</p>
-      </div>
-    </nuxt-link>
-  </div>
-</div>
+          <div v-for="movie in recommendedMovies" :key="movie.movieId" class="movie-card">
+            <nuxt-link :to="`/movie/${movie.movieId}`" class="movie-link">
+              <img
+                :src="movie.posterPath ? `https://image.tmdb.org/t/p/w500${movie.posterPath}` : '/placeholder-movie.jpg'"
+                alt="Movie poster"
+                class="movie-poster"
+                @error="handleImageError"
+              >
+              <div class="movie-info">
+                <h2 class="movie-title">{{ movie.title }}</h2>
+                <p class="movie-genres">{{ movie.genres }}</p>
+                <p class="movie-reason">{{ movie.reason }}</p>
+              </div>
+            </nuxt-link>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -113,17 +119,39 @@ export default {
         : null,
       token: localStorage.getItem("authToken") || null,
       isLoggedIn: !!localStorage.getItem("authToken"),
+      logs: [],
+      bookingCount: 0
     };
+  },
+  computed: {
+    username() {
+      return this.$store.state.auth.user?.username || 'user';
+    }
   },
   async created() {
     if (this.isLoggedIn) {
+      await this.fetchBookingCount();
       await this.fetchRecommendations();
     }
   },
   methods: {
+    async fetchBookingCount() {
+      try {
+        const response = await axios.get("/api/bookings/count", {
+          params: { user_id: this.username },
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+        });
+        this.bookingCount = response.data || 0;
+      } catch (error) {
+        console.error("Error fetching booking count:", error);
+      }
+    },
     async fetchRecommendations() {
       this.loading = true;
       this.error = null;
+      this.logs = [];
 
       try {
         if (!this.token) {
@@ -133,6 +161,7 @@ export default {
           throw new Error("User ID not found. Please log in again.");
         }
 
+        this.logs.push(`Đang lấy danh sách phim đã đặt cho user ${this.username} (${this.bookingCount} bộ phim)...`);
         const response = await axios.get("/api/recommendations", {
           params: { user_id: this.userId },
           headers: {
@@ -140,19 +169,21 @@ export default {
           },
         });
         this.recommendedMovies = response.data || [];
+        this.logs.push(`Lấy được ${this.recommendedMovies.length} bộ phim gợi ý cho user ${this.username}.`);
       } catch (error) {
         this.error =
           error.response?.data?.message ||
           "Failed to load recommendations. Please try again.";
         console.error("Error fetching recommendations:", error);
+        this.logs.push(`Lỗi: ${this.error}`);
       } finally {
         this.loading = false;
       }
     },
     handleImageError(event) {
       event.target.src = "/placeholder-movie.jpg";
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -391,29 +422,14 @@ export default {
 .movie-genres {
   font-size: 14px;
   color: #6b7280;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
-.ai-badge {
+.movie-reason {
   font-size: 12px;
-  background-color: #e0e7ff;
-  color: #4f46e5;
-  padding: 4px 8px;
-  border-radius: 9999px;
-}
-
-.details-button {
-  font-size: 14px;
-  font-weight: 500;
-  color: #4f46e5;
-  background: none;
-  border: none;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-.details-button:hover {
-  color: #4338ca;
+  color: #9ca3af;
+  font-style: italic;
+  margin-top: 8px;
 }
 
 /* Animations */

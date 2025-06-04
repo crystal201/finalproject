@@ -1,7 +1,13 @@
 package com.example.cinema.controller;
 
-import java.util.Map;
-
+import com.example.cinema.dto.UserLoginRequest;
+import com.example.cinema.dto.UserRegistrationRequest;
+import com.example.cinema.entity.User;
+import com.example.cinema.security.JwtUtil;
+import com.example.cinema.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,21 +16,9 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.example.cinema.dto.UserLoginRequest;
-import com.example.cinema.dto.UserRegistrationRequest;
-import com.example.cinema.entity.User;
-import com.example.cinema.security.JwtUtil;
-import com.example.cinema.service.UserService;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -53,18 +47,15 @@ public class AuthController {
             String username = authentication.getName();
             System.out.println("Authentication successful for: " + username);
 
-            // Tạo token
             String token = jwtUtil.generateToken(username);
 
-            // Lấy userId từ UserService
             User user = userService.findByUsername(username)
                     .orElseThrow(() -> new RuntimeException("User not found after authentication"));
-            Long userId = user.getId(); // Giữ kiểu Long
+            Long userId = user.getId();
 
-            // Trả về token và userId
             return ResponseEntity.ok(Map.of(
-                "token", token,
-                "userId", userId
+                    "token", token,
+                    "userId", userId
             ));
         } catch (BadCredentialsException e) {
             System.out.println("Bad credentials for: " + request.getUsername());
@@ -78,9 +69,14 @@ public class AuthController {
     @PostMapping("/register")
     @Operation(summary = "User registration", description = "Register a new user")
     @ApiResponse(responseCode = "200", description = "User registered successfully")
-    public Map<String, String> register(@RequestBody UserRegistrationRequest request) {
-        User registeredUser = userService.register(request);
-        return Map.of("message", "User registered successfully with username: " + registeredUser.getUsername());
+    @ApiResponse(responseCode = "400", description = "Invalid registration data")
+    public ResponseEntity<?> register(@RequestBody UserRegistrationRequest request) {
+        try {
+            User registeredUser = userService.register(request);
+            return ResponseEntity.ok(Map.of("message", "User registered successfully with username: " + registeredUser.getUsername()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @GetMapping("/user")
@@ -99,5 +95,19 @@ public class AuthController {
                     System.out.println("User not found: " + username);
                     return ResponseEntity.notFound().build();
                 });
+    }
+
+    @PostMapping("/logout")
+    @Operation(summary = "User logout", description = "Invalidate user session")
+    @ApiResponse(responseCode = "200", description = "Logged out successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid token")
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            jwtUtil.blacklistToken(token);
+            SecurityContextHolder.clearContext();
+            return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid token");
     }
 }

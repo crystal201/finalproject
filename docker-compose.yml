@@ -91,6 +91,8 @@ services:
     depends_on:
       mysql-db:
         condition: service_healthy
+      redis:
+        condition: service_started
     volumes:
       - ./recommendation-api:/app
     environment:
@@ -100,9 +102,22 @@ services:
       - MYSQL_PASSWORD=crystal2001
       - MYSQL_DATABASE=cinema_db
       - TMDB_API_KEY=770653f0e946b9c775be9a0439b1c4aa
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     dns:
       - 8.8.8.8
       - 1.1.1.1
+    networks:
+      - cinema-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:6
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
     networks:
       - cinema-network
     restart: unless-stopped
@@ -113,4 +128,5 @@ networks:
 
 volumes:
   mysql_data:
+  redis_data:
   node_modules:
