@@ -131,7 +131,7 @@ export default {
   padding: 8px 0;
   
   @media (min-width: 768px) {
-    right: -140;
+    right: -140px;
     top: 100%;
     margin-top: -70px;
   }

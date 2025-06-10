@@ -640,9 +640,7 @@ export default {
 }
 
 .booking-history {
-  height: 500px;
   padding: 25px;
-  overflow-y: auto;
 }
 
 .section-header {
@@ -696,9 +694,11 @@ export default {
 }
 
 .booking-list {
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 15px;
+  height: 350px;
 }
 
 .booking-item {
