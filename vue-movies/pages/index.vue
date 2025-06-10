@@ -45,27 +45,43 @@ export default {
     // },
   },
 
+  // async asyncData ({ error }) {
+  //   try {
+  //     const trendingMovies = await getTrending('movie');
+  //     const trendingTv = await getTrending('tv');
+  //     let featured;
+
+  //     // feature a random item from movies or tv
+  //     const items = [...trendingMovies.results, ...trendingTv.results];
+  //     const randomItem = items[Math.floor(Math.random() * items.length)];
+  //     const media = randomItem.title ? 'movie' : 'tv';
+
+  //     if (media === 'movie') {
+  //       featured = await getMovie(randomItem.id);
+  //     } else {
+  //       featured = await getTvShow(randomItem.id);
+  //     }
+
+  //     return { trendingMovies, trendingTv, featured };
+  //   } catch {
+  //     error({ statusCode: 504, message: 'Data not available' });
+  //   }
+  // },
   async asyncData ({ error }) {
-    try {
-      const trendingMovies = await getTrending('movie');
-      const trendingTv = await getTrending('tv');
-      let featured;
+  try {
+    const trendingMovies = await getTrending('movie');
+    const trendingTv = await getTrending('tv');
 
-      // feature a random item from movies or tv
-      const items = [...trendingMovies.results, ...trendingTv.results];
-      const randomItem = items[Math.floor(Math.random() * items.length)];
-      const media = randomItem.title ? 'movie' : 'tv';
+    // Chỉ random từ movie
+    const items = trendingMovies.results;
+    const randomItem = items[Math.floor(Math.random() * items.length)];
+    const featured = await getMovie(randomItem.id);
 
-      if (media === 'movie') {
-        featured = await getMovie(randomItem.id);
-      } else {
-        featured = await getTvShow(randomItem.id);
-      }
+    return { trendingMovies, trendingTv, featured };
+  } catch {
+    error({ statusCode: 504, message: 'Data not available' });
+  }
+}
 
-      return { trendingMovies, trendingTv, featured };
-    } catch {
-      error({ statusCode: 504, message: 'Data not available' });
-    }
-  },
 };
 </script>

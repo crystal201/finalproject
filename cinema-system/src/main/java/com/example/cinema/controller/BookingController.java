@@ -1,3 +1,4 @@
+// BookingController.java
 package com.example.cinema.controller;
 
 import com.example.cinema.dto.BookingDTO;
@@ -8,6 +9,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +30,7 @@ public class BookingController {
     public ResponseEntity<Map<String, Object>> createBooking(@RequestBody BookingDTO bookingDTO, Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Chưa đăng nhập");
+            errorResponse.put("message", "Not authenticated");
             return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
         }
         try {
@@ -34,11 +39,15 @@ public class BookingController {
             BookingDTO savedBooking = bookingService.createBooking(bookingDTO);
             Map<String, Object> response = new HashMap<>();
             response.put("data", savedBooking);
-            response.put("message", "Đặt vé thành công");
+            response.put("message", "Booking successful");
             return new ResponseEntity<>(response, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Lỗi khi đặt vé: " + e.getMessage());
+            errorResponse.put("message", "Error creating booking: " + e.getMessage());
             return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -54,6 +63,7 @@ public class BookingController {
         List<BookingDTO> bookings = bookingService.getBookingsByUserId(userId, filter);
         return ResponseEntity.ok(bookings);
     }
+
     @GetMapping("/latest")
     public ResponseEntity<BookingDTO> getLatestBooking(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -63,25 +73,27 @@ public class BookingController {
         BookingDTO booking = bookingService.getLatestBookingByUserId(userId);
         return booking != null ? ResponseEntity.ok(booking) : ResponseEntity.noContent().build();
     }
+
     @GetMapping("/count")
     public ResponseEntity<Long> getBookingCount(@RequestParam("user_id") String userId) {
         long count = bookingService.getBookingsByUserId(userId, null).size();
         return ResponseEntity.ok(count);
     }
+
     @PostMapping("/cancel/{id}")
     public ResponseEntity<Map<String, Object>> cancelBooking(
             @PathVariable Long id,
             Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Chưa đăng nhập");
+            errorResponse.put("message", "Not authenticated");
             return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
         }
         try {
             String userId = authentication.getName();
             bookingService.cancelBooking(id, userId);
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "Hủy vé thành công");
+            response.put("message", "Booking cancelled successfully");
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException | SecurityException e) {
             Map<String, Object> errorResponse = new HashMap<>();
@@ -93,7 +105,7 @@ public class BookingController {
             return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Lỗi khi hủy vé: " + e.getMessage());
+            errorResponse.put("message", "Error cancelling booking: " + e.getMessage());
             return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -104,6 +116,13 @@ public class BookingController {
             @RequestParam String date,
             @RequestParam String showtime,
             @RequestParam Integer roomId) {
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+        LocalDate bookingDate = LocalDate.parse(date);
+        LocalDateTime showDateTime = LocalDateTime.of(bookingDate,
+                LocalTime.parse(showtime, DateTimeFormatter.ofPattern("HH:mm")));
+        if (showDateTime.isBefore(now)) {
+            return ResponseEntity.ok(List.of()); // No seats for past showtimes
+        }
         List<String> bookedSeats = bookingService.getBookedSeats(movieId, LocalDate.parse(date), showtime, roomId);
         return ResponseEntity.ok(bookedSeats);
     }

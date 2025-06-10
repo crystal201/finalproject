@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="type==='movie'">
     <div :class="$style.hero">
       <div :class="$style.backdrop">
         <div>

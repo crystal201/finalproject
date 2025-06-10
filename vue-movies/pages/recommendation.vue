@@ -1,105 +1,112 @@
 <template>
   <div class="movie-recommendation-container">
-    <h1>Recommended Movies</h1>
-    <div v-if="!isLoggedIn" class="login-message">
-      Please <nuxt-link to="/login" class="login-link">Login</nuxt-link>
-      to view personalized movie recommendations.
+    <!-- Header Section -->
+    <div class="header-section">
+      <h1 class="section-title">Your Personalized Recommendations</h1>
+      <p class="section-subtitle">Curated just for you based on your viewing history</p>
     </div>
-    <div v-else>
-      <div v-if="loading" class="loading-state">
-        <div class="loading-icon">
-          <svg
-            class="loading-svg"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-            ></path>
-          </svg>
+
+    <!-- Main Content -->
+    <div v-if="!isLoggedIn" class="auth-prompt">
+      <div class="auth-card">
+        <i class="fas fa-film auth-icon"></i>
+        <h3>Personalized Movie Experience</h3>
+        <p>Sign in to unlock recommendations tailored to your taste</p>
+        <nuxt-link to="/login" class="auth-button">
+          Sign In
+          <i class="fas fa-arrow-right"></i>
+        </nuxt-link>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div v-else-if="loading" class="loading-container">
+      <div class="modern-loader">
+        <div class="film-reel-container">
+          <div class="film-reel">
+            <div class="film-cell" v-for="n in 8" :key="n" :style="`--i:${n}`"></div>
+          </div>
         </div>
-        <h2>Analyzing Your Movie Preferences...</h2>
-        <p>
-          Our AI is processing your booking history to find the perfect movie
-          matches. This may take a moment.
-        </p>
-        <div class="progress-bar-container">
-          <div class="progress-bar"></div>
+        <div class="loading-text">
+          <div class="loading-title">Crafting Your Perfect Movie List</div>
+          <div class="loading-subtitle">Analyzing your preferences...</div>
+          <div class="loading-progress">
+            <div class="progress-bar" :style="{ width: progress + '%' }"></div>
+          </div>
         </div>
       </div>
-      <div v-else-if="error" class="error-state">
-        <svg
-          class="error-icon"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          ></path>
-        </svg>
-        <p class="error-message">{{ error }}</p>
-        <button @click="fetchRecommendations" class="retry-button">
-          Try Again
-        </button>
-      </div>
-      <div v-else-if="recommendedMovies.length === 0" class="empty-state">
-        <svg
-          class="empty-icon"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-          ></path>
-        </svg>
-        <h2>No Recommendations Found</h2>
-        <p>
-          We couldn't find any movies based on your booking history. Try
-          watching more movies to get better recommendations!
-        </p>
-      </div>
-      <div v-else>
-        <div class="log-section">
-          <h3>Recommendation Logs</h3>
-          <ul>
-            <li v-for="(log, index) in logs" :key="index">{{ log }}</li>
-          </ul>
-        </div>
-        <p class="recommendation-description">
-          Based on your viewing history, we think you'll love these movies:
-        </p>
-        <div class="movie-grid">
-          <div v-for="movie in recommendedMovies" :key="movie.movieId" class="movie-card">
-            <nuxt-link :to="`/movie/${movie.movieId}`" class="movie-link">
+    </div>
+
+    <!-- Movie Grid -->
+    <div v-else-if="!initialLoad && recommendedMovies.length > 0" class="movie-section">
+      <div class="movie-grid">
+        <div v-for="movie in recommendedMovies" :key="movie.movieId" class="movie-card">
+          <div class="movie-poster-container">
+            <nuxt-link :to="`/movie/${movie.movieId}`">
               <img
                 :src="movie.posterPath ? `https://image.tmdb.org/t/p/w500${movie.posterPath}` : '/placeholder-movie.jpg'"
-                alt="Movie poster"
+                :alt="movie.title"
                 class="movie-poster"
                 @error="handleImageError"
-              >
-              <div class="movie-info">
-                <h2 class="movie-title">{{ movie.title }}</h2>
-                <p class="movie-genres">{{ movie.genres }}</p>
-                <p class="movie-reason">{{ movie.reason }}</p>
+              />
+              <div class="movie-rating" v-if="movie.voteAverage">
+                <i class="fas fa-star"></i>
+                {{ movie.voteAverage.toFixed(1) }}
               </div>
             </nuxt-link>
           </div>
+
+          <div class="movie-content">
+            <div class="movie-header">
+              <h3 class="movie-title">{{ movie.title }}</h3>
+              <p class="movie-genres">{{ displayGenres(movie.genres) }}</p>
+            </div>
+          </div>
+
+          <!-- Popup Details (Always Visible) -->
+          <div class="movie-details-popup">
+            <div class="popup-content">
+              <div class="detail-section">
+                <h4><i class="fas fa-lightbulb"></i> Why we recommend this</h4>
+                <p>{{ movie.reason }}</p>
+              </div>
+
+              <div class="detail-section" v-if="movie.overview_summary">
+                <h4><i class="fas fa-align-left"></i> Summary</h4>
+                <p>{{ movie.overview_summary }}</p>
+              </div>
+
+              <div class="popup-actions">
+                <nuxt-link :to="`/movie/${movie.movieId}`" class="more-info-btn">
+                  More Info
+                </nuxt-link>
+                <nuxt-link :to="{ path: '/booking', query: { movieId: movie.movieId } }" class="book-now-btn">
+                  Book Now
+                </nuxt-link>
+              </div>
+            </div>
+            <div class="popup-arrow"></div>
+          </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div v-else-if="!initialLoad && recommendedMovies.length === 0" class="empty-state">
+      <div class="empty-content">
+        <div class="empty-animation">
+          <div class="film-icon">
+            <i class="fas fa-film"></i>
+          </div>
+          <div class="search-icon">
+            <i class="fas fa-search"></i>
+          </div>
+        </div>
+        <h3>No Recommendations Yet</h3>
+        <p>Watch more movies to get personalized recommendations</p>
+        <nuxt-link to="/" class="explore-button">
+          Explore Movies
+        </nuxt-link>
       </div>
     </div>
   </div>
@@ -112,7 +119,8 @@ export default {
   data() {
     return {
       recommendedMovies: [],
-      loading: false,
+      loading: true,
+      initialLoad: true,
       error: null,
       userId: localStorage.getItem("userId")
         ? parseInt(localStorage.getItem("userId"), 10)
@@ -120,7 +128,9 @@ export default {
       token: localStorage.getItem("authToken") || null,
       isLoggedIn: !!localStorage.getItem("authToken"),
       logs: [],
-      bookingCount: 0
+      bookingCount: 0,
+      progress: 0,
+      progressInterval: null
     };
   },
   computed: {
@@ -130,11 +140,46 @@ export default {
   },
   async created() {
     if (this.isLoggedIn) {
-      await this.fetchBookingCount();
-      await this.fetchRecommendations();
+      this.startProgressSimulation();
+      try {
+        await this.fetchBookingCount();
+        await this.fetchRecommendations();
+      } finally {
+        this.initialLoad = false;
+        this.clearProgressInterval();
+      }
+    } else {
+      this.loading = false;
+      this.initialLoad = false;
     }
   },
   methods: {
+    startProgressSimulation() {
+      this.progressInterval = setInterval(() => {
+        if (this.progress < 90) {
+          this.progress += Math.floor(Math.random() * 10) + 1;
+          if (this.progress > 90) this.progress = 90;
+        }
+      }, 500);
+    },
+    clearProgressInterval() {
+      if (this.progressInterval) {
+        clearInterval(this.progressInterval);
+        this.progress = 100;
+        setTimeout(() => {
+          this.loading = false;
+        }, 500);
+      }
+    },
+    displayGenres(genres) {
+      if (!genres) return 'Genre not specified';
+      if (typeof genres === 'string') return genres;
+      if (Array.isArray(genres)) {
+        const validGenres = genres.filter(g => g);
+        return validGenres.join(', ') || 'Genre not specified';
+      }
+      return 'Genre not specified';
+    },
     async fetchBookingCount() {
       try {
         const response = await axios.get("/api/bookings/count", {
@@ -144,15 +189,15 @@ export default {
           },
         });
         this.bookingCount = response.data || 0;
+        this.logs.push(`Retrieved ${this.bookingCount} bookings for user ${this.username}`);
       } catch (error) {
         console.error("Error fetching booking count:", error);
+        this.logs.push(`Error fetching booking count: ${error.message}`);
       }
     },
     async fetchRecommendations() {
       this.loading = true;
       this.error = null;
-      this.logs = [];
-
       try {
         if (!this.token) {
           throw new Error("No token found. Please log in.");
@@ -160,8 +205,6 @@ export default {
         if (!this.userId) {
           throw new Error("User ID not found. Please log in again.");
         }
-
-        this.logs.push(`Đang lấy danh sách phim đã đặt cho user ${this.username} (${this.bookingCount} bộ phim)...`);
         const response = await axios.get("/api/recommendations", {
           params: { user_id: this.userId },
           headers: {
@@ -169,299 +212,499 @@ export default {
           },
         });
         this.recommendedMovies = response.data || [];
-        this.logs.push(`Lấy được ${this.recommendedMovies.length} bộ phim gợi ý cho user ${this.username}.`);
+        this.logs.push(`Gives ${this.recommendedMovies.length} movies recommended for ${this.username}.`);
       } catch (error) {
         this.error =
-          error.response?.data?.message ||
+          error.response?.data?.error ||
           "Failed to load recommendations. Please try again.";
         console.error("Error fetching recommendations:", error);
         this.logs.push(`Lỗi: ${this.error}`);
-      } finally {
-        this.loading = false;
+        this.clearProgressInterval();
       }
     },
     handleImageError(event) {
       event.target.src = "/placeholder-movie.jpg";
     }
+  },
+  beforeDestroy() {
+    this.clearProgressInterval();
   }
 };
 </script>
 
 <style scoped>
-.login-link {
-  cursor: pointer;
-}
-/* Base container styles */
+/* Base Styles */
 .movie-recommendation-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 20px;
-  min-height: 100vh;
+  padding: 2rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Header styles */
-.movie-recommendation-container h1 {
-  font-size: 28px;
-  font-weight: bold;
-  margin-bottom: 20px;
+/* Header Section */
+.header-section {
   text-align: center;
-  color: #4f46e5;
+  margin-bottom: 3rem;
 }
 
-/* Login message styles */
-.login-message {
-  text-align: center;
-  padding: 30px;
-  background-color: #fef2f2;
-  border-radius: 8px;
-  max-width: 500px;
-  margin: 0 auto;
-  color: #dc2626;
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #4f46e5, #c471ed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
 }
 
-.login-message a {
-  text-decoration: underline;
-  color: #4f46e5;
-  font-weight: 500;
-}
-
-.login-message a:hover {
-  color: #4338ca;
-}
-
-/* Loading state styles */
-.loading-state {
-  text-align: center;
-  padding: 40px 20px;
-}
-
-.loading-icon {
-  display: inline-block;
-  margin-bottom: 20px;
-  animation: pulse 1.5s infinite;
-}
-
-.loading-svg {
-  width: 64px;
-  height: 64px;
-  color: #4f46e5;
-}
-
-.loading-state h2 {
-  font-size: 22px;
-  font-weight: 600;
-  margin-bottom: 10px;
-  color: #374151;
-}
-
-.loading-state p {
+.section-subtitle {
   color: #6b7280;
-  max-width: 500px;
-  margin: 0 auto 20px;
+  font-size: 1.1rem;
 }
 
-.progress-bar-container {
-  width: 100%;
+/* Auth Prompt */
+.auth-prompt {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.auth-card {
+  background: white;
+  border-radius: 16px;
+  padding: 3rem;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
   max-width: 500px;
-  margin: 20px auto 0;
-  background-color: #e5e7eb;
-  border-radius: 9999px;
+  width: 100%;
+}
+
+.auth-icon {
+  font-size: 3rem;
+  color: #4f46e5;
+  margin-bottom: 1.5rem;
+}
+
+.auth-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #111827;
+}
+
+.auth-card p {
+  color: #6b7280;
+  margin-bottom: 2rem;
+}
+
+.auth-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(90deg, #4f46e5, #7c3aed);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.auth-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+}
+
+/* Modern Loading Animation */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.modern-loader {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  max-width: 600px;
+  width: 100%;
+}
+
+.film-reel-container {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.film-reel {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  animation: rotateReel 2s linear infinite;
+}
+
+.film-cell {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: #4f46e5;
+  border-radius: 4px;
+  top: 50%;
+  left: 50%;
+  margin-left: -8px;
+  margin-top: -8px;
+  transform: rotate(calc(var(--i) * 45deg)) translate(0, -32px);
+  opacity: calc(var(--i) * 0.1);
+}
+
+.loading-text {
+  flex: 1;
+}
+
+.loading-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.loading-subtitle {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+
+.loading-progress {
   height: 6px;
+  background: #f3f4f6;
+  border-radius: 3px;
   overflow: hidden;
 }
 
 .progress-bar {
-  background-color: #4f46e5;
   height: 100%;
-  width: 0%;
-  animation: progress 2s ease-in-out infinite;
+  background: linear-gradient(90deg, #4f46e5, #7c3aed);
+  border-radius: 3px;
+  transition: width 0.3s ease;
 }
 
-/* Error state styles */
-.error-state {
-  text-align: center;
-  padding: 30px;
-  background-color: #fef2f2;
-  border-radius: 8px;
-  max-width: 500px;
-  margin: 0 auto;
+@keyframes rotateReel {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-.error-icon {
-  width: 48px;
-  height: 48px;
-  margin: 0 auto 15px;
-  color: #dc2626;
-}
-
-.error-message {
-  color: #dc2626;
-  font-weight: 500;
-  margin-bottom: 20px;
-}
-
-.retry-button {
-  padding: 8px 16px;
-  background-color: #4f46e5;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.retry-button:hover {
-  background-color: #4338ca;
-}
-
-/* Empty state styles */
-.empty-state {
-  text-align: center;
-  padding: 30px;
-  background-color: #fffbeb;
-  border-radius: 8px;
-  max-width: 500px;
-  margin: 0 auto;
-}
-
-.empty-icon {
-  width: 48px;
-  height: 48px;
-  margin: 0 auto 15px;
-  color: #d97706;
-}
-
-.empty-state h2 {
-  font-size: 20px;
-  font-weight: 500;
-  margin-bottom: 10px;
-  color: #374151;
-}
-
-.empty-state p {
-  color: #6b7280;
-}
-
-/* Movie grid styles */
-.recommendation-description {
-  text-align: center;
-  color: #6b7280;
-  margin-bottom: 30px;
+/* Movie Grid */
+.movie-section {
+  margin-top: 2rem;
 }
 
 .movie-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
 }
 
-@media (min-width: 640px) {
-  .movie-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 768px) {
-  .movie-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .movie-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (min-width: 1280px) {
-  .movie-grid {
-    grid-template-columns: repeat(5, 1fr);
-  }
-}
-
-/* Movie card styles */
 .movie-card {
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  background: white;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.3s;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
 }
 
 .movie-card:hover {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+.movie-poster-container {
+  position: relative;
+  padding-top: 150%;
+  overflow: hidden;
 }
 
 .movie-poster {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 320px;
+  height: 100%;
   object-fit: cover;
-  transition: opacity 0.3s;
+  transition: transform 0.3s ease;
 }
 
 .movie-poster:hover {
-  opacity: 0.9;
+  transform: scale(1.03);
 }
 
-.movie-info {
-  padding: 16px;
+.movie-rating {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.movie-content {
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.movie-header {
+  margin-bottom: 1rem;
 }
 
 .movie-title {
-  font-size: 18px;
+  font-size: 1.2rem;
   font-weight: 600;
-  margin-bottom: 4px;
-  color: #bed2ff;
-  white-space: nowrap;
+  color: #111827;
+  margin-bottom: 0.25rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .movie-genres {
-  font-size: 14px;
   color: #6b7280;
-  margin-bottom: 8px;
+  font-size: 0.9rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.movie-reason {
-  font-size: 12px;
-  color: #9ca3af;
-  font-style: italic;
-  margin-top: 8px;
+/* Popup Details (Always Visible) */
+.movie-details-popup {
+  position: relative; /* Changed to relative to keep within card */
+  width: 100%;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  padding: 10px;
 }
 
-/* Animations */
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
+.popup-content {
+  padding: 1rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.popup-arrow {
+  display: none; /* Hidden since popup is now part of card flow */
+}
+
+.detail-section {
+  margin-bottom: 1.25rem;
+}
+
+.detail-section h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4f46e5;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.detail-section p {
+  font-size: 0.9rem;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.popup-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.more-info-btn {
+  flex: 1;
+  background: #f3f4f6;
+  color: #4b5563;
+  text-align: center;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.more-info-btn:hover {
+  background: #e5e7eb;
+}
+
+.book-now-btn {
+  flex: 1;
+  background: linear-gradient(90deg, #4f46e5, #7c3aed);
+  color: white;
+  text-align: center;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.book-now-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+}
+
+.movie-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: auto;
+}
+
+.book-button {
+  flex: 1;
+  background: linear-gradient(90deg, #4f46e5, #7c3aed);
+  color: white;
+  text-align: center;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.book-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.empty-content {
+  text-align: center;
+  max-width: 400px;
+}
+
+.empty-animation {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 2rem;
+}
+
+.film-icon {
+  font-size: 4rem;
+  color: #a5b4fc;
+  position: absolute;
+  top: 0;
+  left: 0;
+  animation: filmFloat 3s ease-in-out infinite;
+}
+
+.search-icon {
+  font-size: 2rem;
+  color: #4f46e5;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  animation: searchPulse 2s ease infinite;
+}
+
+.empty-content h3 {
+  font-size: 1.5rem;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.empty-content p {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+
+.explore-button {
+  display: inline-block;
+  background: linear-gradient(90deg, #4f46e5, #7c3aed);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.explore-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+}
+
+@keyframes filmFloat {
+  0%, 100% {
+    transform: translateY(0);
   }
   50% {
-    opacity: 0.5;
+    transform: translateY(-10px);
   }
 }
 
-@keyframes progress {
-  0% {
-    width: 0%;
+@keyframes searchPulse {
+  0%, 100% {
+    transform: scale(1);
   }
   50% {
+    transform: scale(1.2);
+  }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .section-title {
+    font-size: 2rem;
+  }
+
+  .movie-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+
+  .modern-loader {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .movie-actions,
+  .popup-actions {
+    flex-direction: column;
+  }
+
+  .movie-card {
+    height: auto;
+  }
+
+  .movie-details-popup {
     width: 100%;
+    left: 0;
   }
-  100% {
-    width: 0%;
-  }
-}
-
-/* Transition effects */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.5s;
-}
-.fade-enter,
-.fade-leave-to {
-  opacity: 0;
 }
 </style>

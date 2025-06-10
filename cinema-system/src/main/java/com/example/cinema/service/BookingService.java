@@ -38,6 +38,7 @@ public class BookingService {
     }
 
     @Scheduled(cron = "0 0 * * * *") // Run hourly
+    @Transactional
     public void expireOldBookings() {
         try {
             LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
@@ -121,6 +122,15 @@ public class BookingService {
     }
     @Transactional
     public BookingDTO createBooking(BookingDTO bookingDTO) {
+        // Validate showtime
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+        LocalDate bookingDate = LocalDate.parse(bookingDTO.getDate());
+        LocalDateTime showDateTime = LocalDateTime.of(bookingDate,
+                LocalTime.parse(bookingDTO.getShowtime(), DateTimeFormatter.ofPattern("HH:mm")));
+        if (showDateTime.isBefore(now)) {
+            throw new IllegalArgumentException("Cannot book past showtimes");
+        }
+
         Booking booking = new Booking();
         booking.setMovieId(bookingDTO.getMovieId());
         booking.setMovieTitle(bookingDTO.getMovieTitle());
@@ -133,12 +143,12 @@ public class BookingService {
         Booking savedBooking = bookingRepository.save(booking);
 
         bookingSeatService.saveSeats(
-            savedBooking.getId(),
-            bookingDTO.getSeats(),
-            bookingDTO.getMovieId(),
-            LocalDate.parse(bookingDTO.getDate()),
-            bookingDTO.getShowtime(),
-            bookingDTO.getRoomId()
+                savedBooking.getId(),
+                bookingDTO.getSeats(),
+                bookingDTO.getMovieId(),
+                LocalDate.parse(bookingDTO.getDate()),
+                bookingDTO.getShowtime(),
+                bookingDTO.getRoomId()
         );
 
         bookingDTO.setId(savedBooking.getId());

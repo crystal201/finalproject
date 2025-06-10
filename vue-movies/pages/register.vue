@@ -14,17 +14,21 @@
           <path d="M3 12L12 17L21 12" stroke="#3B82F6" stroke-width="2" />
         </svg>
       </div>
-      <h2 class="title">Đăng ký</h2>
+      <h2 class="title">Register</h2>
+
+      <!-- Username -->
       <div class="form-group">
-        <label class="input-label">Tài khoản</label>
+        <label class="input-label">Username</label>
         <input
           v-model="form.username"
           type="text"
           required
           class="input-field"
-          placeholder="Nhập tài khoản"
+          placeholder="Enter your username"
         />
       </div>
+
+      <!-- Email -->
       <div class="form-group">
         <label class="input-label">Email</label>
         <input
@@ -32,39 +36,61 @@
           type="email"
           required
           class="input-field"
-          placeholder="Nhập email"
+          placeholder="Enter your email"
         />
       </div>
+
+      <!-- Password -->
       <div class="form-group">
-        <label class="input-label">Mật khẩu</label>
+        <label class="input-label">Password</label>
         <input
           v-model="form.password"
           type="password"
           required
           class="input-field"
-          placeholder="Nhập mật khẩu"
+          placeholder="Enter your password"
         />
       </div>
+
+      <!-- Confirm Password -->
       <div class="form-group">
-        <label class="input-label">Số điện thoại</label>
+        <label class="input-label">Confirm Password</label>
+        <input
+          v-model="confirmPassword"
+          type="password"
+          required
+          class="input-field"
+          placeholder="Confirm your password"
+        />
+      </div>
+
+      <!-- Phone -->
+      <div class="form-group">
+        <label class="input-label">Phone Number</label>
         <input
           v-model="form.phone"
           type="tel"
           required
           class="input-field"
-          placeholder="Nhập số điện thoại"
+          placeholder="Enter your phone number"
         />
       </div>
+
+      <!-- Register Button -->
       <button type="submit" class="login-button" :disabled="loading">
         <span v-if="loading">
-          <i class="fas fa-spinner fa-spin"></i> Đang đăng ký...
+          <i class="fas fa-spinner fa-spin"></i> Registering...
         </span>
-        <span v-else>Đăng ký</span>
+        <span v-else>Register</span>
       </button>
+
+      <!-- Already have an account -->
       <p class="register-text">
-        Đã có tài khoản?
-        <nuxt-link to="/login" class="register-link">Đăng nhập</nuxt-link>
+        Already have an account?
+        <nuxt-link to="/login" class="register-link">Login</nuxt-link>
       </p>
+
+      <!-- Error -->
       <p v-if="error" class="error-text">{{ error }}</p>
     </form>
   </div>
@@ -81,27 +107,49 @@ export default {
         phone: '',
         role: 'CUSTOMER',
       },
+      confirmPassword: '',
       error: '',
       loading: false,
-    }
+    };
   },
   methods: {
     async handleRegister() {
-      this.error = '';
-      this.loading = true;
-      try {
-        const response = await this.$axios.post('/api/auth/register', this.form);
-        this.$toast.success(response.data.message || 'Đăng ký thành công! Vui lòng đăng nhập.');
-        this.$router.push('/login');
-      } catch (error) {
-        console.error('Registration failed:', error);
-        this.error = error.response?.data || 'Đăng ký thất bại, vui lòng thử lại!';
-      } finally {
-        this.loading = false;
-      }
+    this.error = '';
+    this.loading = true;
+
+    // Validate confirm password
+    if (this.form.password !== this.confirmPassword) {
+      this.error = 'Password and Confirm Password do not match!';
+      this.$toast.error(this.error);
+      this.loading = false;
+      return;
     }
-  }
-}
+
+    try {
+      const response = await this.$axios.post('/api/auth/register', this.form);
+      this.$toast.success(response.data.message || 'Registration successful! Please login.');
+      this.$router.push('/login');
+    } catch (error) {
+      console.error('Registration failed:', error);
+
+      const message = error.response?.data?.message || 'Registration failed, please try again!';
+      
+      // Handle common known errors for better UX
+      if (message.includes('Username already exists')) {
+        this.error = 'Username already exists. Please choose another one.';
+      } else if (message.includes('Email already exists')) {
+        this.error = 'Email already exists. Please use another email.';
+      } else {
+        this.error = message;
+      }
+
+      this.$toast.error(this.error);
+    } finally {
+      this.loading = false;
+    }
+  },
+  },
+};
 </script>
 
 <style scoped>

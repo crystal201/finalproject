@@ -1,6 +1,7 @@
+```vue
 <template>
-  <div class="typing-welcome" v-if="isAuthenticated && user">
-    <span class="welcome-text">{{ displayedText }}</span>
+  <div class="typing-welcome" v-if="isVisible">
+    <span class="welcome-text">{{ isLoggingOut ? goodbyeText : displayedText }}</span>
     <span class="cursor" :class="{ blinking: !isTyping }">|</span>
   </div>
 </template>
@@ -10,9 +11,14 @@ export default {
   data() {
     return {
       displayedText: '',
+      goodbyeText: '',
       isTyping: true,
+      isLoggingOut: false,
+      lastUsername: '',
+      isVisible: false,
       typingSpeed: 100, // milliseconds per character
-      pauseDuration: 7000, // milliseconds before restart
+      pauseDuration: 7000, // milliseconds before restart (welcome)
+      goodbyePause: 2000, // milliseconds before hiding (goodbye)
     }
   },
   computed: {
@@ -24,11 +30,32 @@ export default {
     },
     fullText() {
       return `Welcome, ${this.user?.username || 'Guest'}`
+    },
+    fullGoodbyeText() {
+      return `Goodbye, ${this.lastUsername}`
     }
   },
   mounted() {
-    if (this.isAuthenticated) {
+    if (this.isAuthenticated && this.user) {
+      this.isVisible = true
+      this.lastUsername = this.user.username
       this.typeText()
+    }
+  },
+  watch: {
+    isAuthenticated(newVal, oldVal) {
+      if (oldVal && !newVal && this.lastUsername) {
+        // User logged out
+        this.isVisible = true
+        this.isLoggingOut = true
+        this.showGoodbye()
+      } else if (newVal && this.user) {
+        // User logged in
+        this.isVisible = true
+        this.isLoggingOut = false
+        this.lastUsername = this.user.username
+        this.typeText()
+      }
     }
   },
   methods: {
@@ -44,9 +71,11 @@ export default {
         } else {
           clearInterval(typingInterval)
           this.isTyping = false
-          setTimeout(() => {
-            this.eraseText()
-          }, this.pauseDuration)
+          if (!this.isLoggingOut) {
+            setTimeout(() => {
+              this.eraseText()
+            }, this.pauseDuration)
+          }
         }
       }, this.typingSpeed)
     },
@@ -66,6 +95,27 @@ export default {
           }, 500)
         }
       }, this.typingSpeed / 2)
+    },
+    showGoodbye() {
+      this.isTyping = true
+      this.displayedText = ''
+      this.goodbyeText = ''
+      let i = 0
+      
+      const typingInterval = setInterval(() => {
+        if (i < this.fullGoodbyeText.length) {
+          this.goodbyeText += this.fullGoodbyeText.charAt(i)
+          i++
+        } else {
+          clearInterval(typingInterval)
+          this.isTyping = false
+          setTimeout(() => {
+            this.isVisible = false
+            this.isLoggingOut = false
+            this.goodbyeText = ''
+          }, this.goodbyePause)
+        }
+      }, this.typingSpeed)
     }
   }
 }
@@ -90,11 +140,22 @@ export default {
 
 .welcome-text {
   margin-right: 5px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.welcome-text::after {
+  display: inline-block;
+  width: 1.2rem; /* Adjust for emoji size */
+  height: 1.2rem;
+  vertical-align: middle;
 }
 
 .cursor {
   opacity: 1;
   transition: opacity 0.3s;
+  font-size: 1.2rem;
+  line-height: 1;
 }
 
 .cursor.blinking {
@@ -106,3 +167,4 @@ export default {
   50% { opacity: 0; }
 }
 </style>
+```
