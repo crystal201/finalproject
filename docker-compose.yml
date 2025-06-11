@@ -44,6 +44,10 @@ services:
       - SPRING_JPA_PROPERTIES_HIBERNATE_ORDER_UPDATES=true
       - SPRING_JPA_PROPERTIES_HIBERNATE_BATCH_VERSIONED_DATA=true
       - SPRING_MAIN_LAZY_INITIALIZATION=true
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_MAIL_USERNAME=${SMTP_USERNAME}
+      - SPRING_MAIL_PASSWORD=${SMTP_PASSWORD}
     depends_on:
       mysql-db:
         condition: service_healthy
