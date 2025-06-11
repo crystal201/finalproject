@@ -5,7 +5,8 @@ WORKDIR /app
 COPY --chown=node:node package.json yarn.lock ./
 RUN yarn install --frozen-lockfile --network-timeout 600000
 COPY --chown=node:node . .
+RUN yarn build  # Build dự án Nuxt
 RUN apk del .build-deps && chown -R node:node /app
 USER node
 EXPOSE 3000
-CMD ["yarn", "dev"]
+CMD ["yarn", "start"]
