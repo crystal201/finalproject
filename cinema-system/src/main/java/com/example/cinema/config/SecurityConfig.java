@@ -62,7 +62,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
                     "/api/auth/login",
-                    "/api/auth/register",
+                    "/api/users/register", // Thêm endpoint đăng ký
+                    "/api/users/verify",
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
                     "/swagger-ui.html",
