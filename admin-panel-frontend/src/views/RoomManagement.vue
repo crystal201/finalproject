@@ -17,7 +17,7 @@ export default {
   },
   methods: {
     fetchRooms() {
-      this.axios.get('http://localhost:8081/admin/rooms')
+      this.axios.get('http://157.66.219.181:8081/admin/rooms')
         .then(response => {
           this.rooms = response.data;
         })
