@@ -15,36 +15,36 @@
           <path d="M3 12L12 17L21 12" stroke="#3B82F6" stroke-width="2" />
         </svg>
       </div>
-      <h2 class="title">Đăng nhập</h2>
+      <h2 class="title">Login</h2>
       <div class="form-group">
-        <label class="input-label">Tài khoản</label>
+        <label class="input-label">Username</label>
         <input
           v-model="form.username"
           type="text"
           required
           class="input-field"
-          placeholder="Nhập tài khoản"
+          placeholder="Enter username"
         />
       </div>
       <div class="form-group">
-        <label class="input-label">Mật khẩu</label>
+        <label class="input-label">Password</label>
         <input
           v-model="form.password"
           type="password"
           required
           class="input-field"
-          placeholder="Nhập mật khẩu"
+          placeholder="Enter Password"
         />
       </div>
       <button type="submit" class="login-button" :disabled="loading">
         <span v-if="loading">
-          <i class="fas fa-spinner fa-spin"></i> Đang đăng nhập...
+          <i class="fas fa-spinner fa-spin"></i> Loging in...
         </span>
-        <span v-else>Đăng nhập</span>
+        <span v-else>Login</span>
       </button>
       <p class="register-text">
-        Chưa có tài khoản?
-        <nuxt-link to="/register" class="register-link">Đăng ký ngay</nuxt-link>
+        Not have account yet?
+        <nuxt-link to="/register" class="register-link">Register Now!</nuxt-link>
       </p>
     </form>
   </div>
@@ -63,24 +63,36 @@ export default {
   },
   methods: {
     async handleLogin() {
-      this.loading = true;
-      try {
-        const success = await this.$store.dispatch("auth/login", this.form);
-        if (success) {
-          this.$toast.success('Đăng nhập thành công!');
-          const redirectTo = this.$route.query.redirect || '/';
-          setTimeout(() => {
-            this.$router.push(redirectTo);
-          }, 1500);
-        } else {
-          this.$toast.error('Sai tài khoản hoặc mật khẩu');
-        }
-      } catch (err) {
-        this.$toast.error('Có lỗi xảy ra, vui lòng thử lại!');
-      } finally {
-        this.loading = false;
-      }
-    },
+  this.loading = true;
+  console.log('Form submitted with:', this.form.username, this.form.password);
+  if (!this.form.username || !this.form.password) {
+    console.error('Username or password is empty');
+    this.$toast.error('Please enter full username and password!');
+    this.loading = false;
+    return;
+  }
+  try {
+    const success = await this.$store.dispatch('auth/login', {
+      username: this.form.username,
+      password: this.form.password,
+    });
+    console.log('Dispatch result:', success);
+    if (success) {
+      this.$toast.success('Login Successfully!');
+      const redirectTo = this.$route.query.redirect || '/';
+      setTimeout(() => {
+        this.$router.push(redirectTo);
+      }, 1500);
+    } else {
+      this.$toast.error('Invalid Username or Password:', this.$store.state.auth.error || 'Unidentified');
+    }
+  } catch (err) {
+    console.error('Login error:', err);
+    this.$toast.error('Invalid Username or Password:', this.$store.state.auth.error || 'Unidentified');
+  } finally {
+    this.loading = false;
+  }
+},
   },
 };
 </script>

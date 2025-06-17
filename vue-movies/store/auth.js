@@ -55,8 +55,11 @@ export const actions = {
         }
     },
     async login({ commit, dispatch }, { username, password }) {
+        console.log('Attempting API call to /api/auth/login with:', { username, password });
         try {
+            const $axios = this.app.$axios;
             const response = await this.$axios.post('/api/auth/login', { username, password });
+            console.log('API response:', response.data);
             const { token, userId } = response.data;
             if (token) {
                 commit('SET_TOKEN', token);

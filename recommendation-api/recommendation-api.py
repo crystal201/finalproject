@@ -52,10 +52,10 @@ except Error as e:
     raise
 
 # TMDB API Key
-tmdb_api_key = os.getenv("TMDB_API_KEY")
+tmdb_api_key = os.getenv("API_KEY")
 if not tmdb_api_key:
-    logger.error("TMDB_API_KEY not set in environment variables!")
-    raise ValueError("TMDB_API_KEY not set!")
+    logger.error("API_KEY not set in environment variables!")
+    raise ValueError("API_KEY not set!")
 
 # Load Keras model
 input_dim = 789  # 19 genres + 768 BERT + 1 vote_average + 1 popularity

@@ -1,4 +1,3 @@
-```vue
 <template>
   <div class="modern-booking-page">
     <!-- Movie Header -->
@@ -189,7 +188,7 @@ export default {
       rooms: [
         { id: 1, name: "Room 1" },
         { id: 2, name: "Room 2" },
-        { id: 2, name: "Room 3" },
+        { id: 3, name: "Room 3" },
         { id: 4, name: "Room 4" },
       ],
       selectedRoom: 1,
@@ -873,4 +872,3 @@ export default {
   }
 }
 </style>
-```
