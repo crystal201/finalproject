@@ -205,7 +205,7 @@ export default {
         if (!this.userId) {
           throw new Error("User ID not found. Please log in again.");
         }
-        const response = await axios.get("/api/recommendations", {
+        const response = await this.$axios.get("/api/recommendations", {
           params: { user_id: this.userId },
           headers: {
             Authorization: `Bearer ${this.token}`,
@@ -633,7 +633,7 @@ export default {
 
 .empty-content h3 {
   font-size: 1.5rem;
-  color: #111827;
+  color: #b7ceff;
   margin-bottom: 0.5rem;
 }
 

@@ -7,11 +7,10 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./vue-movies:/app
       - node_modules:/app/node_modules
     environment:
       - NODE_OPTIONS=--max_old_space_size=4096
-      - NODE_ENV=development
+      - NODE_ENV=production
       - NUXT_PORT=3000
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
@@ -22,7 +21,6 @@ services:
       - 8.8.8.8
       - 1.1.1.1
     user: "node"
-    command: yarn dev
     depends_on:
       - backend
     restart: unless-stopped
@@ -63,8 +61,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2'
-          memory: 2G
+          cpus: '1'
+          memory: 512M
     restart: unless-stopped
 
   mysql-db:
@@ -105,7 +103,7 @@ services:
       - MYSQL_USER=root
       - MYSQL_PASSWORD=crystal2001
       - MYSQL_DATABASE=cinema_db
-      - TMDB_API_KEY=770653f0e946b9c775be9a0439b1c4aa
+      - API_KEY=770653f0e946b9c775be9a0439b1c4aa
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     dns:
@@ -122,6 +120,7 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+      - ./redis.conf:/etc/redis/redis.conf
     networks:
       - cinema-network
     restart: unless-stopped
@@ -129,8 +128,15 @@ services:
 networks:
   cinema-network:
     driver: bridge
+    name: cinema-network
+    attachable: true
 
 volumes:
   mysql_data:
-  redis_data:
   node_modules:
+  redis_data:
+   driver: local
+   driver_opts:
+    type: none
+    o: bind
+    device: ~/finalproject/redis-data

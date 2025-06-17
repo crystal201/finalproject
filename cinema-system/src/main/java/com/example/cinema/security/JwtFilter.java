@@ -34,11 +34,10 @@ public class JwtFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
         String path = request.getRequestURI();
         System.out.println("PATH: " + path + " | AUTH HEADER: " + authHeader);
-
-        // Bỏ qua các endpoint không cần token
         if (path.startsWith("/api/auth/login") ||
             path.startsWith("/api/users/register") ||
             path.startsWith("/api/users/verify") ||
+            path.startsWith("/api/health") ||
             path.startsWith("/swagger-ui") ||
             path.startsWith("/v3/api-docs")) {
             System.out.println("Allowing public endpoint without JWT: " + path);

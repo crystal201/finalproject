@@ -1,0 +1,136 @@
+services:
+  frontend:
+    container_name: vue-movies
+    build:
+      context: ./vue-movies
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./vue-movies:/app
+      - node_modules:/app/node_modules
+    environment:
+      - NODE_OPTIONS=--max_old_space_size=4096
+      - NODE_ENV=development
+      - NUXT_PORT=3000
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - HOST=0.0.0.0
+      - NUXT_HOST=0.0.0.0
+      - NPM_CONFIG_REGISTRY=https://registry.npmmirror.com
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    user: "node"
+    command: yarn dev
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - cinema-network
+
+  backend:
+    container_name: cinema-system
+    build:
+      context: ./cinema-system
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/cinema_db?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=crystal2001
+      - SPRING_JPA_PROPERTIES_HIBERNATE_JDBC_TIME_ZONE=UTC
+      - SPRING_JPA_PROPERTIES_HIBERNATE_ORDER_UPDATES=true
+      - SPRING_JPA_PROPERTIES_HIBERNATE_BATCH_VERSIONED_DATA=true
+      - SPRING_MAIN_LAZY_INITIALIZATION=true
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_MAIL_USERNAME=${SMTP_USERNAME}
+      - SPRING_MAIL_PASSWORD=${SMTP_PASSWORD}
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      recommendation-api:
+        condition: service_started
+    volumes:
+      - ./cinema-system:/app
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    networks:
+      - cinema-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+    restart: unless-stopped
+
+  mysql-db:
+    image: mysql:8.0
+    container_name: cinema-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=crystal2001
+      - MYSQL_DATABASE=cinema_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - cinema-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    restart: unless-stopped
+
+  recommendation-api:
+    build:
+      context: ./recommendation-api
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - ./recommendation-api:/app
+    environment:
+      - MYSQL_HOST=mysql-db
+      - MYSQL_PORT=3306
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=crystal2001
+      - MYSQL_DATABASE=cinema_db
+      - TMDB_API_KEY=770653f0e946b9c775be9a0439b1c4aa
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    networks:
+      - cinema-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:6
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - cinema-network
+    restart: unless-stopped
+
+networks:
+  cinema-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
+  node_modules:

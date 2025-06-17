@@ -7,7 +7,7 @@
           :to="{ name: 'login' }"
           aria-label="Login"
         >
-          Đăng nhập
+          Login
         </nuxt-link>
         <div v-else class="logout-button" aria-label="Logout">
           <UserDropdown />
