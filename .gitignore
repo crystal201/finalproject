@@ -1,0 +1,20 @@
+# Ignore Node.js dependencies
+node_modules/
+
+# Ignore compiled Java/Spring Boot files
+target/
+*.jar
+*.war
+
+# Ignore specific OS/IDE files
+.idea/
+.vscode/
+.DS_Store
+*.iml
+
+# Ignore Redis data and config
+redis-data/
+redis.conf
+
+# Ignore environment variables
+.env
