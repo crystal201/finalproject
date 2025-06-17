@@ -141,7 +141,7 @@ services:
         condition: service_healthy
     networks:
       - cinema-network
-    restart: unless-stopped
+    #restart: unless-stopped
 
   admin-panel-frontend:
     container_name: admin-panel-frontend
