@@ -21,7 +21,11 @@
            <label class="input-label">Email</label>
            <input v-model="form.email" type="email" required class="input-field" placeholder="Enter your email" />
          </div>
-
+         <!-- Phone -->
+         <div class="form-group">
+           <label class="input-label">Phone Number</label>
+           <input v-model="form.phone" type="tel" required class="input-field" placeholder="Enter your phone number" />
+         </div>
          <!-- Password -->
          <div class="form-group">
            <label class="input-label">Password</label>
@@ -33,13 +37,6 @@
            <label class="input-label">Confirm Password</label>
            <input v-model="confirmPassword" type="password" required class="input-field" placeholder="Confirm your password" />
          </div>
-
-         <!-- Phone -->
-         <div class="form-group">
-           <label class="input-label">Phone Number</label>
-           <input v-model="form.phone" type="tel" required class="input-field" placeholder="Enter your phone number" />
-         </div>
-
          <!-- Register Button -->
          <button type="submit" class="login-button" :disabled="loading">
            <span v-if="loading">
@@ -95,7 +92,7 @@
            password: '',
            phone: '',
            role: 'CUSTOMER',
-           avatar: ''
+           avatar: '',
          },
          confirmPassword: '',
          verificationCode: '',

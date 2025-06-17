@@ -110,4 +110,17 @@ public class AuthController {
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid token");
     }
+   @PostMapping("/users/verify")
+   @Operation(summary = "Verify user email", description = "Verify user with code") 
+   @ApiResponse(responseCode = "200", description = "Verification successful")
+   @ApiResponse(responseCode = "400", description = "Invalid verification code")
+   public ResponseEntity<?> verify(@RequestBody Map<String, String> request) {
+    String email = request.get("email");
+    String code = request.get("code");
+    boolean isVerified = userService.verifyUser(email, code);
+    if (isVerified) {
+        return ResponseEntity.ok(Map.of("message", "Email verified successfully"));
+    }
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid verification code");
+}
 }
