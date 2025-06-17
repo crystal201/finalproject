@@ -124,7 +124,37 @@ services:
     networks:
       - cinema-network
     restart: unless-stopped
+  admin-panel-backend:
+    container_name: admin-panel-backend
+    build:
+      context: ./admin-panel-backend
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/cinema_db?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=crystal2001
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    networks:
+      - cinema-network
+    restart: unless-stopped
 
+  admin-panel-frontend:
+    container_name: admin-panel-frontend
+    build:
+      context: ./admin-panel-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8082:80"
+    depends_on:
+      - admin-panel-backend
+    networks:
+      - cinema-network
+    restart: unless-stopped
 networks:
   cinema-network:
     driver: bridge
