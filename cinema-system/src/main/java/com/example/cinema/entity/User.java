@@ -33,16 +33,6 @@ package com.example.cinema.entity;
 
        @Column(name = "enabled", nullable = false)
        private boolean enabled;
-
-       @Column(name = "account_non_expired", nullable = false)
-       private boolean accountNonExpired;
-
-       @Column(name = "account_non_locked", nullable = false)
-       private boolean accountNonLocked;
-
-       @Column(name = "credentials_non_expired", nullable = false)
-       private boolean credentialsNonExpired;
-
        @Column(name = "role")
        private String role;
 
@@ -107,33 +97,6 @@ package com.example.cinema.entity;
            this.enabled = enabled;
        }
 
-       @Override
-       public boolean isAccountNonExpired() {
-           return accountNonExpired;
-       }
-
-       public void setAccountNonExpired(boolean accountNonExpired) {
-           this.accountNonExpired = accountNonExpired;
-       }
-
-       @Override
-       public boolean isAccountNonLocked() {
-           return accountNonLocked;
-       }
-
-       public void setAccountNonLocked(boolean accountNonLocked) {
-           this.accountNonLocked = accountNonLocked;
-       }
-
-       @Override
-       public boolean isCredentialsNonExpired() {
-           return credentialsNonExpired;
-       }
-
-       public void setCredentialsNonExpired(boolean credentialsNonExpired) {
-           this.credentialsNonExpired = credentialsNonExpired;
-       }
-
        public String getRole() {
            return role;
        }
@@ -158,4 +121,18 @@ package com.example.cinema.entity;
            }
            return Collections.emptyList();
        }
+       @Override
+    public boolean isAccountNonExpired() {
+        return true; // Giá trị mặc định
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true; // Giá trị mặc định
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true; // Giá trị mặc định
+    }
    }
