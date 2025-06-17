@@ -34,6 +34,7 @@ export default {
       usePolling: true
     }
   },
+  serverMiddleware: ['~/server/middleware/proxy'],
   router: {
     middleware: [],
     // extendRoutes(routes, resolve) {
@@ -118,14 +119,19 @@ export default {
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
-    baseURL: process.env.API_BASE_URL || 'http://backend:8080',
-    credentials: true,
-    proxy: true
+    baseURL: process.env.API_BASE_URL || 'http://157.66.219.181:8080',
+    credentials: false,
   },
   proxy: {
     '/api/': {
-      target: 'http://backend:8080',
+      target: 'http://157.66.219.181:8080',
       changeOrigin: true,
+      pathRewrite: { '^/api': '' }
+    },
+    '/api/recommendations': {
+      target: 'http://recommendation-api:5000',
+      changeOrigin: true,
+      pathRewrite: { '^/api/recommendations': '/recommendations' }
     }
   },
   // PWA module configuration: https://go.nuxtjs.dev/pwa

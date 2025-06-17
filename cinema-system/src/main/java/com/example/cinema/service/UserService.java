@@ -91,13 +91,13 @@ public class UserService implements UserDetailsService {
         return user;
     }
 
-    public void verifyUser(String email, String code) {
+    public boolean verifyUser(String email, String code) {
         if (email == null || code == null) {
             throw new IllegalArgumentException("Email hoặc mã xác nhận không được để trống");
         }
         String storedCode = redisTemplate.opsForValue().get(VERIFICATION_KEY_PREFIX + email);
         if (storedCode == null || !storedCode.equals(code)) {
-            throw new IllegalArgumentException("Mã xác nhận không đúng hoặc đã hết hạn");
+           return false;
         }
 
         User user = userRepository.findByEmail(email)
@@ -106,6 +106,7 @@ public class UserService implements UserDetailsService {
         user.setEnabled(true);
         userRepository.save(user);
         redisTemplate.delete(VERIFICATION_KEY_PREFIX + email);
+        return true;
     }
 
     public Optional<User> findByUsername(String username) {

@@ -1,9 +1,9 @@
-/app/src/main/java/com/example/cinema/controller/BookingController.java
 /app/src/main/java/com/example/cinema/service/UserService.java
+/app/src/main/java/com/example/cinema/controller/BookingController.java
 /app/src/main/java/com/example/cinema/controller/AuthController.java
 /app/src/main/java/com/example/cinema/config/SecurityConfig.java
-/app/src/main/java/com/example/cinema/security/JwtFilter.java
 /app/src/main/java/com/example/cinema/service/BookingSeatService.java
+/app/src/main/java/com/example/cinema/security/JwtFilter.java
 /app/src/main/java/com/example/cinema/config/WebConfig.java
 /app/src/main/java/com/example/cinema/dto/MovieDTO.java
 /app/src/main/java/com/example/cinema/entity/Booking.java
@@ -20,10 +20,10 @@
 /app/src/main/java/com/example/cinema/dto/UserLoginRequest.java
 /app/src/main/java/com/example/cinema/config/PasswordEncoderConfig.java
 /app/src/main/java/com/example/cinema/controller/UserController.java
-/app/src/main/java/com/example/cinema/dto/UserRegistrationRequest.java
 /app/src/main/java/com/example/cinema/entity/BookingSeat.java
-/app/src/main/java/com/example/cinema/config/SwaggerConfig.java
+/app/src/main/java/com/example/cinema/dto/UserRegistrationRequest.java
 /app/src/main/java/com/example/cinema/service/MovieService.java
+/app/src/main/java/com/example/cinema/config/SwaggerConfig.java
 /app/src/main/java/com/example/cinema/security/JwtAuthenticationEntryPoint.java
 /app/src/main/java/com/example/cinema/config/AppConfig.java
 /app/src/main/java/com/example/cinema/repository/BookingSeatRepository.java
