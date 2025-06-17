@@ -1,9 +1,9 @@
-package com.example.admin.controller;
+package com.example.demo.controller;
 
-import com.example.admin.entity.Room;
-import com.example.admin.entity.BookingCancellation;
-import com.example.admin.repository.RoomRepository;
-import com.example.admin.repository.BookingCancellationRepository;
+import com.example.demo.entity.Room;
+import com.example.demo.entity.BookingCancellation;
+import com.example.demo.repository.RoomRepository;
+import com.example.demo.repository.BookingCancellationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
