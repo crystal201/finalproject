@@ -2,7 +2,9 @@
   <div>
     <h1>Room Management</h1>
     <ul>
-      <li v-for="room in rooms" :key="room.id">{{ room.roomName }} (Capacity: {{ room.capacity }})</li>
+      <li v-for="room in rooms" :key="room.id">
+        {{ room.roomName }} (Capacity: {{ room.capacity }})
+      </li>
     </ul>
     <button @click="fetchRooms">Refresh</button>
   </div>
@@ -16,16 +18,22 @@ export default {
     }
   },
   methods: {
-    fetchRooms() {
-      this.axios.get('http://157.66.219.181:8081/admin/rooms')
-        .then(response => {
-          this.rooms = response.data;
+    async fetchRooms() {
+      try {
+        const response = await this.$axios.get('/api/rooms')
+        this.rooms = response.data
+      } catch (error) {
+        console.error("API Error:", error)
+        this.rooms = []
+        this.$notify.error({
+          title: 'Error',
+          message: 'Failed to fetch rooms'
         })
-        .catch(error => console.log(error));
+      }
     }
   },
   mounted() {
-    this.fetchRooms();
+    this.fetchRooms()
   }
 }
 </script>
