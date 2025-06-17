@@ -73,9 +73,6 @@ public class UserService implements UserDetailsService {
         user.setPhone(request.getPhone());
         user.setAvatar(request.getAvatar());
         user.setEnabled(false); // Chưa kích hoạt
-        user.setAccountNonExpired(true);
-        user.setAccountNonLocked(true);
-        user.setCredentialsNonExpired(true);
         user.setRole("CUSTOMER");
         user.setVerified(false);
         userRepository.save(user);
