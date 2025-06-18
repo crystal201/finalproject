@@ -3,7 +3,7 @@
     <h1>Room Management</h1>
     <ul>
       <li v-for="room in rooms" :key="room.id">
-        {{ room.roomName }} (Status: {{ room.status }})
+        {{ room.roomName }}
       </li>
     </ul>
     <button @click="fetchRooms">Refresh</button>

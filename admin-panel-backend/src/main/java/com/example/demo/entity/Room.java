@@ -14,6 +14,8 @@ public class Room {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String roomName;
+
+    public Long getId() { return id; }
+    public String getRoomName() { return roomName; }
 }
