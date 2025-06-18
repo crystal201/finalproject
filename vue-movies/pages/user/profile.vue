@@ -162,10 +162,10 @@
         <p>Are you sure you want to cancel this ticket?</p>
         <div class="dialog-buttons">
           <button @click="confirmCancel" class="confirm-btn">
-            <i class="fas fa-check"></i> Yes, Cancel
+            <i class="fas fa-check"></i> Confirm
           </button>
           <button @click="showCancelConfirm = false" class="cancel-btn">
-            <i class="fas fa-times"></i> No, Keep It
+            <i class="fas fa-times"></i> Quit
           </button>
         </div>
       </div>
@@ -459,7 +459,7 @@ cancelBooking(bookingId) {
 
 .cancel-btn {
   background-color: transparent;
-  color: #4a5568;
+  color: #3d4451;
   border: 1px solid #e2e8f0;
 }
 
