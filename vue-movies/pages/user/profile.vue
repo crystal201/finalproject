@@ -156,6 +156,20 @@
         </div>
       </div>
     </div>
+        <div v-if="showCancelConfirm" class="confirmation-dialog-overlay">
+      <div class="confirmation-dialog">
+        <h3>Confirm Cancellation</h3>
+        <p>Are you sure you want to cancel this ticket?</p>
+        <div class="dialog-buttons">
+          <button @click="confirmCancel" class="confirm-btn">
+            <i class="fas fa-check"></i> Yes, Cancel
+          </button>
+          <button @click="showCancelConfirm = false" class="cancel-btn">
+            <i class="fas fa-times"></i> No, Keep It
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -166,6 +180,8 @@ export default {
   middleware: 'auth',
   data() {
     return {
+      showCancelConfirm: false,
+      bookingToCancel: null,
       loading: true,
       error: null,
       bookings: [],
@@ -244,15 +260,22 @@ export default {
       }
     },
     
-    async cancelBooking(bookingId) {
-      if (!confirm('Are you sure you want to cancel this ticket?')) return;
+cancelBooking(bookingId) {
+      this.bookingToCancel = bookingId;
+      this.showCancelConfirm = true;
+    },
+    
+    async confirmCancel() {
       try {
-        const response = await this.$axios.post(`/api/bookings/cancel/${bookingId}`);
+        const response = await this.$axios.post(`/api/bookings/cancel/${this.bookingToCancel}`);
         this.$toast.success(response.data.message || 'Ticket cancelled successfully!');
         await this.loadData();
       } catch (err) {
         console.error('Error cancelling ticket:', err);
         this.$toast.error(err.response?.data?.message || 'Failed to cancel ticket.');
+      } finally {
+        this.showCancelConfirm = false;
+        this.bookingToCancel = null;
       }
     },
     
@@ -375,6 +398,74 @@ export default {
 </script>
 
 <style scoped>
+.confirmation-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.confirmation-dialog {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.confirmation-dialog h3 {
+  color: #2d3748;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+.confirmation-dialog p {
+  color: #4a5568;
+  margin-bottom: 1.5rem;
+}
+
+.dialog-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.dialog-buttons button {
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.confirm-btn {
+  background-color: #e53e3e;
+  color: white;
+  border: none;
+}
+
+.confirm-btn:hover {
+  background-color: #c53030;
+}
+
+.cancel-btn {
+  background-color: transparent;
+  color: #4a5568;
+  border: 1px solid #e2e8f0;
+}
+
+.cancel-btn:hover {
+  background-color: #f7fafc;
+}
 .profile-container {
   max-width: 1200px;
   margin: 0 auto;
