@@ -165,8 +165,8 @@ services:
     build:
       context: ./admin-panel-frontend
       dockerfile: Dockerfile
-    ports:
-      - "8082:80"
+    # ports:
+    #   - "8082:80"
     depends_on:
       - admin-panel-backend
     networks:
