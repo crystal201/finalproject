@@ -11,6 +11,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   data() {
     return {
@@ -20,7 +22,7 @@ export default {
   methods: {
     async fetchOccupiedSeats() {
       try {
-        const response = await this.$axios.get('/api/bookings/occupied-seats');
+        const response = await axios.get('/api/bookings/occupied-seats');
         this.occupiedSeats = response.data;
       } catch (error) {
         console.error("API Error:", error);
