@@ -9,8 +9,20 @@ import ManageUsers from '../views/ManageUsers.vue'
 Vue.use(VueRouter)
 
 const routes = [
-  { path: '/', component: Dashboard },
-  { path: '/rooms', component: RoomManagement },
+  {
+    path: '/',
+    redirect: '/dashboard'
+  },
+  {
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: Dashboard
+  },
+  {
+    path: '/rooms',
+    name: 'RoomManagement',
+    component: RoomManagement
+  },
   {
     path: '/users',
     name: 'ManageUsers',
@@ -29,6 +41,7 @@ const routes = [
 ]
 
 const router = new VueRouter({
+  mode: 'history',
   routes
 })
 
