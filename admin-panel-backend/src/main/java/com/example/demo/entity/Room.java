@@ -16,8 +16,4 @@ public class Room {
     private Long id;
 
     private String roomName;
-    private String status;
-    private Integer capacity;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 }
