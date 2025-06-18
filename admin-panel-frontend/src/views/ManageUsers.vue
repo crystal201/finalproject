@@ -11,8 +11,6 @@
 </template>
 
 <script>
-import axios from 'axios';
-
 export default {
   data() {
     return {
@@ -22,10 +20,12 @@ export default {
   methods: {
     async fetchUsers() {
       try {
-        const response = await axios.get('/api/users');
+        console.log("Fetching users with baseURL:", this.axios.defaults.baseURL); // Debug
+        const response = await this.axios.get('/api/users'); // Sử dụng this.axios
+        console.log("Users data:", response.data);
         this.users = response.data;
       } catch (error) {
-        console.error("API Error:", error);
+        console.error("API Error:", error.response ? error.response.data : error.message);
         this.users = [];
       }
     }
