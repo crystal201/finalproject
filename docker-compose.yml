@@ -167,6 +167,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8082:80"
+    environment:
+      - NODE_ENV=production
+      - VUE_APP_API_URL=http://157.66.219.181:8081
     depends_on:
       - admin-panel-backend
     networks:

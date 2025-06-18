@@ -12,5 +12,8 @@ FROM node:14
 WORKDIR /app
 COPY --from=build /app/dist ./dist
 RUN npm install -g serve
+# Định nghĩa biến môi trường
+ENV NODE_ENV=production
+ENV VUE_APP_API_URL=http://157.66.219.181:8081
 EXPOSE 80
 CMD ["serve", "-s", "dist", "-l", "80"]
