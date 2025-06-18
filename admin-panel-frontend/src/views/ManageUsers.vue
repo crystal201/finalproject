@@ -11,6 +11,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   data() {
     return {
@@ -20,7 +22,7 @@ export default {
   methods: {
     async fetchUsers() {
       try {
-        const response = await this.$axios.get('/api/users');
+        const response = await axios.get('/api/users');
         this.users = response.data;
       } catch (error) {
         console.error("API Error:", error);

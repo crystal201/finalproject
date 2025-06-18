@@ -15,6 +15,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   data() {
     return {
@@ -24,7 +26,7 @@ export default {
   methods: {
     async fetchBookings() {
       try {
-        const response = await this.$axios.get('/api/bookings');
+        const response = await axios.get('/api/bookings');
         this.bookings = response.data;
       } catch (error) {
         console.error("API Error:", error);
