@@ -49,7 +49,7 @@ public class AdminController {
         return cancelRepo.save(cancel);
     }
 
-    @GetMapping("/api/users")
+    @GetMapping("/users")
     public List<UserResponse> getUsers() {
         return usersRepo.findAll().stream()
             .map(user -> new UserResponse(
