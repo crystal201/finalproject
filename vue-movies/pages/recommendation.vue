@@ -287,7 +287,7 @@ export default {
 .auth-card h3 {
   font-size: 1.5rem;
   margin-bottom: 0.5rem;
-  color: #111827;
+  color: #82aaff;
 }
 
 .auth-card p {
@@ -366,7 +366,7 @@ export default {
 .loading-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #111827;
+  color: #82aaff;
   margin-bottom: 0.5rem;
 }
 
@@ -474,7 +474,7 @@ export default {
 .movie-title {
   font-size: 1.2rem;
   font-weight: 600;
-  color: #111827;
+  color: #82aaff;
   margin-bottom: 0.25rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;
