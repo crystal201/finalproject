@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
+@CrossOrigin(origins = "http://157.66.219.181:8082")
 @RequestMapping("/api")
 public class AdminController {
 
