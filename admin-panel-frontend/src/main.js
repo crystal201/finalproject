@@ -1,30 +1,19 @@
 import Vue from 'vue';
-import App from './views/App.vue';
-import VueRouter from 'vue-router'; // Import vue-router
+import App from './App.vue';
+import VueRouter from 'vue-router';
 import axios from 'axios';
 import VueAxios from 'vue-axios';
 
-// Sử dụng vue-router
 Vue.use(VueRouter);
+Vue.use(VueAxios, axios.create({
+  baseURL: 'http://157.66.219.181:8081/admin'
+}));
 
-// Định nghĩa routes
-import Dashboard from './views/Dashboard.vue';
-import RoomManagement from './views/RoomManagement.vue';
+import router from './router';
 
-const routes = [
-  { path: '/', component: Dashboard },
-  { path: '/rooms', component: RoomManagement }
-];
-
-const router = new VueRouter({
-  routes
-});
-
-// Sử dụng axios
-Vue.use(VueAxios, axios);
 Vue.config.productionTip = false;
 
 new Vue({
-  router, // Thêm router vào instance Vue
+  router,
   render: h => h(App),
 }).$mount('#app');

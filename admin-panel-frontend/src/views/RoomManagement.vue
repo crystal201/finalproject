@@ -3,7 +3,7 @@
     <h1>Room Management</h1>
     <ul>
       <li v-for="room in rooms" :key="room.id">
-        {{ room.roomName }} (Capacity: {{ room.capacity }})
+        {{ room.roomName }} (Status: {{ room.status }})
       </li>
     </ul>
     <button @click="fetchRooms">Refresh</button>
@@ -25,10 +25,6 @@ export default {
       } catch (error) {
         console.error("API Error:", error)
         this.rooms = []
-        this.$notify.error({
-          title: 'Error',
-          message: 'Failed to fetch rooms'
-        })
       }
     }
   },

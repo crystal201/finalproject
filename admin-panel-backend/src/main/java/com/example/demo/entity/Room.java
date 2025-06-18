@@ -2,8 +2,6 @@ package com.example.demo.entity;
 
 import java.time.LocalDateTime;
 
-import org.hibernate.annotations.Table;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,6 +17,7 @@ public class Room {
 
     private String roomName;
     private String status;
+    private Integer capacity;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
