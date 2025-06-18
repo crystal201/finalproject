@@ -21,7 +21,7 @@ export default {
   methods: {
     async fetchRooms() {
       try {
-        const response = await axios.get('/rooms')
+        const response = await axios.get('api/rooms')
         this.rooms = response.data
       } catch (error) {
         console.error("API Error:", error)
