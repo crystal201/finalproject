@@ -4,11 +4,12 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN chmod +x node_modules/.bin/vue-cli-service # Đảm bảo quyền thực thi
 RUN npm run build
 
-# Stage 2: Run
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
+# Stage 2: Run with Node.js and serve
+FROM node:14
+WORKDIR /app
+COPY --from=build /app/dist ./dist
+RUN npm install -g serve
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["serve", "-s", "dist", "-l", "80"]
