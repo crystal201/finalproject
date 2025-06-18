@@ -2,7 +2,7 @@
 FROM node:14 AS build
 WORKDIR /app
 COPY package*.json ./
-RUN npm install --save-dev cross-env
+RUN npm install --save-dev cross-env && npm list cross-env
 COPY . .
 ARG VUE_APP_API_URL=http://157.66.219.181:8081
 ENV VUE_APP_API_URL=$VUE_APP_API_URL
