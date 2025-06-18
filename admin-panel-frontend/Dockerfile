@@ -2,13 +2,14 @@
 FROM node:14 AS build
 WORKDIR /app
 COPY package*.json ./
-RUN npm install --save-dev cross-env && npm list cross-env  # Cài đặt và kiểm tra trước
+RUN npm install --save-dev cross-env && npm list cross-env  # Cài đặt và kiểm tra
 COPY . .
 ARG VUE_APP_API_URL=http://157.66.219.181:8081
 ENV VUE_APP_API_URL=$VUE_APP_API_URL
 RUN chmod +x node_modules/.bin/vue-cli-service
 RUN if [ ! -f node_modules/.bin/cross-env ]; then echo "cross-env not found in node_modules"; exit 1; fi  # Kiểm tra file
-RUN cross-env VUE_APP_API_URL=$VUE_APP_API_URL npm run build
+# Sử dụng đường dẫn tuyệt đối để gọi cross-env
+RUN ./node_modules/.bin/cross-env VUE_APP_API_URL=$VUE_APP_API_URL npm run build
 
 # Stage 2: Run with Node.js and serve
 FROM node:14
