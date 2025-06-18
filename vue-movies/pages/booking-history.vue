@@ -111,6 +111,16 @@
       </div>
     </div>
   </div>
+    <div v-if="showCancelConfirm" class="confirmation-dialog-overlay">
+    <div class="confirmation-dialog">
+      <h3>Confirm Cancellation</h3>
+      <p>Are you sure you want to cancel this ticket?</p>
+      <div class="dialog-buttons">
+        <button @click="confirmCancel" class="confirm-btn">Yes, Cancel</button>
+        <button @click="showCancelConfirm = false" class="cancel-btn">No, Keep It</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -118,6 +128,8 @@ export default {
   middleware: ['auth'],
   data() {
     return {
+      showCancelConfirm: false,
+      bookingToCancel: null,
       bookings: [],
       loading: false,
       rooms: [
@@ -171,14 +183,20 @@ export default {
       }
     },
     async cancelBooking(bookingId) {
-      if (!confirm('Bạn có chắc muốn hủy vé này?')) return;
+      this.bookingToCancel = bookingId;
+      this.showCancelConfirm = true;
+    },
+    async confirmCancel() {
       try {
-        const response = await this.$axios.post(`/api/bookings/cancel/${bookingId}`);
-        this.$toast.success(response.data.message || 'Hủy vé thành công!');
+        const response = await this.$axios.post(`/api/bookings/cancel/${this.bookingToCancel}`);
+        this.$toast.success(response.data.message || 'Cancel ticket successfully!');
         await this.fetchBookings();
       } catch (err) {
         console.error('Error cancelling booking:', err);
-        this.$toast.error(err.response?.data?.message || 'Không thể hủy vé.');
+        this.$toast.error(err.response?.data?.message || 'Cannot cancel ticket');
+      } finally {
+        this.showCancelConfirm = false;
+        this.bookingToCancel = null;
       }
     },
     canCancel(booking) {
@@ -241,6 +259,72 @@ export default {
 </script>
 
 <style scoped>
+.confirmation-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.confirmation-dialog {
+  background-color: #374151;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.confirmation-dialog h3 {
+  color: #e5e7eb;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+.confirmation-dialog p {
+  color: #9ca3af;
+  margin-bottom: 1.5rem;
+}
+
+.dialog-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.dialog-buttons button {
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.confirm-btn {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+}
+
+.confirm-btn:hover {
+  background-color: #dc2626;
+}
+
+.cancel-btn {
+  background-color: transparent;
+  color: #9ca3af;
+  border: 1px solid #4b5563;
+}
+
+.cancel-btn:hover {
+  background-color: #4b5563;
+  color: #e5e7eb;
+}
 .history-header{
   padding: 10px 20px;
 }
