@@ -22,7 +22,7 @@ export default {
   methods: {
     async fetchUsers() {
       try {
-        const response = await axios.get('/api/users');
+        const response = await axios.get('/admin/users');
         this.users = response.data;
       } catch (error) {
         console.error("API Error:", error);
