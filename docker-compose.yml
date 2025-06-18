@@ -190,10 +190,10 @@ networks:
 
 volumes:
   mysql_data:
-  node_modules:
-  redis_data:
-   driver: local
-   driver_opts:
-    type: none
-    o: bind
-    device: ~/finalproject/redis-data
+  # node_modules:
+  # redis_data:
+  #  driver: local
+  #  driver_opts:
+  #   type: none
+  #   o: bind
+  #   device: ~/finalproject/redis-data
