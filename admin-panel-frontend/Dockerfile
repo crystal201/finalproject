@@ -7,6 +7,8 @@ COPY . .
 # Truyền biến môi trường vào build time
 ARG VUE_APP_API_URL=http://157.66.219.181:8081
 ENV VUE_APP_API_URL=$VUE_APP_API_URL
+# Cấp quyền thực thi cho vue-cli-service
+RUN chmod +x node_modules/.bin/vue-cli-service
 # Chạy build với biến môi trường
 RUN VUE_APP_API_URL=$VUE_APP_API_URL npm run build
 
