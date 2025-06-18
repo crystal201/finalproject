@@ -6,7 +6,7 @@ import VueAxios from 'vue-axios';
 
 Vue.use(VueRouter);
 Vue.use(VueAxios, axios.create({
-  baseURL: 'http://157.66.219.181:8081/admin'
+  baseURL: '/api'
 }));
 
 import router from './router';
