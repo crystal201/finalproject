@@ -6,7 +6,7 @@ import VueAxios from 'vue-axios';
 
 Vue.use(VueRouter);
 Vue.use(VueAxios, axios.create({
-  baseURL: '/api'
+  baseURL: process.env.NODE_ENV === 'development' ? '/api' : 'http://157.66.219.181:8081'
 }));
 
 import router from './router';
