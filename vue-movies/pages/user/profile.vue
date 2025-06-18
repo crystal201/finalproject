@@ -164,7 +164,7 @@
           <button @click="confirmCancel" class="confirm-btn">
             <i class="fas fa-check"></i> Confirm
           </button>
-          <button @click="showCancelConfirm = false" class="cancel-btn">
+          <button @click="showCancelConfirm = false" class="cancel-btn-modal">
             <i class="fas fa-times"></i> Quit
           </button>
         </div>
@@ -457,13 +457,13 @@ cancelBooking(bookingId) {
   background-color: #c53030;
 }
 
-.cancel-btn {
+.cancel-btn-modal {
   background-color: transparent;
   color: #3d4451;
   border: 1px solid #e2e8f0;
 }
 
-.cancel-btn:hover {
+.cancel-btn-modal:hover {
   background-color: #f7fafc;
 }
 .profile-container {
