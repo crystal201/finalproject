@@ -1,26 +1,23 @@
 # Build stage
 FROM node:14 as builder
 
-# 1. Sử dụng root để build (tạm thời)
-USER root
-
-# 2. Tạo thư mục làm việc
 WORKDIR /app
 
-# 3. Copy package files trước để tận dụng cache Docker
+# 1. Copy package files trước
 COPY package*.json ./
 
-# 4. Cài đặt local @vue/cli-service (KHÔNG dùng -g)
-RUN npm install --save-dev @vue/cli-service @vue/cli
+# 2. Cài đặt vue-cli-service chính xác
+RUN npm install -g @vue/cli
+RUN npm install --save-dev @vue/cli-service
 RUN npm install
 
-# 5. Copy toàn bộ source code
+# 3. Copy source code
 COPY . .
 
-# 6. Build ứng dụng bằng npx
+# 4. Build với đường dẫn đầy đủ
 ARG VUE_APP_API_URL=/api
 ENV VUE_APP_API_URL=$VUE_APP_API_URL
-RUN npx vue-cli-service build
+RUN ./node_modules/.bin/vue-cli-service build
 
 # Production stage
 FROM nginx:1.19-alpine
