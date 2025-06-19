@@ -7,8 +7,9 @@ module.exports = {
         target: 'http://157.66.219.181:8081',
         changeOrigin: true,
         pathRewrite: {
-          '^/api': '/api'
-        }
+          '^/api': ''
+        },
+        logLevel: 'debug'
       }
     }
   },
