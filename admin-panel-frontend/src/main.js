@@ -1,23 +1,18 @@
-import Vue from 'vue';
-import App from './App.vue';
-import VueRouter from 'vue-router';
-import axios from 'axios';
-import VueAxios from 'vue-axios';
+import Vue from 'vue'
+import App from './App.vue'
+import axios from 'axios'
+import VueAxios from 'vue-axios'
 
-Vue.use(VueRouter);
+const axiosInstance = axios.create({
+  baseURL: process.env.NODE_ENV === 'development' 
+    ? 'http://localhost:8081/api' 
+    : '/api'
+})
 
-const apiClient = axios.create({
-  baseURL: '/api'
-});
+Vue.use(VueAxios, axiosInstance)
 
-Vue.use(VueAxios, apiClient);
-console.log('Axios configured with baseURL:', apiClient.defaults.baseURL);
-
-import router from './router';
-
-Vue.config.productionTip = false;
+Vue.prototype.$axios = axiosInstance
 
 new Vue({
-  router,
   render: h => h(App),
-}).$mount('#app');
+}).$mount('#app')
