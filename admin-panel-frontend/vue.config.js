@@ -3,12 +3,10 @@ module.exports = {
     port: 8082,
     host: '0.0.0.0',
     proxy: {
-      '/api': {
-        target: 'http://157.66.219.181:8081',
+      '^/api': {
+        target: 'http://localhost:8081',
         changeOrigin: true,
-        pathRewrite: {
-          '^/api': ''
-        },
+        pathRewrite: { '^/api': '/api' },
         logLevel: 'debug'
       }
     }
