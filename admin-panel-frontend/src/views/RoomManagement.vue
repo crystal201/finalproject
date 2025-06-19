@@ -20,7 +20,7 @@ export default {
   methods: {
     async fetchRooms() {
       try {
-        const response = await this.axios.get('/api/rooms')
+        const response = await this.axios.get('/rooms')
         console.log("Rooms data:", response.data)
         this.rooms = response.data
       } catch (error) {
