@@ -1,20 +1,23 @@
 # Build stage
 FROM node:14 as builder
 
-# 1. Không tạo user appuser nữa (dùng root để tránh lỗi permission)
+# 1. Sử dụng root để build (tạm thời)
+USER root
+
+# 2. Tạo thư mục làm việc
 WORKDIR /app
 
-# 2. Copy package files trước
+# 3. Copy package files trước để tận dụng cache Docker
 COPY package*.json ./
 
-# 3. Cài đặt local @vue/cli-service (không dùng -g)
-RUN npm install --save-dev @vue/cli-service
+# 4. Cài đặt local @vue/cli-service (KHÔNG dùng -g)
+RUN npm install --save-dev @vue/cli-service @vue/cli
 RUN npm install
 
-# 4. Copy source code
+# 5. Copy toàn bộ source code
 COPY . .
 
-# 5. Build với npx để tránh lỗi permission
+# 6. Build ứng dụng bằng npx
 ARG VUE_APP_API_URL=/api
 ENV VUE_APP_API_URL=$VUE_APP_API_URL
 RUN npx vue-cli-service build
