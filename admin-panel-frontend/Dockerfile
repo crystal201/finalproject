@@ -1,22 +1,16 @@
-# Stage 1: Build
-FROM node:14 AS build
+# Build stage
+FROM node:14 as build-stage
 WORKDIR /app
 COPY package*.json ./
-RUN npm install --save-dev cross-env && npm list cross-env  # Cài đặt và kiểm tra
+RUN npm install
 COPY . .
-ARG VUE_APP_API_URL=http://157.66.219.181:8081
+ARG VUE_APP_API_URL=/api
 ENV VUE_APP_API_URL=$VUE_APP_API_URL
-RUN chmod +x node_modules/.bin/vue-cli-service
-RUN if [ ! -f node_modules/.bin/cross-env ]; then echo "cross-env not found in node_modules"; exit 1; fi  # Kiểm tra file
-# Sử dụng đường dẫn tuyệt đối để gọi cross-env
-RUN ./node_modules/.bin/cross-env VUE_APP_API_URL=$VUE_APP_API_URL npm run build
+RUN npm run build
 
-# Stage 2: Run with Node.js and serve
-FROM node:14
-WORKDIR /app
-COPY --from=build /app/dist ./dist
-RUN npm install -g serve
-ENV NODE_ENV=production
-ENV VUE_APP_API_URL=http://157.66.219.181:8081
+# Production stage
+FROM nginx:stable-alpine as production-stage
+COPY --from=build-stage /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
-CMD ["serve", "-s", "dist", "-l", "80"]
+CMD ["nginx", "-g", "daemon off;"]

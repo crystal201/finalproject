@@ -166,12 +166,12 @@ services:
       context: ./admin-panel-frontend
       dockerfile: Dockerfile
       args:
-        - VUE_APP_API_URL=http://157.66.219.181:8081
+        - VUE_APP_API_URL=/api
     ports:
       - "8082:80"
     environment:
       - NODE_ENV=production
-      - VUE_APP_API_URL=http://157.66.219.181:8081
+      - VUE_APP_API_URL=/api
     depends_on:
       - admin-panel-backend
     networks:

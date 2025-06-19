@@ -8,7 +8,7 @@ Vue.use(VueRouter);
 
 const apiClient = axios.create({
   baseURL: process.env.NODE_ENV === 'development' 
-    ? '/api'
+    ? 'http://localhost:8081/api'
     : '/api'
 });
 
