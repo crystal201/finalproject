@@ -1,22 +1,23 @@
 # Build stage
 FROM node:14 as builder
 
-# Tạo và chuyển sang user node
+# Tạo và chuyển sang user appuser
 RUN useradd -m appuser && mkdir -p /app && chown -R appuser:appuser /app
 WORKDIR /app
 USER appuser
 
-# Copy package files và cài đặt
+# Copy package files
 COPY --chown=appuser:appuser package*.json ./
+
+# Cài đặt local thay vì global
+RUN npm install --save-dev @vue/cli-service
 RUN npm install
 
 # Copy source code
 COPY --chown=appuser:appuser . .
 
-# Cài đặt global vue-cli-service và cấp quyền
-RUN npm install -g @vue/cli-service
-RUN chmod 755 /app/node_modules/.bin/vue-cli-service
-RUN chmod -R 755 /app/node_modules
+# Cấp quyền thực thi
+RUN chmod 755 node_modules/.bin/*
 
 # Build ứng dụng
 ARG VUE_APP_API_URL=/api
