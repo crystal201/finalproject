@@ -148,6 +148,8 @@ services:
       - spring.datasource.hikari.max-lifetime=1800000
       - spring.devtools.livereload.enabled=false
       - spring.devtools.restart.enabled=false
+      - SERVER_PORT=8081
+      - SERVER_SERVLET_CONTEXT_PATH=/
     depends_on:
       mysql-db:
         condition: service_healthy
@@ -159,7 +161,6 @@ services:
     networks:
       - cinema-network
     restart: unless-stopped
-
   admin-panel-frontend:
     container_name: admin-panel-frontend
     build:
