@@ -21,7 +21,7 @@ export default {
   methods: {
     async fetchRooms() {
       try {
-        const response = await this.$axios.get('/api/rooms')
+        const response = await this.axios.get('/api/rooms')
         this.rooms = response.data
       } catch (error) {
         console.error("API Error:", error)
