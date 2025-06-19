@@ -5,11 +5,13 @@ import axios from 'axios';
 import VueAxios from 'vue-axios';
 
 Vue.use(VueRouter);
-const baseURL = process.env.VUE_APP_API_URL || 'http://157.66.219.181:8081';
-console.log('Configured baseURL:', baseURL); // Debug
-Vue.use(VueAxios, axios.create({
-  baseURL: baseURL
-}));
+const baseURL = process.env.NODE_ENV === 'development' 
+  ? 'http://localhost:8081' 
+  : '/api';
+
+Vue.use(VueAxios, axios.create({ baseURL }));
+console.log('Configured baseURL:', baseURL); 
+
 
 import router from './router';
 
