@@ -1,0 +1,72 @@
+services:
+  admin-panel-backend:
+    container_name: admin-panel-backend
+    build:
+      context: ./admin-panel-backend
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/cinema_db?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=crystal2001
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
+      - spring.datasource.hikari.maximum-pool-size=5
+      - spring.datasource.hikari.minimum-idle=2
+      - spring.datasource.hikari.connection-timeout=20000
+      - spring.datasource.hikari.idle-timeout=300000
+      - spring.datasource.hikari.max-lifetime=1800000
+      - spring.devtools.livereload.enabled=false
+      - spring.devtools.restart.enabled=false
+      - SERVER_PORT=8081
+      - SERVER_SERVLET_CONTEXT_PATH=/api  # Đảm bảo khớp với proxy
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "512m"
+    networks:
+      - cinema-network
+    restart: unless-stopped
+
+  admin-panel-frontend:
+    container_name: admin-panel-frontend
+    build:
+      context: ./admin-panel-frontend
+      dockerfile: Dockerfile
+      args:
+        - VUE_APP_API_URL=/api
+    ports:
+      - "8082:80"
+    environment:
+      - NODE_ENV=production
+      - VUE_APP_API_URL=/api
+    depends_on:
+      - admin-panel-backend
+    networks:
+      - cinema-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.3"
+          memory: "256m"
+    restart: unless-stopped
+
+networks:
+  cinema-network:
+    driver: bridge
+    name: cinema-network
+    attachable: true
+
+volumes:
+  mysql_data:
+  node_modules:
+  redis_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ~/finalproject/redis-data
