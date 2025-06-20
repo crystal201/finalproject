@@ -26,6 +26,11 @@ services:
     restart: unless-stopped
     networks:
       - cinema-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.3"
+          memory: "256M"
 
   backend:
     container_name: cinema-system
@@ -61,7 +66,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1'
+          cpus: '0.4'
           memory: 512M
     restart: unless-stopped
 
@@ -85,7 +90,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.5"
+          cpus: "0.3"
           memory: "512m"
     restart: unless-stopped
 
@@ -116,6 +121,11 @@ services:
       - 1.1.1.1
     networks:
       - cinema-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: "256M"
     restart: unless-stopped
 
   redis:
@@ -128,6 +138,11 @@ services:
       - ./redis.conf:/etc/redis/redis.conf
     networks:
       - cinema-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: "256M"
     restart: unless-stopped
   admin-panel-backend:
     container_name: admin-panel-backend
@@ -154,10 +169,10 @@ services:
       mysql-db:
         condition: service_healthy
     deploy:
-      resources:
-        limits:
-          cpus: "0.5"
-          memory: "512m"
+          resources:
+            limits:
+              cpus: "0.3"
+              memory: "512M"
     networks:
       - cinema-network
     restart: unless-stopped
