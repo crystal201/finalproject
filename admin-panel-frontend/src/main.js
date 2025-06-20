@@ -7,7 +7,7 @@ import router from './router/index'
 const axiosInstance = axios.create({
   baseURL: process.env.NODE_ENV === 'development' 
     ? 'http://localhost:8081/api' 
-    : '/api'
+    : ''
 })
 
 Vue.use(VueAxios, axiosInstance)
