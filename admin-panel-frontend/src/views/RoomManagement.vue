@@ -20,16 +20,12 @@ export default {
   methods: {
     async fetchRooms() {
       try {
-        const response = await this.$axios.get('/rooms');
+        console.log("Fetching rooms with baseURL:", this.$axios.defaults.baseURL);
+        const response = await this.$axios.get('/api/rooms');
         console.log("Rooms data:", response.data);
         this.rooms = response.data;
       } catch (error) {
-        console.error("API Error:", {
-          message: error.message,
-          response: error.response ? error.response.data : 'No response',
-          status: error.response ? error.response.status : 'No status',
-          config: error.config ? error.config.url : 'No config'
-        });
+        console.error("API Error:", error.response ? error.response.data : error.message);
         this.rooms = [];
       }
     }
