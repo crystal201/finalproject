@@ -13,6 +13,7 @@ COPY package*.json ./
 RUN npm install -g @vue/cli
 RUN npm install --save-dev @vue/cli-service
 RUN npm install
+RUN npm config set registry https://registry.npmmirror.com
 
 # Copy source code
 COPY . .
