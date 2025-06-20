@@ -21,7 +21,7 @@ export default {
     async fetchUsers() {
       try {
         console.log("Fetching users with baseURL:", this.axios.defaults.baseURL); // Debug
-        const response = await this.axios.get('/users'); // Sử dụng this.axios
+        const response = await this.axios.get('/api/users'); // Sử dụng this.axios
         console.log("Users data:", response.data);
         this.users = response.data;
       } catch (error) {
