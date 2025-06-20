@@ -20,9 +20,6 @@ services:
       - spring.devtools.restart.enabled=false
       - SERVER_PORT=8081
       - SERVER_SERVLET_CONTEXT_PATH=/api  # Đảm bảo khớp với proxy
-    depends_on:
-      mysql-db:
-        condition: service_healthy
     deploy:
       resources:
         limits:
