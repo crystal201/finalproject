@@ -11,7 +11,6 @@ COPY package*.json ./
 
 # Cài đặt dependencies
 RUN npm install
-RUN npm config set registry https://registry.npmmirror.com
 
 # Copy source code
 COPY . .
