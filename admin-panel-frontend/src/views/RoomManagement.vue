@@ -27,6 +27,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 export default {
   data() {
     return {
@@ -41,7 +42,7 @@ export default {
     async fetchRooms() {
       try {
         console.log("Fetching rooms with baseURL:", this.$axios.defaults.baseURL);
-        const response = await this.$axios.get('/api/rooms');
+        const response = await axios.get('/api/rooms');
         console.log("Rooms data:", response.data);
         this.rooms = response.data;
       } catch (error) {
@@ -62,7 +63,7 @@ export default {
       this.addingRoom = true;
       this.addRoomMessage = '';
       try {
-        const response = await this.$axios.post('/api/rooms/add');
+        const response = await axios.post('/api/rooms/add');
         this.addRoomSuccess = true;
         this.addRoomMessage = response.data.message;
         await this.fetchRooms();
