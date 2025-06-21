@@ -106,6 +106,7 @@
 
 <script>
 import axios from 'axios';
+
 export default {
   data() {
     return {
@@ -126,9 +127,18 @@ export default {
     async fetchBookings() {
       try {
         this.loading = true;
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+          console.error('No userId found in localStorage');
+          this.$toast.error('Không tìm thấy userId. Vui lòng đăng nhập lại.');
+          this.bookings = [];
+          this.loading = false;
+          return;
+        }
+
         const movieCache = JSON.parse(localStorage.getItem('movieCache') || '{}');
         const response = await this.$axios.get("/api/bookings", {
-          params: { userId: this.$route.query.userId || '' }
+          params: { userId }
         });
         if (!response.data) {
           this.bookings = [];
@@ -169,7 +179,7 @@ export default {
         this.loading = false;
       }
     },
-    async requestCancelBooking(bookingId) {
+    async cancelBooking(bookingId) {
       if (!confirm('Bạn có chắc muốn yêu cầu hủy vé này?')) return;
       try {
         const response = await this.$axios.post(`/api/bookings/cancel/${bookingId}`);
@@ -238,8 +248,6 @@ export default {
   },
 };
 </script>
-
-
 <style scoped>
 .history-header{
   padding: 10px 20px;
