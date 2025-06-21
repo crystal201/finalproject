@@ -122,19 +122,26 @@ public class AdminController {
 
     @PostMapping("/bookings/reject/{id}")
     public ResponseEntity<Map<String, Object>> rejectBooking(@PathVariable Long id) {
-        Bookings booking = bookingsRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+        Bookings booking = bookingsRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
         if (!"WAITING_BOOKING".equalsIgnoreCase(booking.getStatus())) {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("message", "Booking is not in WAITING_BOOKING state");
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
-        bookingSeatsRepo.deleteByBookingId(id);
-        bookingsRepo.delete(booking);
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Booking rejected successfully");
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        try {
+            bookingSeatsRepo.deleteByBookingId(id);
+            booking.setStatus("REJECTED");
+            bookingsRepo.save(booking);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Booking rejected successfully");
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Error rejecting booking: " + e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
-
     @PostMapping("/bookings/accept-cancel/{id}")
     public ResponseEntity<Map<String, Object>> acceptCancelBooking(@PathVariable Long id) {
         Bookings booking = bookingsRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Booking not found"));

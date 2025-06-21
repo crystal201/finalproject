@@ -141,7 +141,7 @@
                 </div>
               </div>
               <div class="booking-actions" v-if="canCancel(booking)">
-                <button class="cancel-btn" @click="cancelBooking(booking.id)">
+                <button class="cancel-btn" @click="requestCancelBooking(booking.id)">
                   <i class="fas fa-times"></i> Cancel ticket
                 </button>
               </div>
@@ -190,7 +190,8 @@ export default {
         { value: 'active', label: 'Active' },
         { value: 'waiting_cancel', label: 'Waiting Cancel' },
         { value: 'cancelled', label: 'Cancelled' },
-        { value: 'expired', label: 'Expired' }
+        { value: 'expired', label: 'Expired' },
+        { value: 'rejected', label: 'Rejected' }
       ],
       activeFilter: 'all',
       defaultAvatar: 'https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff&bold=true&size=128',
@@ -230,6 +231,9 @@ export default {
         }
         if (this.activeFilter === 'expired') {
           return booking.status === 'EXPIRED';
+        }
+        if (this.activeFilter === 'rejected') {
+          return booking.status === 'REJECTED';
         }
         return true;
       });
@@ -391,6 +395,7 @@ export default {
         case 'WAITING_CANCEL': return 'Đang chờ xác nhận hủy vé';
         case 'CANCELLED': return 'Đã hủy';
         case 'EXPIRED': return 'Hết hiệu lực';
+        case 'REJECTED': return 'Đã từ chối';
         default: return 'Không xác định';
       }
     },
