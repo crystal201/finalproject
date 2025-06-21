@@ -225,18 +225,24 @@ export default {
     async fetchRooms() {
       try {
         const response = await axios.get("/api/rooms");
-        this.rooms = response.data.map((room) => ({
-          id: room.id,
-          roomName: room.roomName,
-          capacity: room.capacity,
-        }));
+        if (Array.isArray(response.data)) {
+          this.rooms = response.data.map((room) => ({
+            id: room.id,
+            roomName: room.roomName,
+            capacity: room.capacity,
+          }));
+        } else {
+          console.warn("Unexpected data format from /api/rooms:", response.data);
+          this.rooms = [];
+          this.$toast.error("Invalid data format from server.");
+        }
         this.selectedRoom = this.rooms.length > 0 ? this.rooms[0].id : null;
         if (this.selectedRoom) {
           this.fetchBookedSeats();
         }
       } catch (error) {
         console.error("Error fetching rooms:", error);
-        this.$toast.error("Error loading rooms: " + error.message);
+        this.$toast.error("Error loading rooms: " + (error.response?.data?.message || error.message));
         this.rooms = [];
       }
     },
