@@ -443,35 +443,42 @@ export default {
       this.showConfirmModal = true;
     },
     async handleConfirm() {
-      this.closeConfirmModal();
-      this.loading = true;
-      const booking = {
-        movieId: this.movie.id.toString(),
-        movieTitle: this.movie.title,
-        showtime: this.selectedShowtime,
-        date: this.selectedDate,
-        seats: this.selectedSeats,
-        total: this.selectedSeats.length * this.ticketPrice,
-        roomId: this.selectedRoom,
-      };
-      try {
-        const response = await this.$axios.post("/api/bookings", booking);
-        this.$toast.success(response.data.message || "Booking request submitted successfully!");
-        this.selectedSeats = [];
-        await this.fetchBookedSeats();
-        this.$router.push("/booking-history");
-      } catch (error) {
-        console.error("Error booking seats:", error);
-        const errorMessage =
-          error.response?.data?.message ||
-          error.message ||
-          "Unknown error while booking";
-        this.$toast.error("Failed to submit booking request: " + errorMessage);
-        await this.fetchBookedSeats();
-      } finally {
-        this.loading = false;
-      }
-    },
+  this.closeConfirmModal();
+  this.loading = true;
+  const userId = localStorage.getItem('userId');
+  if (!userId) {
+    this.$toast.error('Vui lòng đăng nhập để đặt vé.');
+    this.loading = false;
+    return;
+  }
+  const booking = {
+    movieId: this.movie.id.toString(),
+    movieTitle: this.movie.title,
+    showtime: this.selectedShowtime,
+    date: this.selectedDate,
+    seats: this.selectedSeats,
+    total: this.selectedSeats.length * this.ticketPrice,
+    roomId: this.selectedRoom,
+    userId: userId 
+  };
+  try {
+    const response = await this.$axios.post("/api/bookings", booking);
+    this.$toast.success(response.data.message || "Booking request submitted successfully!");
+    this.selectedSeats = [];
+    await this.fetchBookedSeats();
+    this.$router.push("/booking-history");
+  } catch (error) {
+    console.error("Error booking seats:", error);
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Unknown error while booking";
+    this.$toast.error("Failed to submit booking request: " + errorMessage);
+    await this.fetchBookedSeats();
+  } finally {
+    this.loading = false;
+  }
+},
     closeConfirmModal() {
       this.showConfirmModal = false;
     },
