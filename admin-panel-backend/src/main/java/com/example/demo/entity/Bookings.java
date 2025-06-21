@@ -26,6 +26,7 @@ public class Bookings {
     public String getShowtime() { return showtime; }
     public String getDate() { return date; }
     public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
     public Double getTotal() { return total; }
     public Long getRoomId() { return roomId; }
 }
