@@ -240,18 +240,19 @@ export default {
   },
   methods: {
     async loadData() {
-      try {
-        this.loading = true;
-        this.error = null;
-        
-        if (this.user) {
-          const response = await axios.get("/api/bookings", {
-            params: { filter: this.activeFilter, userId: this.user.id }
-          });
+    try {
+      this.loading = true;
+      this.error = null;
+      
+      if (this.user && this.user.id) { // Đảm bảo user.id có giá trị
+        const response = await this.$axios.get("/api/bookings", {
+          params: { filter: this.activeFilter, userId: this.user.id }
+        });
+        if (Array.isArray(response.data)) {
           this.bookings = await Promise.all(
             response.data.map(async (booking) => {
               try {
-                const movieResponse = await axios.get(
+                const movieResponse = await this.$axios.get(
                   `https://api.themoviedb.org/3/movie/${booking.movieId}`,
                   { params: { api_key: this.$config.tmdbApiKey } }
                 );
@@ -262,14 +263,19 @@ export default {
               }
             })
           );
+        } else {
+          console.warn("Unexpected data format from /api/bookings:", response.data);
+          this.bookings = [];
+          this.$toast.error("Invalid data format from server.");
         }
-      } catch (err) {
-        console.error('Error loading data:', err);
-        this.error = err.response?.data?.message || 'Failed to load information. Please try again later.';
-      } finally {
-        this.loading = false;
       }
-    },
+    } catch (err) {
+      console.error('Error loading data:', err);
+      this.error = err.response?.data?.message || 'Failed to load information. Please try again later.';
+    } finally {
+      this.loading = false;
+    }
+  },
     requestCancelBooking(bookingId) {
       this.bookingToCancel = bookingId;
       this.showCancelConfirm = true;

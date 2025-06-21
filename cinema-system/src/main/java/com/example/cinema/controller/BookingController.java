@@ -4,6 +4,7 @@ import com.example.cinema.dto.BookingDTO;
 import com.example.cinema.service.BookingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -43,13 +44,17 @@ public class BookingController {
         }
     }
 
-    @GetMapping
-    public ResponseEntity<List<BookingDTO>> getUserBookings(
-            @RequestParam(defaultValue = "all") String filter,
-            @RequestParam(required = false) String userId) {
-        List<BookingDTO> bookings = bookingService.getBookingsByUserId(userId, filter);
-        return ResponseEntity.ok(bookings);
+@GetMapping
+public ResponseEntity<List<BookingDTO>> getUserBookings(
+        Authentication authentication,
+        @RequestParam(defaultValue = "all") String filter,
+        @RequestParam(required = false) String userId) {
+    if (authentication == null || !authentication.isAuthenticated()) {
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
+    List<BookingDTO> bookings = bookingService.getBookingsByUserId(userId, filter);
+    return ResponseEntity.ok(bookings);
+}
 
     @GetMapping("/latest")
     public ResponseEntity<BookingDTO> getLatestBooking(@RequestParam(required = false) String userId) {

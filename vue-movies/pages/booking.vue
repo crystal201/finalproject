@@ -222,14 +222,16 @@ export default {
     this.generateSeats();
   },
   methods: {
-    async fetchRooms() {
+ async fetchRooms() {
       try {
-        const response = await axios.get("/api/rooms");
+        const response = await this.$axios.get("/api/rooms", {
+          headers: { Authorization: `Bearer ${this.$store.state.auth.token}` },
+        });
         if (Array.isArray(response.data)) {
           this.rooms = response.data.map((room) => ({
             id: room.id,
             roomName: room.roomName,
-            capacity: room.capacity,
+            capacity: room.capacity || 50,
           }));
         } else {
           console.warn("Unexpected data format from /api/rooms:", response.data);
@@ -242,7 +244,7 @@ export default {
         }
       } catch (error) {
         console.error("Error fetching rooms:", error);
-        this.$toast.error("Error loading rooms: " + (error.response?.data?.message || error.message));
+        this.$toast.error("Error loading rooms: " + error.message);
         this.rooms = [];
       }
     },
