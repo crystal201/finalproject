@@ -45,7 +45,34 @@ public class AdminController {
     public void deleteRoom(@PathVariable Long id) {
         roomRepo.deleteById(id);
     }
+    @PostMapping("/rooms/add")
+    public ResponseEntity<Map<String, Object>> addRoomAutomatically() {
+        try {
+            Long maxId = roomRepo.findAll().stream()
+                    .map(Room::getId)
+                    .max(Long::compare)
+                    .orElse(0L);
+            Long newId = maxId + 1;
 
+            String roomName = "Room " + newId;
+
+            Room room = new Room();
+            room.setId(newId);
+            room.setRoomName(roomName);
+            room.setCapacity(50);
+            room.setStatus("Available");
+
+            Room savedRoom = roomRepo.save(room);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Room added successfully");
+            response.put("room", savedRoom);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Error adding room: " + e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     @PutMapping("/cancellations/{id}/approve")
     public BookingCancellation approveCancellation(@PathVariable Long id) {
         BookingCancellation cancel = cancelRepo.findById(id).orElseThrow();
