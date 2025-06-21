@@ -260,7 +260,7 @@ export default {
         return;
       }
       try {
-        const response = await axios.get(
+        const response = await this.$axios.get(
           `https://api.themoviedb.org/3/movie/${movieId}`,
           {
             params: { api_key: this.$config.tmdbApiKey },
@@ -387,7 +387,7 @@ export default {
         return;
       }
       try {
-        const response = await axios.get("/api/bookings/check-seats", {
+        const response = await this.$axios.get("/api/bookings/check-seats", {
           params: {
             movieId: this.movie.id,
             date: this.selectedDate,
@@ -455,7 +455,7 @@ export default {
         roomId: this.selectedRoom,
       };
       try {
-        const response = await axios.post("/api/bookings", booking);
+        const response = await this.$axios.post("/api/bookings", booking);
         this.$toast.success(response.data.message || "Booking request submitted successfully!");
         this.selectedSeats = [];
         await this.fetchBookedSeats();

@@ -282,7 +282,7 @@ export default {
     },
     async confirmCancel() {
       try {
-        const response = await axios.post(`/api/bookings/cancel/${this.bookingToCancel}`);
+        const response = await this.$axios.post(`/api/bookings/cancel/${this.bookingToCancel}`);
         this.$toast.success(response.data.message || 'Yêu cầu hủy vé đã được gửi!');
         await this.loadData();
       } catch (err) {

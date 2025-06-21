@@ -136,7 +136,7 @@ export default {
       try {
         this.loading = true;
         const movieCache = JSON.parse(localStorage.getItem('movieCache') || '{}');
-        const response = await axios.get("/api/bookings/latest", {
+        const response = await this.$axios.get("/api/bookings/latest", {
           params: { userId: this.$route.query.userId || '' }
         });
         if (!response.data) {
@@ -149,20 +149,26 @@ export default {
         if (booking.status === 'ACTIVE' && showDateTime < now) {
           console.warn(`Booking ${booking.id} is ACTIVE but past due: ${showDateTime}`);
         }
-        if (movieCache[booking.movieId]) {
-          this.bookings = [{ ...booking, movie: movieCache[booking.movieId] }];
-          return;
-        }
-        try {
-          const movieResponse = await axios.get(
-            `https://api.themoviedb.org/3/movie/${booking.movieId}`,
-            { params: { api_key: this.$config.tmdbApiKey } }
-          );
-          movieCache[booking.movieId] = movieResponse.data;
-          localStorage.setItem('movieCache', JSON.stringify(movieCache));
-          this.bookings = [{ ...booking, movie: movieResponse.data }];
-        } catch (err) {
-          console.warn(`Failed to fetch movie data for movieId ${booking.movieId}:`, err);
+        // Kiểm tra movieId trước khi gọi TMDB
+        if (booking.movieId) {
+          if (movieCache[booking.movieId]) {
+            this.bookings = [{ ...booking, movie: movieCache[booking.movieId] }];
+            return;
+          }
+          try {
+            const movieResponse = await this.$axios.get(
+              `https://api.themoviedb.org/3/movie/${booking.movieId}`,
+              { params: { api_key: this.$config.tmdbApiKey } }
+            );
+            movieCache[booking.movieId] = movieResponse.data;
+            localStorage.setItem('movieCache', JSON.stringify(movieCache));
+            this.bookings = [{ ...booking, movie: movieResponse.data }];
+          } catch (err) {
+            console.warn(`Failed to fetch movie data for movieId ${booking.movieId}:`, err);
+            this.bookings = [{ ...booking, movie: { poster_path: '', title: booking.movieTitle, genres: [], overview: '', releaseDate: '' } }];
+          }
+        } else {
+          console.warn('movieId is missing in booking data:', booking);
           this.bookings = [{ ...booking, movie: { poster_path: '', title: booking.movieTitle, genres: [], overview: '', releaseDate: '' } }];
         }
       } catch (error) {
