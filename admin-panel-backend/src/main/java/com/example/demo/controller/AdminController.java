@@ -3,9 +3,13 @@ package com.example.demo.controller;
 import com.example.demo.entity.*;
 import com.example.demo.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -89,9 +93,9 @@ public class AdminController {
             @RequestParam(required = false) String showtime) {
         return bookingsRepo.findAll().stream()
             .filter(b -> "ACTIVE".equalsIgnoreCase(b.getStatus()))
-            .filter(b -> roomId == null || b.getRoomId().equals(roomId)) // Sửa lỗi
-            .filter(b -> date == null || b.getDate().equals(date))      // Sửa lỗi
-            .filter(b -> showtime == null || b.getShowtime().equals(showtime)) // Sửa lỗi
+            .filter(b -> roomId == null || b.getRoomId().equals(roomId))
+            .filter(b -> date == null || b.getDate().equals(date))
+            .filter(b -> showtime == null || b.getShowtime().equals(showtime))
             .flatMap(booking -> bookingSeatsRepo.findByBookingId(booking.getId()).stream()
                 .map(seat -> new OccupiedSeatResponse(
                     booking.getRoomId(),
@@ -100,6 +104,67 @@ public class AdminController {
                     booking.getShowtime()
                 )))
             .collect(Collectors.toList());
+    }
+
+    @PostMapping("/bookings/accept/{id}")
+    public ResponseEntity<Map<String, Object>> acceptBooking(@PathVariable Long id) {
+        Bookings booking = bookingsRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+        if (!"WAITING_BOOKING".equalsIgnoreCase(booking.getStatus())) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Booking is not in WAITING_BOOKING state");
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+        booking.setStatus("ACTIVE");
+        bookingsRepo.save(booking);
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Booking accepted successfully");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/bookings/reject/{id}")
+    public ResponseEntity<Map<String, Object>> rejectBooking(@PathVariable Long id) {
+        Bookings booking = bookingsRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+        if (!"WAITING_BOOKING".equalsIgnoreCase(booking.getStatus())) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Booking is not in WAITING_BOOKING state");
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+        bookingSeatsRepo.deleteByBookingId(id);
+        bookingsRepo.delete(booking);
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Booking rejected successfully");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/bookings/accept-cancel/{id}")
+    public ResponseEntity<Map<String, Object>> acceptCancelBooking(@PathVariable Long id) {
+        Bookings booking = bookingsRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+        if (!"WAITING_CANCEL".equalsIgnoreCase(booking.getStatus())) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Booking is not in WAITING_CANCEL state");
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+        bookingSeatsRepo.deleteByBookingId(id);
+        booking.setStatus("CANCELLED");
+        bookingsRepo.save(booking);
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Cancellation accepted successfully");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/bookings/reject-cancel/{id}")
+    public ResponseEntity<Map<String, Object>> rejectCancelBooking(@PathVariable Long id) {
+        Bookings booking = bookingsRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+        if (!"WAITING_CANCEL".equalsIgnoreCase(booking.getStatus())) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Booking is not in WAITING_CANCEL state");
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+        booking.setStatus("ACTIVE");
+        bookingsRepo.save(booking);
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Cancellation rejected successfully");
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
 

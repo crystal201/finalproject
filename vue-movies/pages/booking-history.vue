@@ -115,7 +115,6 @@
 
 <script>
 export default {
-  middleware: ['auth'],
   data() {
     return {
       bookings: [],
@@ -136,7 +135,9 @@ export default {
       try {
         this.loading = true;
         const movieCache = JSON.parse(localStorage.getItem('movieCache') || '{}');
-        const response = await this.$axios.get('/api/bookings/latest');
+        const response = await axios.get("/api/bookings/latest", {
+          params: { userId: this.$route.query.userId || '' }
+        });
         if (!response.data) {
           this.bookings = [];
           return;
@@ -152,7 +153,7 @@ export default {
           return;
         }
         try {
-          const movieResponse = await this.$axios.get(
+          const movieResponse = await axios.get(
             `https://api.themoviedb.org/3/movie/${booking.movieId}`,
             { params: { api_key: this.$config.tmdbApiKey } }
           );
@@ -170,15 +171,15 @@ export default {
         this.loading = false;
       }
     },
-    async cancelBooking(bookingId) {
-      if (!confirm('Bạn có chắc muốn hủy vé này?')) return;
+    async requestCancelBooking(bookingId) {
+      if (!confirm('Bạn có chắc muốn yêu cầu hủy vé này?')) return;
       try {
-        const response = await this.$axios.post(`/api/bookings/cancel/${bookingId}`);
-        this.$toast.success(response.data.message || 'Hủy vé thành công!');
+        const response = await axios.post(`/api/bookings/cancel/${bookingId}`);
+        this.$toast.success(response.data.message || 'Yêu cầu hủy vé đã được gửi!');
         await this.fetchBookings();
       } catch (err) {
-        console.error('Error cancelling booking:', err);
-        this.$toast.error(err.response?.data?.message || 'Không thể hủy vé.');
+        console.error('Error requesting cancellation:', err);
+        this.$toast.error(err.response?.data?.message || 'Không thể gửi yêu cầu hủy vé.');
       }
     },
     canCancel(booking) {

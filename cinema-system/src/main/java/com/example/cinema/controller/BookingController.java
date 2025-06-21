@@ -1,11 +1,9 @@
-// BookingController.java
 package com.example.cinema.controller;
 
 import com.example.cinema.dto.BookingDTO;
 import com.example.cinema.service.BookingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -27,19 +25,12 @@ public class BookingController {
     }
 
     @PostMapping
-    public ResponseEntity<Map<String, Object>> createBooking(@RequestBody BookingDTO bookingDTO, Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Not authenticated");
-            return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
-        }
+    public ResponseEntity<Map<String, Object>> createBooking(@RequestBody BookingDTO bookingDTO) {
         try {
-            String userId = authentication.getName();
-            bookingDTO.setUserId(userId);
             BookingDTO savedBooking = bookingService.createBooking(bookingDTO);
             Map<String, Object> response = new HashMap<>();
             response.put("data", savedBooking);
-            response.put("message", "Booking successful");
+            response.put("message", "Booking request submitted successfully");
             return new ResponseEntity<>(response, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             Map<String, Object> errorResponse = new HashMap<>();
@@ -54,48 +45,32 @@ public class BookingController {
 
     @GetMapping
     public ResponseEntity<List<BookingDTO>> getUserBookings(
-            Authentication authentication,
-            @RequestParam(defaultValue = "all") String filter) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        String userId = authentication.getName();
+            @RequestParam(defaultValue = "all") String filter,
+            @RequestParam(required = false) String userId) {
         List<BookingDTO> bookings = bookingService.getBookingsByUserId(userId, filter);
         return ResponseEntity.ok(bookings);
     }
 
     @GetMapping("/latest")
-    public ResponseEntity<BookingDTO> getLatestBooking(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        String userId = authentication.getName();
+    public ResponseEntity<BookingDTO> getLatestBooking(@RequestParam(required = false) String userId) {
         BookingDTO booking = bookingService.getLatestBookingByUserId(userId);
         return booking != null ? ResponseEntity.ok(booking) : ResponseEntity.noContent().build();
     }
 
     @GetMapping("/count")
-    public ResponseEntity<Long> getBookingCount(@RequestParam("user_id") String userId) {
+    public ResponseEntity<Long> getBookingCount(@RequestParam("userId") String userId) {
         long count = bookingService.getBookingsByUserId(userId, null).size();
         return ResponseEntity.ok(count);
     }
 
     @PostMapping("/cancel/{id}")
-    public ResponseEntity<Map<String, Object>> cancelBooking(
-            @PathVariable Long id,
-            Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Not authenticated");
-            return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
-        }
+    public ResponseEntity<Map<String, Object>> requestCancelBooking(@PathVariable Long id) {
         try {
-            String userId = authentication.getName();
-            bookingService.cancelBooking(id, userId);
+            bookingService.requestCancelBooking(id);
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "Booking cancelled successfully");
+            response.put("message", "Cancellation request submitted successfully");
             return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException | SecurityException e) {
+        } catch (IllegalArgumentException e) {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("message", e.getMessage());
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
@@ -105,7 +80,7 @@ public class BookingController {
             return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Error cancelling booking: " + e.getMessage());
+            errorResponse.put("message", "Error requesting cancellation: " + e.getMessage());
             return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -121,7 +96,7 @@ public class BookingController {
         LocalDateTime showDateTime = LocalDateTime.of(bookingDate,
                 LocalTime.parse(showtime, DateTimeFormatter.ofPattern("HH:mm")));
         if (showDateTime.isBefore(now)) {
-            return ResponseEntity.ok(List.of()); // No seats for past showtimes
+            return ResponseEntity.ok(List.of());
         }
         List<String> bookedSeats = bookingService.getBookedSeats(movieId, LocalDate.parse(date), showtime, roomId);
         return ResponseEntity.ok(bookedSeats);

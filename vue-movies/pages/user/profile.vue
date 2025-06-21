@@ -177,7 +177,6 @@
 import { mapState } from 'vuex';
 
 export default {
-  middleware: 'auth',
   data() {
     return {
       showCancelConfirm: false,
@@ -187,6 +186,9 @@ export default {
       bookings: [],
       filters: [
         { value: 'all', label: 'All' },
+        { value: 'waiting_booking', label: 'Waiting Booking' },
+        { value: 'active', label: 'Active' },
+        { value: 'waiting_cancel', label: 'Waiting Cancel' },
         { value: 'cancelled', label: 'Cancelled' },
         { value: 'expired', label: 'Expired' }
       ],
@@ -214,6 +216,15 @@ export default {
       if (!this.bookings.length) return [];
       
       return this.bookings.filter(booking => {
+        if (this.activeFilter === 'waiting_booking') {
+          return booking.status === 'WAITING_BOOKING';
+        }
+        if (this.activeFilter === 'active') {
+          return booking.status === 'ACTIVE';
+        }
+        if (this.activeFilter === 'waiting_cancel') {
+          return booking.status === 'WAITING_CANCEL';
+        }
         if (this.activeFilter === 'cancelled') {
           return booking.status === 'CANCELLED';
         }
@@ -234,13 +245,13 @@ export default {
         this.error = null;
         
         if (this.user) {
-          const response = await this.$axios.get('/api/bookings', {
-            params: { filter: this.activeFilter }
+          const response = await axios.get("/api/bookings", {
+            params: { filter: this.activeFilter, userId: this.user.id }
           });
           this.bookings = await Promise.all(
             response.data.map(async (booking) => {
               try {
-                const movieResponse = await this.$axios.get(
+                const movieResponse = await axios.get(
                   `https://api.themoviedb.org/3/movie/${booking.movieId}`,
                   { params: { api_key: this.$config.tmdbApiKey } }
                 );
@@ -259,50 +270,42 @@ export default {
         this.loading = false;
       }
     },
-    
-cancelBooking(bookingId) {
+    requestCancelBooking(bookingId) {
       this.bookingToCancel = bookingId;
       this.showCancelConfirm = true;
     },
-    
     async confirmCancel() {
       try {
-        const response = await this.$axios.post(`/api/bookings/cancel/${this.bookingToCancel}`);
-        this.$toast.success(response.data.message || 'Ticket cancelled successfully!');
+        const response = await axios.post(`/api/bookings/cancel/${this.bookingToCancel}`);
+        this.$toast.success(response.data.message || 'Yêu cầu hủy vé đã được gửi!');
         await this.loadData();
       } catch (err) {
         console.error('Error cancelling ticket:', err);
-        this.$toast.error(err.response?.data?.message || 'Failed to cancel ticket.');
+        this.$toast.error(err.response?.data?.message || 'Failed to request cancellation.');
       } finally {
         this.showCancelConfirm = false;
         this.bookingToCancel = null;
       }
     },
-    
     canCancel(booking) {
       if (!booking || booking.status !== 'ACTIVE') return false;
       const showDateTime = new Date(`${booking.date} ${booking.showtime}`);
       return showDateTime > new Date();
     },
-    
     retryLoading() {
       this.loadData();
     },
-    
     getRoomName(roomId) {
       const room = this.rooms.find(r => r.id === roomId);
       return room ? room.name : 'Unknown';
     },
-    
     getRoleClass(role) {
       if (!role) return '';
       return role.toLowerCase().replace(/\s+/g, '-');
     },
-    
     formatSeats(seats) {
       return seats?.join(', ') || '--';
     },
-    
     formatDateTime(dateTime) {
       if (!dateTime) return 'N/A';
       try {
@@ -318,7 +321,6 @@ cancelBooking(bookingId) {
         return 'N/A';
       }
     },
-    
     formatDate(date) {
       if (!date) return '--';
       try {
@@ -332,7 +334,6 @@ cancelBooking(bookingId) {
         return '--';
       }
     },
-    
     formatJoinDate(dateTime) {
       if (!dateTime) return 'N/A';
       try {
@@ -345,7 +346,6 @@ cancelBooking(bookingId) {
         return 'N/A';
       }
     },
-    
     formatCurrency(amount) {
       if (!amount) return '0 ₫';
       try {
@@ -357,37 +357,32 @@ cancelBooking(bookingId) {
         return amount + ' ₫';
       }
     },
-    
     getMoviePoster(posterPath) {
       return posterPath 
         ? `https://image.tmdb.org/t/p/w200${posterPath}`
         : this.defaultPoster;
     },
-    
     handleImageError(e) {
       e.target.src = this.defaultAvatar;
     },
-    
     handlePosterError(e) {
       e.target.src = this.defaultPoster;
     },
-    
     changeFilter(filter) {
       this.activeFilter = filter;
       this.loadData();
     },
-    
     editProfile() {
       this.$router.push('/profile/edit');
     },
-    
     openAvatarEditor() {
       this.$toast.info('Feature under development');
     },
-    
     getStatusLabel(status) {
       switch (status) {
+        case 'WAITING_BOOKING': return 'Đang chờ xác nhận đặt vé';
         case 'ACTIVE': return 'Đang hoạt động';
+        case 'WAITING_CANCEL': return 'Đang chờ xác nhận hủy vé';
         case 'CANCELLED': return 'Đã hủy';
         case 'EXPIRED': return 'Hết hiệu lực';
         default: return 'Không xác định';

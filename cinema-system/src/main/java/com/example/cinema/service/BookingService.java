@@ -1,13 +1,11 @@
 package com.example.cinema.service;
 
-import org.springdoc.core.converters.models.Pageable;
-
 import com.example.cinema.dto.BookingDTO;
 import com.example.cinema.entity.Booking;
-import com.example.cinema.entity.BookingSeat;
+import com.example.cinema.entity.BookingSeat; // Thêm import
 import com.example.cinema.repository.BookingRepository;
 import com.example.cinema.repository.BookingSeatRepository;
-
+import com.example.cinema.service.BookingSeatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
@@ -52,7 +50,7 @@ public class BookingService {
             }
 
             for (Booking booking : expiredBookings) {
-                booking.setStatus(Booking.Status.EXPIRED);
+                booking.setStatus("EXPIRED");
                 bookingRepository.save(booking);
                 bookingSeatRepository.deleteByBookingId(booking.getId());
                 logger.info("Expired booking ID {} for movie '{}' on {} at {}", 
@@ -73,11 +71,15 @@ public class BookingService {
         if ("valid".equalsIgnoreCase(filter)) {
             bookings = bookingRepository.findValidBookingsByUserId(userId, currentDate, currentTime);
         } else if ("active".equalsIgnoreCase(filter)) {
-            bookings = bookingRepository.findByUserIdAndStatus(userId, Booking.Status.ACTIVE);
+            bookings = bookingRepository.findByUserIdAndStatus(userId, "ACTIVE");
+        } else if ("waiting_booking".equalsIgnoreCase(filter)) {
+            bookings = bookingRepository.findByUserIdAndStatus(userId, "WAITING_BOOKING");
+        } else if ("waiting_cancel".equalsIgnoreCase(filter)) {
+            bookings = bookingRepository.findByUserIdAndStatus(userId, "WAITING_CANCEL");
         } else if ("cancelled".equalsIgnoreCase(filter)) {
-            bookings = bookingRepository.findByUserIdAndStatus(userId, Booking.Status.CANCELLED);
+            bookings = bookingRepository.findByUserIdAndStatus(userId, "CANCELLED");
         } else if ("expired".equalsIgnoreCase(filter)) {
-            bookings = bookingRepository.findByUserIdAndStatus(userId, Booking.Status.EXPIRED);
+            bookings = bookingRepository.findByUserIdAndStatus(userId, "EXPIRED");
         } else {
             bookings = bookingRepository.findByUserId(userId);
         }
@@ -91,13 +93,14 @@ public class BookingService {
             dto.setTotal(booking.getTotal());
             dto.setUserId(booking.getUserId());
             dto.setRoomId(booking.getRoomId());
-            dto.setStatus(booking.getStatus().name());
+            dto.setStatus(booking.getStatus());
             List<String> seats = bookingSeatRepository.findByBookingId(booking.getId())
                     .stream().map(BookingSeat::getSeat).collect(Collectors.toList());
             dto.setSeats(seats);
             return dto;
         }).collect(Collectors.toList());
     }
+
     public BookingDTO getLatestBookingByUserId(String userId) {
         PageRequest pageable = PageRequest.of(0, 1);
         List<Booking> bookings = bookingRepository.findLatestByUserId(userId, pageable);
@@ -114,15 +117,15 @@ public class BookingService {
         dto.setTotal(booking.getTotal());
         dto.setUserId(booking.getUserId());
         dto.setRoomId(booking.getRoomId());
-        dto.setStatus(booking.getStatus().name());
+        dto.setStatus(booking.getStatus());
         List<String> seats = bookingSeatRepository.findByBookingId(booking.getId())
                 .stream().map(BookingSeat::getSeat).collect(Collectors.toList());
         dto.setSeats(seats);
         return dto;
     }
+
     @Transactional
     public BookingDTO createBooking(BookingDTO bookingDTO) {
-        // Validate showtime
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
         LocalDate bookingDate = LocalDate.parse(bookingDTO.getDate());
         LocalDateTime showDateTime = LocalDateTime.of(bookingDate,
@@ -139,7 +142,7 @@ public class BookingService {
         booking.setTotal(bookingDTO.getTotal());
         booking.setUserId(bookingDTO.getUserId());
         booking.setRoomId(bookingDTO.getRoomId());
-        booking.setStatus(Booking.Status.ACTIVE);
+        booking.setStatus("WAITING_BOOKING");
         Booking savedBooking = bookingRepository.save(booking);
 
         bookingSeatService.saveSeats(
@@ -152,30 +155,23 @@ public class BookingService {
         );
 
         bookingDTO.setId(savedBooking.getId());
-        bookingDTO.setStatus(savedBooking.getStatus().name());
+        bookingDTO.setStatus(savedBooking.getStatus());
         return bookingDTO;
     }
 
     @Transactional
-    public void cancelBooking(Long bookingId, String userId) {
+    public void requestCancelBooking(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
-        if (!booking.getUserId().equals(userId)) {
-            throw new SecurityException("Unauthorized to cancel this booking");
-        }
         LocalDateTime showDateTime = LocalDateTime.of(booking.getDate(), 
-            LocalTime.parse(booking.getShowtime()));
+                LocalTime.parse(booking.getShowtime()));
         if (showDateTime.isBefore(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")))) {
             throw new IllegalStateException("Cannot cancel past bookings");
         }
-        if (booking.getStatus() == Booking.Status.CANCELLED) {
-            throw new IllegalStateException("Booking already cancelled");
+        if (!"ACTIVE".equalsIgnoreCase(booking.getStatus())) {
+            throw new IllegalStateException("Booking is not active");
         }
-        if (booking.getStatus() != Booking.Status.ACTIVE) {
-            throw new IllegalStateException("Booking is not active (already cancelled or expired)");
-        }
-        bookingSeatRepository.deleteByBookingId(bookingId);
-        booking.setStatus(Booking.Status.CANCELLED);
+        booking.setStatus("WAITING_CANCEL");
         bookingRepository.save(booking);
     }
 

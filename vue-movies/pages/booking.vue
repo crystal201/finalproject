@@ -181,7 +181,6 @@ import ConfirmBookingModal from "../components/modal/ConfirmBookingModal.vue";
 
 export default {
   components: { ConfirmBookingModal },
-  middleware: ["auth"],
   data() {
     return {
       movie: null,
@@ -222,20 +221,10 @@ export default {
     this.fetchRooms();
     this.generateSeats();
   },
-  watch: {
-    bookedSeats(newVal) {
-      console.log("Booked seats updated:", JSON.stringify(newVal));
-    },
-    seats(newVal) {
-      console.log("Seats updated:", JSON.stringify(newVal, null, 2));
-    },
-  },
   methods: {
     async fetchRooms() {
       try {
-        const response = await this.$axios.get("/api/rooms", {
-          headers: { Authorization: `Bearer ${this.$store.state.auth.token}` },
-        });
+        const response = await axios.get("/api/rooms");
         this.rooms = response.data.map((room) => ({
           id: room.id,
           roomName: room.roomName,
@@ -263,7 +252,7 @@ export default {
         return;
       }
       try {
-        const response = await this.$axios.get(
+        const response = await axios.get(
           `https://api.themoviedb.org/3/movie/${movieId}`,
           {
             params: { api_key: this.$config.tmdbApiKey },
@@ -295,7 +284,6 @@ export default {
           });
         }
       });
-      console.log("Generated seats:", JSON.stringify(this.seats, null, 2));
     },
     generateAvailableDays() {
       const now = new Date();
@@ -323,10 +311,6 @@ export default {
       this.availableDays = availableDays;
       this.selectedDate = availableDays[0].date;
       this.updateShowtimes();
-      console.log(
-        "Generated available days:",
-        JSON.stringify(this.availableDays, null, 2)
-      );
     },
     updateShowtimes() {
       const now = new Date();
@@ -355,7 +339,6 @@ export default {
       if (this.selectedShowtime) {
         this.fetchBookedSeats();
       }
-      console.log("Updated showtimes:", JSON.stringify(this.availableShowtimes));
     },
     selectDay(date) {
       this.selectedDate = date;
@@ -396,14 +379,13 @@ export default {
         return;
       }
       try {
-        const response = await this.$axios.get("/api/bookings/check-seats", {
+        const response = await axios.get("/api/bookings/check-seats", {
           params: {
             movieId: this.movie.id,
             date: this.selectedDate,
             showtime: this.selectedShowtime,
             roomId: this.selectedRoom,
           },
-          headers: { Authorization: `Bearer ${this.$store.state.auth.token}` },
         });
         const bookedSeatsData = Array.isArray(response.data)
           ? response.data
@@ -465,10 +447,8 @@ export default {
         roomId: this.selectedRoom,
       };
       try {
-        const response = await this.$axios.post("/api/bookings", booking, {
-          headers: { Authorization: `Bearer ${this.$store.state.auth.token}` },
-        });
-        this.$toast.success(response.data.message || "Booking successful!");
+        const response = await axios.post("/api/bookings", booking);
+        this.$toast.success(response.data.message || "Booking request submitted successfully!");
         this.selectedSeats = [];
         await this.fetchBookedSeats();
         this.$router.push("/booking-history");
@@ -478,7 +458,7 @@ export default {
           error.response?.data?.message ||
           error.message ||
           "Unknown error while booking";
-        this.$toast.error("Failed to book ticket: " + errorMessage);
+        this.$toast.error("Failed to submit booking request: " + errorMessage);
         await this.fetchBookedSeats();
       } finally {
         this.loading = false;

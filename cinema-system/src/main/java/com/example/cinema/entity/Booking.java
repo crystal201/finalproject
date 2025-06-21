@@ -35,33 +35,28 @@ public class Booking {
     @Column(name = "room_id", nullable = false)
     private Integer roomId;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Status status = Status.ACTIVE;
+    private String status = "WAITING_BOOKING";
 
-    public enum Status {
-        ACTIVE, CANCELLED, EXPIRED
-    }
-
-    // Getters and setters
+    // Getters
     public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
     public String getMovieId() { return movieId; }
-    public void setMovieId(String movieId) { this.movieId = movieId; }
     public String getMovieTitle() { return movieTitle; }
-    public void setMovieTitle(String movieTitle) { this.movieTitle = movieTitle; }
     public String getShowtime() { return showtime; }
-    public void setShowtime(String showtime) { this.showtime = showtime; }
     public LocalDate getDate() { return date; }
-    public void setDate(LocalDate date) { this.date = date; }
     public double getTotal() { return total; }
-    public void setTotal(double total) { this.total = total; }
     public String getUserId() { return userId; }
-    public void setUserId(String userId) { this.userId = userId; }
     public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public Integer getRoomId() { return roomId; }
+    public String getStatus() { return status; }
+
+    // Setters
+    public void setMovieId(String movieId) { this.movieId = movieId; }
+    public void setMovieTitle(String movieTitle) { this.movieTitle = movieTitle; }
+    public void setShowtime(String showtime) { this.showtime = showtime; }
+    public void setDate(LocalDate date) { this.date = date; }
+    public void setTotal(double total) { this.total = total; }
+    public void setUserId(String userId) { this.userId = userId; }
     public void setRoomId(Integer roomId) { this.roomId = roomId; }
-    public Status getStatus() { return status; }
-    public void setStatus(Status status) { this.status = status; }
+    public void setStatus(String status) { this.status = status; }
 }
