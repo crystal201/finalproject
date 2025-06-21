@@ -21,32 +21,24 @@
     </div>
 
     <div v-else class="booking-list">
-      <div class="booking-card" :class="{ 'expired': bookings[0].status === 'EXPIRED' }">
+      <div class="booking-card" :class="{ 'expired': bookings[bookings.length - 1].status === 'EXPIRED' }">
         <div class="movie-section">
           <img
-            :src="'https://image.tmdb.org/t/p/w300' + (bookings[0].movie.poster_path || '/placeholder-dark.jpg')"
-            :alt="bookings[0].movie.title || 'Non title'"
+            :src="'https://image.tmdb.org/t/p/w300' + (bookings[bookings.length - 1].movie.poster_path || '/placeholder-dark.jpg')"
+            :alt="bookings[bookings.length - 1].movie.title || 'Non title'"
             class="movie-poster"
             @error="handleImageError"
           />
           <div class="movie-info">
             <div class="title-rating">
-              <h3>{{ bookings[0].movie.title || 'Non title' }}</h3>
+              <h3>{{ bookings[bookings.length - 1].movie.title || 'Non title' }}</h3>
             </div>
             <div class="genres">
-              <span v-for="genre in bookings[0].movie.genres" :key="genre.id" class="genre">
+              <span v-for="genre in bookings[bookings.length - 1].movie.genres" :key="genre.id" class="genre">
                 {{ genre.name }}
               </span>
             </div>
-            <p class="overview">{{ truncateOverview(bookings[0].movie.overview) }}</p>
-            <!-- <div class="meta">
-              <div class="meta-item">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#9CA3AF">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span>{{ bookings[0].movie.releaseDate || 'Chưa rõ' }}</span>
-              </div>
-            </div> -->
+            <p class="overview">{{ truncateOverview(bookings[bookings.length - 1].movie.overview) }}</p>
           </div>
         </div>
         <div class="ticket-section">
@@ -57,8 +49,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div>
-                <p>{{ bookings[0].showtime || 'No information' }}</p>
-                <p class="date">{{ formatDate(bookings[0].date) }}</p>
+                <p>{{ bookings[bookings.length - 1].showtime || 'No information' }}</p>
+                <p class="date">{{ formatDate(bookings[bookings.length - 1].date) }}</p>
               </div>
             </div>
             <div class="info-row">
@@ -66,7 +58,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
               </svg>
               <div>
-                <p>Seats: {{ bookings[0].seats?.join(', ') || 'No seat booked' }}</p>
+                <p>Seats: {{ bookings[bookings.length - 1].seats?.join(', ') || 'No seat booked' }}</p>
               </div>
             </div>
             <div class="info-row">
@@ -74,7 +66,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a2 2 0 012-2h2a2 2 0 012 2v5m-4 0h4" />
               </svg>
               <div>
-                <p>Room: {{ getRoomName(bookings[0].roomId) || 'No information' }}</p>
+                <p>Room: {{ getRoomName(bookings[bookings.length - 1].roomId) || 'No information' }}</p>
               </div>
             </div>
           </div>
@@ -85,23 +77,22 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
               <div>
-                <p class="total">{{ formatCurrency(bookings[0].total) }}</p>
-
+                <p class="total">{{ formatCurrency(bookings[bookings.length - 1].total) }}</p>
               </div>
               <div>
                 <p class="status" :class="{
-                    'status-active': bookings[0].status === 'ACTIVE',
-                    'status-cancelled': bookings[0].status === 'CANCELLED',
-                    'status-expired': bookings[0].status === 'EXPIRED'
+                    'status-active': bookings[bookings.length - 1].status === 'ACTIVE',
+                    'status-cancelled': bookings[bookings.length - 1].status === 'CANCELLED',
+                    'status-expired': bookings[bookings.length - 1].status === 'EXPIRED'
                   }">
-                  Status: {{ bookings[0].status }}
+                  Status: {{ bookings[bookings.length - 1].status }}
                 </p>
               </div>
             </div>
           </div>
         </div>
         <div class="action-buttons">
-          <button v-if="canCancel(bookings[0])" class="cancel-btn" @click="cancelBooking(bookings[0].id)">
+          <button v-if="canCancel(bookings[bookings.length - 1])" class="cancel-btn" @click="cancelBooking(bookings[bookings.length - 1].id)">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#FFF">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -136,7 +127,7 @@ export default {
       try {
         this.loading = true;
         const movieCache = JSON.parse(localStorage.getItem('movieCache') || '{}');
-        const response = await this.$axios.get("/api/bookings/latest", {
+        const response = await this.$axios.get("/api/bookings", {
           params: { userId: this.$route.query.userId || '' }
         });
         if (!response.data) {
@@ -181,7 +172,7 @@ export default {
     async requestCancelBooking(bookingId) {
       if (!confirm('Bạn có chắc muốn yêu cầu hủy vé này?')) return;
       try {
-        const response = await axios.post(`/api/bookings/cancel/${bookingId}`);
+        const response = await this.$axios.post(`/api/bookings/cancel/${bookingId}`);
         this.$toast.success(response.data.message || 'Yêu cầu hủy vé đã được gửi!');
         await this.fetchBookings();
       } catch (err) {
@@ -247,6 +238,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 .history-header{
