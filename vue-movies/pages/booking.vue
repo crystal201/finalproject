@@ -17,7 +17,7 @@
         <h3 class="section-title">
           <i class="fas fa-door-open"></i> Select a room
           <span v-if="selectedRoom" class="selected-info"
-            >({{ rooms.find((r) => r.id === selectedRoom).name }})</span
+            >({{ rooms.find((r) => r.id === selectedRoom)?.roomName }} - Capacity: {{ rooms.find((r) => r.id === selectedRoom)?.capacity }} seats)</span
           >
         </h3>
         <div class="room-grid">
@@ -28,7 +28,7 @@
             :class="{ selected: selectedRoom === room.id }"
             @click="selectRoom(room.id)"
           >
-            {{ room.name }}
+            {{ room.roomName }} ({{ room.capacity }} seats)
           </button>
         </div>
       </section>
@@ -115,9 +115,9 @@
             <span class="label">Room:</span>
             <span class="value">{{
               selectedRoom
-                ? rooms.find((r) => r.id === selectedRoom).name
+                ? rooms.find((r) => r.id === selectedRoom)?.roomName
                 : "--"
-            }}</span>
+            }} ({{ selectedRoom ? rooms.find((r) => r.id === selectedRoom)?.capacity : "--" }} seats)</span>
           </div>
           <div class="summary-item">
             <span class="label">Showtime:</span>
@@ -185,13 +185,8 @@ export default {
   data() {
     return {
       movie: null,
-      rooms: [
-        { id: 1, name: "Room 1" },
-        { id: 2, name: "Room 2" },
-        { id: 3, name: "Room 3" },
-        { id: 4, name: "Room 4" },
-      ],
-      selectedRoom: 1,
+      rooms: [],
+      selectedRoom: null,
       availableDays: [],
       selectedDate: null,
       selectedShowtime: null,
@@ -224,6 +219,7 @@ export default {
   },
   created() {
     this.fetchMovieDetails();
+    this.fetchRooms();
     this.generateSeats();
   },
   watch: {
@@ -235,6 +231,26 @@ export default {
     },
   },
   methods: {
+    async fetchRooms() {
+      try {
+        const response = await this.$axios.get("/api/rooms", {
+          headers: { Authorization: `Bearer ${this.$store.state.auth.token}` },
+        });
+        this.rooms = response.data.map((room) => ({
+          id: room.id,
+          roomName: room.roomName,
+          capacity: room.capacity,
+        }));
+        this.selectedRoom = this.rooms.length > 0 ? this.rooms[0].id : null;
+        if (this.selectedRoom) {
+          this.fetchBookedSeats();
+        }
+      } catch (error) {
+        console.error("Error fetching rooms:", error);
+        this.$toast.error("Error loading rooms: " + error.message);
+        this.rooms = [];
+      }
+    },
     selectRoom(roomId) {
       this.selectedRoom = roomId;
       this.selectedSeats = [];
@@ -294,7 +310,6 @@ export default {
       ];
       const availableDays = [];
 
-      // Generate 5 days starting from today
       for (let i = 0; i < 5; i++) {
         const date = new Date(now);
         date.setDate(now.getDate() + i);
@@ -306,7 +321,7 @@ export default {
       }
 
       this.availableDays = availableDays;
-      this.selectedDate = availableDays[0].date; // Select first day
+      this.selectedDate = availableDays[0].date;
       this.updateShowtimes();
       console.log(
         "Generated available days:",
@@ -316,22 +331,16 @@ export default {
     updateShowtimes() {
       const now = new Date();
       const isToday = this.selectedDate === now.toISOString().split("T")[0];
-      const runtime = this.movie?.runtime || 120; // Runtime in minutes
-      const interval = runtime + 30; // Runtime + 30 minutes break
+      const runtime = this.movie?.runtime || 120;
+      const interval = runtime + 30;
       const showtimes = [];
-      const startHour = 15; // Start at 15:30
-      const startMinutes = 30;
-
-      // Set initial showtime
       let currentTime = new Date(this.selectedDate);
-      currentTime.setHours(startHour, startMinutes, 0, 0);
+      currentTime.setHours(15, 30, 0, 0);
 
-      // Set end time as 02:00 of the next day
       const endTime = new Date(this.selectedDate);
       endTime.setDate(endTime.getDate() + 1);
       endTime.setHours(2, 0, 0, 0);
 
-      // Generate showtimes
       while (currentTime < endTime) {
         if (!isToday || currentTime > now) {
           const hours = String(currentTime.getHours()).padStart(2, "0");
@@ -343,10 +352,10 @@ export default {
 
       this.availableShowtimes = showtimes;
       this.selectedShowtime = showtimes.length > 0 ? showtimes[0] : null;
-      console.log("Updated showtimes:", JSON.stringify(this.availableShowtimes));
       if (this.selectedShowtime) {
         this.fetchBookedSeats();
       }
+      console.log("Updated showtimes:", JSON.stringify(this.availableShowtimes));
     },
     selectDay(date) {
       this.selectedDate = date;
@@ -357,12 +366,6 @@ export default {
     selectShowtime(time) {
       this.selectedShowtime = time;
       this.selectedSeats = [];
-      console.log(
-        "Selected showtime:",
-        this.selectedShowtime,
-        "date:",
-        this.selectedDate
-      );
       this.fetchBookedSeats();
     },
     formatDateDisplay(dateString) {
@@ -402,26 +405,16 @@ export default {
           },
           headers: { Authorization: `Bearer ${this.$store.state.auth.token}` },
         });
-        console.log("Raw response:", JSON.stringify(response.data));
         const bookedSeatsData = Array.isArray(response.data)
           ? response.data
           : response.data.data || [];
         this.$set(this, "bookedSeats", bookedSeatsData);
-        console.log("Booked seats:", JSON.stringify(this.bookedSeats));
-        const updatedSeats = this.seats.map((seat) => {
-          const isTaken = this.bookedSeats.includes(seat.id);
-          console.log(
-            `Checking seat ${
-              seat.id
-            }: isTaken=${isTaken}, bookedSeats=${JSON.stringify(
-              this.bookedSeats
-            )}`
-          );
-          return { ...seat, taken: isTaken };
-        });
+        const updatedSeats = this.seats.map((seat) => ({
+          ...seat,
+          taken: this.bookedSeats.includes(seat.id),
+        }));
         this.$set(this, "seats", updatedSeats);
         this.seatsKey++;
-        console.log("Seats after update:", JSON.stringify(this.seats, null, 2));
       } catch (error) {
         console.error("Error fetching booked seats:", error);
         this.$set(this, "bookedSeats", []);
@@ -430,7 +423,6 @@ export default {
           "seats",
           this.seats.map((seat) => ({ ...seat, taken: false }))
         );
-        console.log("Seats after error:", JSON.stringify(this.seats, null, 2));
         this.$toast.error(
           "Error loading seats: " +
             (error.response?.data?.message || error.message)
@@ -452,7 +444,7 @@ export default {
       if (!this.canBook) return;
       this.bookingSummary = {
         movieTitle: this.movie?.title || "--",
-        room: this.rooms.find((r) => r.id === this.selectedRoom)?.name || "--",
+        room: this.rooms.find((r) => r.id === this.selectedRoom)?.roomName || "--",
         showtime: this.selectedShowtime || "--",
         date: this.selectedDate,
         seats: [...this.selectedSeats],
