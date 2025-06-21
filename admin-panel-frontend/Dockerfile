@@ -1,5 +1,5 @@
 # Build stage
-FROM node:14 as builder
+FROM node:16-alpine AS builder
 
 # Sử dụng root để build
 USER root
@@ -10,8 +10,6 @@ WORKDIR /app
 COPY package*.json ./
 
 # Cài đặt dependencies
-RUN npm install -g @vue/cli
-RUN npm install --save-dev @vue/cli-service
 RUN npm install
 RUN npm config set registry https://registry.npmmirror.com
 
