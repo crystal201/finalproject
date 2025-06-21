@@ -47,7 +47,7 @@
     <div v-if="showDeleteConfirmModal" class="modal">
       <div class="modal-content">
         <h2>Confirm Delete</h2>
-        <p>Are you sure you want to delete {{ roomToDelete?.roomName }}?</p>
+        <p>Are you sure you want to delete {{ roomToDelete ? roomToDelete.roomName : 'Unknown Room' }}?</p>
         <button @click="deleteRoom" :disabled="deletingRoom">
           <span v-if="deletingRoom">Deleting...</span>
           <span v-else>Yes, Delete</span>
@@ -62,7 +62,6 @@
 </template>
 
 <script>
-import axios from 'axios';
 export default {
   data() {
     return {
