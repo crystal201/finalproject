@@ -68,7 +68,7 @@ export default {
         await this.fetchRooms();
       } catch (error) {
         this.addRoomSuccess = false;
-        this.addRoomMessage = error.response?.data?.message || 'Failed to add room';
+        this.addRoomMessage = error.response && error.response.data ? error.response.data.message : 'Failed to add room';
         console.error("Error adding room:", error);
       } finally {
         this.addingRoom = false;
