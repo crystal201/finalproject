@@ -1,8 +1,13 @@
-# Ignore compiled Java files
-*.class
-
-# Ignore target directories (Maven build output)
+# Ignore build output
 target/
+surefire-reports/
+test-classes/
+
+# Ignore Redis data
+redis-data/
+
+# Ignore editor swap files
+*.swp
 
 # Ignore other build artifacts
 *.jar

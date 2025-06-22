@@ -1,7 +1,0 @@
-com/example/App.class
-com/example/admin/entity/Room.class
-com/example/admin/repository/RoomRepository.class
-com/example/admin/repository/BookingCancellationRepository.class
-com/example/admin/entity/BookingCancellation.class
-com/example/admin/controller/AdminController.class
-com/example/admin/config/SecurityConfig.class
