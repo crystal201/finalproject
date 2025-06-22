@@ -232,23 +232,25 @@ def get_booked_movie_ids(user_id):
             logger.warning(f"Database connection lost for user_id {user_id}, reconnecting")
             conn.reconnect(attempts=3, delay=1)
         cursor = conn.cursor()
-        query = """
-            SELECT DISTINCT b.movie_id
-            FROM bookings b
-            JOIN users u ON b.user_id = u.username
-            WHERE u.id = %s
-        """
-        cursor.execute(query, (user_id,))
+        username_query = "SELECT username FROM users WHERE id = %s"
+        cursor.execute(username_query, (user_id,))
+        result = cursor.fetchone()
+        if not result:
+            logger.warning(f"No username found for user_id {user_id}")
+            cursor.close()
+            conn.close()
+            return []
+        username = result[0]
+        query = "SELECT DISTINCT movie_id FROM bookings WHERE user_id = %s"
+        cursor.execute(query, (username,))
         booked_movies = [str(row[0]) for row in cursor.fetchall()]
         cursor.close()
         conn.close()
-        logger.info(f"Executed query for user_id {user_id}: {query % user_id}")
-        logger.info(f"Retrieved {len(booked_movies)} booked movies for user_id {user_id}: {booked_movies}")
+        logger.info(f"Retrieved {len(booked_movies)} booked movies for user_id {user_id} (username: {username}): {booked_movies}")
         return booked_movies
     except Exception as e:
         logger.error(f"Error fetching booking history for user_id {user_id}: {e}")
         return []
-
 def get_recommendations(user_id, sequence_length=3, n=10):
     logger.debug(f"Starting recommendations for user_id {user_id}")
     booked_movie_ids = get_booked_movie_ids(user_id)

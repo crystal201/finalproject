@@ -139,6 +139,7 @@ export default {
     }
   },
   async created() {
+    console.log("User ID from localStorage:", this.userId);
     if (this.isLoggedIn) {
       this.startProgressSimulation();
       try {
