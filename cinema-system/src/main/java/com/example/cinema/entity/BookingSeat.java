@@ -26,7 +26,7 @@ public class BookingSeat {
     private String showtime;
 
     @Column(name = "room_id", nullable = false)
-    private Integer roomId;
+    private Long roomId;
 
     // Getters and setters
     public Long getId() { return id; }
@@ -41,6 +41,6 @@ public class BookingSeat {
     public void setDate(LocalDate date) { this.date = date; }
     public String getShowtime() { return showtime; }
     public void setShowtime(String showtime) { this.showtime = showtime; }
-    public Integer getRoomId() { return roomId; }
-    public void setRoomId(Integer roomId) { this.roomId = roomId; }
+    public Long getRoomId() { return roomId; }
+    public void setRoomId(Long roomId) { this.roomId = roomId; }
 }

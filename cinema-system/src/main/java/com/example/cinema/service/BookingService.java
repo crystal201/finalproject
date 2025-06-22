@@ -175,7 +175,7 @@ public class BookingService {
         bookingRepository.save(booking);
     }
 
-    public List<String> getBookedSeats(String movieId, LocalDate date, String showtime, Integer roomId) {
+    public List<String> getBookedSeats(String movieId, LocalDate date, String showtime, Long roomId) {
         return bookingSeatService.getBookedSeats(movieId, date, showtime, roomId);
     }
 }

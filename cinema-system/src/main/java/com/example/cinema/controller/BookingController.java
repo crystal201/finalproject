@@ -95,7 +95,7 @@ public ResponseEntity<List<BookingDTO>> getUserBookings(
             @RequestParam String movieId,
             @RequestParam String date,
             @RequestParam String showtime,
-            @RequestParam Integer roomId) {
+            @RequestParam Long roomId) {
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
         LocalDate bookingDate = LocalDate.parse(date);
         LocalDateTime showDateTime = LocalDateTime.of(bookingDate,
