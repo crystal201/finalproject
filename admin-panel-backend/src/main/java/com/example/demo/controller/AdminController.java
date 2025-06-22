@@ -6,6 +6,7 @@ import com.example.demo.repository.*;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -80,7 +81,7 @@ public class AdminController {
                             return new Users();
                         });
                 } catch (NumberFormatException e) {
-                    logger.error("Failed to parse userId {} for booking {}: {}", userId, booking.getId(), e.getMessage());
+                    logger.error("Failed to parse userId {} for booking {}: {}", userId, booking.getId(), e.getMessage(), e);
                     user = new Users();
                 }
                 String username = user.getUsername() != null ? user.getUsername() : "Unknown";
@@ -251,7 +252,9 @@ class BookingResponse {
     private String status;
     private List<String> seats;
     private String roomName;
+    @JsonProperty("userId")
     private String userId;
+    @JsonProperty("username")
     private String username;
 
     public BookingResponse(Long id, String movieTitle, String showtime, String date, Double total, String status, List<String> seats, String roomName, String userId, String username) {
@@ -285,7 +288,9 @@ class OccupiedSeatResponse {
     private String seat;
     private String date;
     private String showtime;
+    @JsonProperty("userId")
     private String userId;
+    @JsonProperty("username")
     private String username;
 
     public OccupiedSeatResponse(Long roomId, String seat, String date, String showtime, String userId, String username) {
@@ -296,7 +301,6 @@ class OccupiedSeatResponse {
         this.userId = userId;
         this.username = username;
     }
-
     // Getters
     public Long getRoomId() { return roomId; }
     public String getSeat() { return seat; }
