@@ -5,6 +5,7 @@ import RoomManagement from '../views/RoomManagement.vue'
 import ManageBookings from '../views/ManageBookings.vue'
 import ManageSeats from '../views/ManageSeats.vue'
 import ManageUsers from '../views/ManageUsers.vue'
+import Login from '../views/Login.vue'
 
 Vue.use(VueRouter)
 
