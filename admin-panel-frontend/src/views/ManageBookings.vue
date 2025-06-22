@@ -3,7 +3,7 @@
     <h2>Manage Bookings</h2>
     <ul>
       <li v-for="booking in bookings" :key="booking.id">
-        {{ booking.movieTitle }} (Showtime: {{ booking.showtime }}, Date: {{ booking.date }}, Total: {{ booking.total }} VND, Status: {{ booking.status }})
+        {{ booking.movieTitle }} (Showtime: {{ booking.showtime }}, Date: {{ booking.date }}, Total: {{ booking.total }} VND, Status: {{ booking.status }}, User: {{ booking.username || booking.userId || 'Unknown' }})
         <ul>
           <li v-for="seat in booking.seats" :key="seat">{{ seat }}</li>
         </ul>
@@ -36,6 +36,7 @@ export default {
       try {
         const response = await axios.get("/api/bookings");
         this.bookings = response.data;
+        console.log("Fetched bookings:", this.bookings); // Debug
       } catch (error) {
         console.error("API Error:", error);
         this.bookings = [];

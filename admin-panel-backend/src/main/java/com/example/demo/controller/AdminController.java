@@ -65,6 +65,8 @@ public class AdminController {
             .map(booking -> {
                 List<BookingSeats> seats = bookingSeatsRepo.findByBookingId(booking.getId());
                 Room room = roomRepo.findById(booking.getRoomId()).orElse(null);
+                Users user = usersRepo.findById(Long.parseLong(booking.getUserId())) // Ánh xạ userId
+                    .orElse(new Users()); // Fallback nếu không tìm thấy
                 return new BookingResponse(
                     booking.getId(),
                     booking.getMovieTitle(),
@@ -73,7 +75,9 @@ public class AdminController {
                     booking.getTotal(),
                     booking.getStatus(),
                     seats.stream().map(BookingSeats::getSeat).collect(Collectors.toList()),
-                    room != null ? room.getRoomName() : null
+                    room != null ? room.getRoomName() : null,
+                    booking.getUserId(), // Thêm userId
+                    user.getUsername() != null ? user.getUsername() : "Unknown" // Thêm username
                 );
             })
             .collect(Collectors.toList());
@@ -215,8 +219,10 @@ class BookingResponse {
     private String status;
     private List<String> seats;
     private String roomName;
+    private String userId;
+    private String username;
 
-    public BookingResponse(Long id, String movieTitle, String showtime, String date, Double total, String status, List<String> seats, String roomName) {
+    public BookingResponse(Long id, String movieTitle, String showtime, String date, Double total, String status, List<String> seats, String roomName, String userId, String username) {
         this.id = id;
         this.movieTitle = movieTitle;
         this.showtime = showtime;
@@ -225,6 +231,8 @@ class BookingResponse {
         this.status = status;
         this.seats = seats;
         this.roomName = roomName;
+        this.userId = userId;
+        this.username = username;
     }
 
     // Getters
@@ -236,6 +244,8 @@ class BookingResponse {
     public String getStatus() { return status; }
     public List<String> getSeats() { return seats; }
     public String getRoomName() { return roomName; }
+    public String getUserId() { return userId; }
+    public String getUsername() { return username; }
 }
 
 class OccupiedSeatResponse {
