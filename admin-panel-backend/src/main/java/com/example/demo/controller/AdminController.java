@@ -59,14 +59,23 @@ public class AdminController {
             .collect(Collectors.toList());
     }
 
-    @GetMapping("/bookings")
+   @GetMapping("/bookings")
     public List<BookingResponse> getBookings() {
         return bookingsRepo.findAll().stream()
             .map(booking -> {
                 List<BookingSeats> seats = bookingSeatsRepo.findByBookingId(booking.getId());
                 Room room = roomRepo.findById(booking.getRoomId()).orElse(null);
-                Users user = usersRepo.findById(Long.parseLong(booking.getUserId())) // Ánh xạ userId
-                    .orElse(new Users()); // Fallback nếu không tìm thấy
+                String userId = booking.getUserId();
+                Users user = null;
+                try {
+                    long userIdLong = Long.parseLong(userId);
+                    user = usersRepo.findById(userIdLong)
+                        .orElseGet(() -> {
+                            return new Users();
+                        });
+                } catch (NumberFormatException e) {
+                    user = new Users();
+                }
                 return new BookingResponse(
                     booking.getId(),
                     booking.getMovieTitle(),
@@ -76,8 +85,8 @@ public class AdminController {
                     booking.getStatus(),
                     seats.stream().map(BookingSeats::getSeat).collect(Collectors.toList()),
                     room != null ? room.getRoomName() : null,
-                    booking.getUserId(), // Thêm userId
-                    user.getUsername() != null ? user.getUsername() : "Unknown" // Thêm username
+                    userId,
+                    user.getUsername() != null ? user.getUsername() : "Unknown"
                 );
             })
             .collect(Collectors.toList());
@@ -95,15 +104,24 @@ public class AdminController {
             .filter(b -> showtime == null || b.getShowtime().equals(showtime))
             .flatMap(booking -> bookingSeatsRepo.findByBookingId(booking.getId()).stream()
                 .map(seat -> {
-                    Users user = usersRepo.findById(Long.parseLong(booking.getUserId()))
-                        .orElse(new Users()); // Fallback nếu không tìm thấy
+                    String userId = booking.getUserId();
+                    Users user = null;
+                    try {
+                        long userIdLong = Long.parseLong(userId);
+                        user = usersRepo.findById(userIdLong)
+                            .orElseGet(() -> {
+                                return new Users();
+                            });
+                    } catch (NumberFormatException e) {
+                        user = new Users();
+                    }
                     return new OccupiedSeatResponse(
                         booking.getRoomId(),
                         seat.getSeat(),
                         booking.getDate(),
                         booking.getShowtime(),
-                        booking.getUserId(), // Thêm userId
-                        user.getUsername() != null ? user.getUsername() : "Unknown" // Thêm username
+                        userId,
+                        user.getUsername() != null ? user.getUsername() : "Unknown"
                     );
                 }))
             .collect(Collectors.toList());
