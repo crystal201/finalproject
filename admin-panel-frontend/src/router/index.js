@@ -12,6 +12,15 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
+    redirect: '/login'
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: Login
+  },
+  {
+    path: '/',
     redirect: '/dashboard'
   },
   {
@@ -45,5 +54,11 @@ const router = new VueRouter({
   mode: 'history',
   routes
 })
-
+router.beforeEach((to, from, next) => {
+  if (to.meta.requiresAuth && !localStorage.getItem('authenticated')) {
+    next('/login');
+  } else {
+    next();
+  }
+});
 export default router
