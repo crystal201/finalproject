@@ -9,7 +9,7 @@ services:
     volumes:
       - node_modules:/app/node_modules
     environment:
-      - NODE_OPTIONS=--max_old_space_size=4096
+      - NODE_OPTIONS=--max_old_space_size=2048  # Tăng lên 2GB cho Vue
       - NODE_ENV=production
       - NUXT_PORT=3000
       - CHOKIDAR_USEPOLLING=true
@@ -29,8 +29,13 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.3"
-          memory: "256M"
+          cpus: "0.5"  # Tăng CPU cho xử lý giao diện
+          memory: "1024M"  # Tăng memory để xử lý request lớn
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   backend:
     container_name: cinema-system
@@ -51,6 +56,7 @@ services:
       - SPRING_REDIS_PORT=6379
       - SPRING_MAIL_USERNAME=${SMTP_USERNAME}
       - SPRING_MAIL_PASSWORD=${SMTP_PASSWORD}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update  # Tự động cập nhật schema
     depends_on:
       mysql-db:
         condition: service_healthy
@@ -66,9 +72,14 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.4'
-          memory: 512M
+          cpus: "0.8"  # Tăng CPU cho xử lý logic backend
+          memory: "1024M"  # Tăng memory để xử lý request và caching
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   mysql-db:
     image: mysql:8.0
@@ -76,6 +87,7 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=crystal2001
       - MYSQL_DATABASE=cinema_db
+      - MYSQL_MAX_CONNECTIONS=200  # Tăng số kết nối tối đa
     ports:
       - "3306:3306"
     volumes:
@@ -90,8 +102,9 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.3"
-          memory: "512m"
+          cpus: "0.5"  # Tăng CPU cho MySQL
+          memory: "1024M"  # Tăng memory để cải thiện hiệu suất
+    command: --innodb_buffer_pool_size=512M  # Tối ưu cache MySQL
     restart: unless-stopped
 
   recommendation-api:
@@ -124,9 +137,14 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.2"
-          memory: "256M"
+          cpus: "0.4"  # Tăng CPU cho xử lý khuyến nghị
+          memory: "512M"  # Tăng memory cho xử lý dữ liệu
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   redis:
     image: redis:6
@@ -136,14 +154,21 @@ services:
     volumes:
       - redis_data:/data
       - ./redis.conf:/etc/redis/redis.conf
+    command: redis-server /etc/redis/redis.conf  # Sử dụng config tùy chỉnh
     networks:
       - cinema-network
     deploy:
       resources:
         limits:
-          cpus: "0.2"
-          memory: "256M"
+          cpus: "0.3"  # Tăng CPU nhẹ
+          memory: "512M"  # Tăng memory cho caching
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
   admin-panel-backend:
     container_name: admin-panel-backend
     build:
@@ -156,8 +181,8 @@ services:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=crystal2001
       - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
-      - spring.datasource.hikari.maximum-pool-size=5
-      - spring.datasource.hikari.minimum-idle=2
+      - spring.datasource.hikari.maximum-pool-size=10  # Tăng pool size
+      - spring.datasource.hikari.minimum-idle=3
       - spring.datasource.hikari.connection-timeout=20000
       - spring.datasource.hikari.idle-timeout=300000
       - spring.datasource.hikari.max-lifetime=1800000
@@ -169,13 +194,19 @@ services:
       mysql-db:
         condition: service_healthy
     deploy:
-          resources:
-            limits:
-              cpus: "0.3"
-              memory: "512M"
+      resources:
+        limits:
+          cpus: "0.5"  # Tăng CPU
+          memory: "1024M"  # Tăng memory
     networks:
       - cinema-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   admin-panel-frontend:
     container_name: admin-panel-frontend
     build:
@@ -195,9 +226,15 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.3"
-          memory: "256m"
+          cpus: "0.4"  # Tăng CPU
+          memory: "512M"  # Tăng memory
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
 networks:
   cinema-network:
     driver: bridge
@@ -208,8 +245,8 @@ volumes:
   mysql_data:
   node_modules:
   redis_data:
-   driver: local
-   driver_opts:
-    type: none
-    o: bind
-    device: ~/finalproject/redis-data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ~/finalproject/redis-data
