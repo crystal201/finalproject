@@ -138,39 +138,36 @@ export default {
 
         const movieCache = JSON.parse(localStorage.getItem('movieCache') || '{}');
         const response = await this.$axios.get("/api/bookings", {
-          params: { userId }
+          params: {
+            filter: 'all',
+            userId: userId || '2'
+          }
         });
-        if (!response.data) {
+        if (!response.data || !Array.isArray(response.data)) {
           this.bookings = [];
           return;
         }
-        const booking = response.data;
-        const showDateTime = new Date(`${booking.date} ${booking.showtime}`);
-        const now = new Date();
-        if (booking.status === 'ACTIVE' && showDateTime < now) {
-          console.warn(`Booking ${booking.id} is ACTIVE but past due: ${showDateTime}`);
-        }
-        // Kiểm tra movieId trước khi gọi TMDB
-        if (booking.movieId) {
-          if (movieCache[booking.movieId]) {
-            this.bookings = [{ ...booking, movie: movieCache[booking.movieId] }];
-            return;
-          }
-          try {
-            const movieResponse = await this.$axios.get(
-              `https://api.themoviedb.org/3/movie/${booking.movieId}`,
-              { params: { api_key: this.$config.tmdbApiKey } }
-            );
-            movieCache[booking.movieId] = movieResponse.data;
-            localStorage.setItem('movieCache', JSON.stringify(movieCache));
-            this.bookings = [{ ...booking, movie: movieResponse.data }];
-          } catch (err) {
-            console.warn(`Failed to fetch movie data for movieId ${booking.movieId}:`, err);
-            this.bookings = [{ ...booking, movie: { poster_path: '', title: booking.movieTitle, genres: [], overview: '', releaseDate: '' } }];
+        const lastBooking = response.data[response.data.length - 1];
+        if (lastBooking.movieId) {
+          if (movieCache[lastBooking.movieId]) {
+            this.bookings = [{ ...lastBooking, movie: movieCache[lastBooking.movieId] }];
+          } else {
+            try {
+              const movieResponse = await this.$axios.get(
+                `https://api.themoviedb.org/3/movie/${lastBooking.movieId}`,
+                { params: { api_key: this.$config.tmdbApiKey } }
+              );
+              movieCache[lastBooking.movieId] = movieResponse.data;
+              localStorage.setItem('movieCache', JSON.stringify(movieCache));
+              this.bookings = [{ ...lastBooking, movie: movieResponse.data }];
+            } catch (err) {
+              console.warn(`Failed to fetch movie data for movieId ${lastBooking.movieId}:`, err);
+              this.bookings = [{ ...lastBooking, movie: { poster_path: '', title: lastBooking.movieTitle, genres: [], overview: '', releaseDate: '' } }];
+            }
           }
         } else {
-          console.warn('movieId is missing in booking data:', booking);
-          this.bookings = [{ ...booking, movie: { poster_path: '', title: booking.movieTitle, genres: [], overview: '', releaseDate: '' } }];
+          console.warn('movieId is missing in booking data:', lastBooking);
+          this.bookings = [{ ...lastBooking, movie: { poster_path: '', title: lastBooking.movieTitle, genres: [], overview: '', releaseDate: '' } }];
         }
       } catch (error) {
         console.error('Error fetching booking:', error);
@@ -248,30 +245,36 @@ export default {
   },
 };
 </script>
+
 <style scoped>
-.history-header{
+.history-header {
   padding: 10px 20px;
 }
+
 .history-header h1 {
   font-size: 1.8rem;
   font-weight: bold;
   color: #e5e7eb;
   margin-bottom: 0.5rem;
 }
+
 .history-header p {
   color: #9ca3af;
   margin-bottom: 1rem;
 }
+
 .loading-container, .empty-history {
   text-align: center;
   padding: 2rem;
   color: #9ca3af;
 }
+
 .loading-container svg, .empty-history svg {
   width: 40px;
   height: 40px;
   margin-bottom: 1rem;
 }
+
 .discover-btn {
   display: inline-block;
   padding: 0.5rem 1rem;
@@ -281,48 +284,58 @@ export default {
   text-decoration: none;
   margin-top: 1rem;
 }
+
 .discover-btn:hover {
   background-color: #4f46e5;
 }
+
 .booking-list {
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
+
 .booking-card {
   background-color: #374151;
   border-radius: 0.5rem;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
 .booking-card.expired {
   opacity: 0.7;
   border: 1px solid #dc2626;
 }
+
 .movie-section {
   display: flex;
   gap: 1rem;
   padding: 1rem;
 }
+
 .movie-poster {
   width: 120px;
   height: auto;
   border-radius: 0.25rem;
 }
+
 .movie-info {
   flex: 1;
 }
+
 .movie-info h3 {
   color: #e5e7eb;
   font-size: 1.25rem;
   margin-bottom: 0.5rem;
 }
+
 .genres {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
 }
+
 .genre {
   background-color: #4b5563;
   color: #e5e7eb;
@@ -330,72 +343,89 @@ export default {
   border-radius: 0.25rem;
   font-size: 0.875rem;
 }
+
 .overview {
   color: #9ca3af;
   margin-bottom: 0.5rem;
 }
+
 .meta {
   display: flex;
   gap: 1rem;
   color: #9ca3af;
 }
+
 .meta-item {
   display: flex;
   align-items: center;
   gap: 0.25rem;
 }
+
 .meta-item svg {
   width: 16px;
   height: 16px;
 }
+
 .ticket-section {
   display: flex;
   gap: 2rem;
   padding: 1rem;
   border-top: 1px solid #4b5563;
 }
+
 .ticket-info, .payment-info {
   flex: 1;
 }
+
 .ticket-info h4, .payment-info h4 {
   color: #e5e7eb;
   font-size: 1.125rem;
   margin-bottom: 0.5rem;
 }
+
 .info-row {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
   color: #9ca3af;
 }
+
 .info-row svg {
   width: 20px;
   height: 20px;
 }
+
 .info-row p {
   margin: 0;
 }
+
 .date, .time {
   color: #d1d5db;
 }
+
 .total {
   color: #e5e7eb;
   font-weight: bold;
 }
+
 .status.status-active {
   color: #22c55e;
 }
+
 .status.status-cancelled {
   color: #ef4444;
 }
+
 .status.status-expired {
   color: #f59e0b;
 }
+
 .action-buttons {
   padding: 1rem;
   border-top: 1px solid #4b5563;
   text-align: right;
 }
+
 .cancel-btn {
   display: inline-flex;
   align-items: center;
@@ -407,9 +437,11 @@ export default {
   border-radius: 0.25rem;
   cursor: pointer;
 }
+
 .cancel-btn:hover {
   background-color: #dc2626;
 }
+
 .cancel-btn svg {
   width: 16px;
   height: 16px;
