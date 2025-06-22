@@ -4,6 +4,8 @@ import com.example.demo.entity.*;
 import com.example.demo.repository.*;
 
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api")
 public class AdminController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
     @Autowired
     private RoomRepository roomRepo;
@@ -59,7 +63,7 @@ public class AdminController {
             .collect(Collectors.toList());
     }
 
-   @GetMapping("/bookings")
+    @GetMapping("/bookings")
     public List<BookingResponse> getBookings() {
         return bookingsRepo.findAll().stream()
             .map(booking -> {
@@ -69,13 +73,17 @@ public class AdminController {
                 Users user = null;
                 try {
                     long userIdLong = Long.parseLong(userId);
+                    logger.info("Attempting to find user with id: {}", userIdLong);
                     user = usersRepo.findById(userIdLong)
                         .orElseGet(() -> {
+                            logger.warn("User with id {} not found, creating default", userIdLong);
                             return new Users();
                         });
                 } catch (NumberFormatException e) {
+                    logger.error("Failed to parse userId {}: {}", userId, e.getMessage());
                     user = new Users();
                 }
+                logger.info("Mapped booking {} to userId: {}, username: {}", booking.getId(), userId, user.getUsername());
                 return new BookingResponse(
                     booking.getId(),
                     booking.getMovieTitle(),
@@ -108,13 +116,17 @@ public class AdminController {
                     Users user = null;
                     try {
                         long userIdLong = Long.parseLong(userId);
+                        logger.info("Attempting to find user with id: {}", userIdLong);
                         user = usersRepo.findById(userIdLong)
                             .orElseGet(() -> {
+                                logger.warn("User with id {} not found, creating default", userIdLong);
                                 return new Users();
                             });
                     } catch (NumberFormatException e) {
+                        logger.error("Failed to parse userId {}: {}", userId, e.getMessage());
                         user = new Users();
                     }
+                    logger.info("Mapped occupied seat for booking {} to userId: {}, username: {}", booking.getId(), userId, user.getUsername());
                     return new OccupiedSeatResponse(
                         booking.getRoomId(),
                         seat.getSeat(),
