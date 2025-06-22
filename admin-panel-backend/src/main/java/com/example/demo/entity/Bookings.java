@@ -29,4 +29,10 @@ public class Bookings {
     public void setStatus(String status) { this.status = status; }
     public Double getTotal() { return total; }
     public Long getRoomId() { return roomId; }
+    public String getUserId() {
+        return userId;
+    }
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 }

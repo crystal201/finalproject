@@ -23,9 +23,6 @@ public class AdminController {
     private RoomRepository roomRepo;
 
     @Autowired
-    private BookingCancellationRepository cancelRepo;
-
-    @Autowired
     private UsersRepository usersRepo;
 
     @Autowired
@@ -47,12 +44,6 @@ public class AdminController {
     @DeleteMapping("/rooms/{id}")
     public void deleteRoom(@PathVariable Long id) {
         roomRepo.deleteById(id);
-    }
-    @PutMapping("/cancellations/{id}/approve")
-    public BookingCancellation approveCancellation(@PathVariable Long id) {
-        BookingCancellation cancel = cancelRepo.findById(id).orElseThrow();
-        cancel.setStatus("APPROVED");
-        return cancelRepo.save(cancel);
     }
 
     @GetMapping("/users")
@@ -88,7 +79,7 @@ public class AdminController {
             .collect(Collectors.toList());
     }
 
-    @GetMapping("/bookings/occupied-seats")
+   @GetMapping("/bookings/occupied-seats")
     public List<OccupiedSeatResponse> getOccupiedSeats(
             @RequestParam(required = false) Long roomId,
             @RequestParam(required = false) String date,
@@ -99,12 +90,18 @@ public class AdminController {
             .filter(b -> date == null || b.getDate().equals(date))
             .filter(b -> showtime == null || b.getShowtime().equals(showtime))
             .flatMap(booking -> bookingSeatsRepo.findByBookingId(booking.getId()).stream()
-                .map(seat -> new OccupiedSeatResponse(
-                    booking.getRoomId(),
-                    seat.getSeat(),
-                    booking.getDate(),
-                    booking.getShowtime()
-                )))
+                .map(seat -> {
+                    Users user = usersRepo.findById(Long.parseLong(booking.getUserId()))
+                        .orElse(new Users()); // Fallback nếu không tìm thấy
+                    return new OccupiedSeatResponse(
+                        booking.getRoomId(),
+                        seat.getSeat(),
+                        booking.getDate(),
+                        booking.getShowtime(),
+                        booking.getUserId(), // Thêm userId
+                        user.getUsername() != null ? user.getUsername() : "Unknown" // Thêm username
+                    );
+                }))
             .collect(Collectors.toList());
     }
 
@@ -246,12 +243,16 @@ class OccupiedSeatResponse {
     private String seat;
     private String date;
     private String showtime;
+    private String userId;
+    private String username;
 
-    public OccupiedSeatResponse(Long roomId, String seat, String date, String showtime) {
+    public OccupiedSeatResponse(Long roomId, String seat, String date, String showtime, String userId, String username) {
         this.roomId = roomId;
         this.seat = seat;
         this.date = date;
         this.showtime = showtime;
+        this.userId = userId;
+        this.username = username;
     }
 
     // Getters
@@ -259,4 +260,6 @@ class OccupiedSeatResponse {
     public String getSeat() { return seat; }
     public String getDate() { return date; }
     public String getShowtime() { return showtime; }
+    public String getUserId() { return userId; }
+    public String getUsername() { return username; }
 }

@@ -5,6 +5,7 @@
       <li v-for="room in rooms" :key="room.id" class="room-item">
         {{ room.roomName }} (Capacity: {{ room.capacity }}, Status: {{ room.status }})
         <button @click="confirmDeleteRoom(room.id)" class="delete-btn">Delete</button>
+        <button @click="showRoomBookings(room.id)" class="view-btn">View Bookings</button>
       </li>
     </ul>
     <button @click="openAddRoomModal">Add New Room</button>
@@ -58,11 +59,29 @@
         </p>
       </div>
     </div>
+
+    <!-- Modal for viewing bookings -->
+    <div v-if="showBookingsModal" class="modal">
+      <div class="modal-content">
+        <h2>Bookings for {{ selectedRoomName }}</h2>
+        <ul v-if="roomBookings.length > 0" class="booking-list">
+          <li v-for="booking in roomBookings" :key="booking.id" class="booking-item">
+            <strong>Date:</strong> {{ booking.date }}<br>
+            <strong>Showtime:</strong> {{ booking.showtime }}<br>
+            <strong>User:</strong> {{ booking.username }}<br>
+            <strong>Seats:</strong> {{ booking.seat }}
+          </li>
+        </ul>
+        <p v-else>No active bookings found for this room.</p>
+        <button @click="closeBookingsModal">Close</button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
+
 export default {
   data() {
     return {
@@ -81,6 +100,10 @@ export default {
       deleteMessage: '',
       deleteSuccess: false,
       roomToDelete: null,
+      showBookingsModal: false,
+      roomBookings: [],
+      selectedRoomName: '',
+      selectedRoomId: null,
     };
   },
   methods: {
@@ -149,6 +172,34 @@ export default {
         this.deletingRoom = false;
       }
     },
+    async showRoomBookings(roomId) {
+      this.selectedRoomId = roomId;
+      const room = this.rooms.find(r => r.id === roomId);
+      this.selectedRoomName = room ? room.roomName : 'Unknown Room';
+      try {
+        const response = await axios.get('/api/bookings/occupied-seats', {
+          params: { roomId: roomId }
+        });
+        this.roomBookings = response.data.map(booking => ({
+          id: booking.roomId + '-' + booking.date + '-' + booking.showtime, // Unique key
+          date: booking.date,
+          showtime: booking.showtime,
+          username: booking.username,
+          seat: booking.seat
+        }));
+        this.showBookingsModal = true;
+      } catch (error) {
+        console.error("Error fetching bookings:", error);
+        this.roomBookings = [];
+        this.showBookingsModal = true; // Hiển thị modal với thông báo lỗi
+      }
+    },
+    closeBookingsModal() {
+      this.showBookingsModal = false;
+      this.roomBookings = [];
+      this.selectedRoomId = null;
+      this.selectedRoomName = '';
+    },
   },
   mounted() {
     this.fetchRooms();
@@ -174,6 +225,8 @@ export default {
   border-radius: 5px;
   text-align: center;
   min-width: 300px;
+  max-height: 70vh;
+  overflow-y: auto;
 }
 form {
   display: flex;
@@ -202,6 +255,17 @@ button {
 .delete-btn:hover {
   background-color: #cc0000;
 }
+.view-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+.view-btn:hover {
+  background-color: #45a049;
+}
 .success {
   color: green;
 }
@@ -213,5 +277,16 @@ button {
   justify-content: space-between;
   align-items: center;
   padding: 5px 0;
+}
+.booking-list {
+  list-style: none;
+  padding: 0;
+  text-align: left;
+}
+.booking-item {
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
 }
 </style>
