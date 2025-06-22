@@ -232,21 +232,25 @@ def get_booked_movie_ids(user_id):
             logger.warning(f"Database connection lost for user_id {user_id}, reconnecting")
             conn.reconnect(attempts=3, delay=1)
         cursor = conn.cursor()
+        # Kiểm tra user tồn tại (không cần username nếu user_id khớp trực tiếp)
         username_query = "SELECT username FROM users WHERE id = %s"
         cursor.execute(username_query, (user_id,))
         result = cursor.fetchone()
         if not result:
-            logger.warning(f"No username found for user_id {user_id}")
+            logger.warning(f"No user found for user_id {user_id}")
             cursor.close()
             conn.close()
             return []
-        username = result[0]
+        # Lấy movie_id trực tiếp từ bookings với user_id (số nguyên)
         query = "SELECT DISTINCT movie_id FROM bookings WHERE user_id = %s"
-        cursor.execute(query, (username,))
+        cursor.execute(query, (str(user_id),))  # Chuyển user_id thành string để khớp với varchar
         booked_movies = [str(row[0]) for row in cursor.fetchall()]
+        if not booked_movies:
+            logger.warning(f"No bookings found for user_id {user_id}")
+        else:
+            logger.info(f"Retrieved {len(booked_movies)} booked movies for user_id {user_id}: {booked_movies}")
         cursor.close()
         conn.close()
-        logger.info(f"Retrieved {len(booked_movies)} booked movies for user_id {user_id} (username: {username}): {booked_movies}")
         return booked_movies
     except Exception as e:
         logger.error(f"Error fetching booking history for user_id {user_id}: {e}")
