@@ -1,0 +1,9 @@
+# Ignore compiled Java files
+*.class
+
+# Ignore target directories (Maven build output)
+target/
+
+# Ignore other build artifacts
+*.jar
+*.war
