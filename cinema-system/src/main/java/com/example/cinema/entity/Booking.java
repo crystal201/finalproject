@@ -33,7 +33,7 @@ public class Booking {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "room_id", nullable = false)
-    private Integer roomId;
+    private Long roomId;
 
     @Column(nullable = false)
     private String status = "WAITING_BOOKING";
@@ -47,7 +47,7 @@ public class Booking {
     public double getTotal() { return total; }
     public String getUserId() { return userId; }
     public LocalDateTime getCreatedAt() { return createdAt; }
-    public Integer getRoomId() { return roomId; }
+    public Long getRoomId() { return roomId; }
     public String getStatus() { return status; }
 
     // Setters
@@ -57,6 +57,6 @@ public class Booking {
     public void setDate(LocalDate date) { this.date = date; }
     public void setTotal(double total) { this.total = total; }
     public void setUserId(String userId) { this.userId = userId; }
-    public void setRoomId(Integer roomId) { this.roomId = roomId; }
+    public void setRoomId(Long roomId) { this.roomId = roomId; }
     public void setStatus(String status) { this.status = status; }
 }

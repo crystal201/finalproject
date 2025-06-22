@@ -12,7 +12,7 @@ public class BookingDTO {
     private List<String> seats;
     private Double total;
     private String userId;
-    private Integer roomId;
+    private Long roomId;
     private LocalDateTime createdAt;
     private String status;
 
@@ -28,8 +28,8 @@ public class BookingDTO {
     public String getDate() { return date; }
     public void setDate(String date) { this.date = date; }
     public List<String> getSeats() { return seats; }
-    public Integer getRoomId() { return roomId; }
-    public void setRoomId(Integer roomId) { this.roomId = roomId; }
+    public Long getRoomId() { return roomId; }
+    public void setRoomId(Long roomId) { this.roomId = roomId; }
     public void setSeats(List<String> seats) { this.seats = seats; }
     public Double getTotal() { return total; }
     public void setTotal(Double total) { this.total = total; }

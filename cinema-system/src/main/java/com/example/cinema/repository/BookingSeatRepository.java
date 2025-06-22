@@ -23,7 +23,7 @@ public interface BookingSeatRepository extends JpaRepository<BookingSeat, Long> 
             @Param("movieId") String movieId,
             @Param("date") LocalDate date,
             @Param("showtime") String showtime,
-            @Param("roomId") Integer roomId);
+            @Param("roomId") Long roomId);
 
     List<BookingSeat> findByBookingId(Long bookingId);
     void deleteByBookingId(Long bookingId);

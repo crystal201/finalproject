@@ -18,7 +18,7 @@ public class BookingSeatService {
         this.bookingSeatRepository = bookingSeatRepository;
     }
 
-public List<String> getBookedSeats(String movieId, LocalDate date, String showtime, Integer roomId) {
+public List<String> getBookedSeats(String movieId, LocalDate date, String showtime, Long roomId) {
     try {
         List<String> bookedSeats = bookingSeatRepository.findSeatsByMovieIdAndDateAndShowtimeAndRoomId(movieId, date, showtime, roomId);
         logger.info("Retrieved booked seats for movieId={}, date={}, showtime={}, roomId={}: {}", 
@@ -31,7 +31,7 @@ public List<String> getBookedSeats(String movieId, LocalDate date, String showti
     }
 }
 
-    public void saveSeats(Long bookingId, List<String> seats, String movieId, LocalDate date, String showtime, Integer roomId) {
+    public void saveSeats(Long bookingId, List<String> seats, String movieId, LocalDate date, String showtime, Long roomId) {
         try {
             List<String> bookedSeats = getBookedSeats(movieId, date, showtime, roomId);
             if (seats.stream().anyMatch(bookedSeats::contains)) {

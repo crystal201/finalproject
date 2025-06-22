@@ -48,7 +48,7 @@ export default {
         await this.fetchBookings();
       } catch (error) {
         this.$toast.error('Error accepting booking: ' + error.message);
-      }
+      } 
     },
     async rejectBooking(bookingId) {
       try {
