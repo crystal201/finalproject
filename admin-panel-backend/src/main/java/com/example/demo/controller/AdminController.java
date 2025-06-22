@@ -73,17 +73,18 @@ public class AdminController {
                 Users user = null;
                 try {
                     long userIdLong = Long.parseLong(userId);
-                    logger.info("Attempting to find user with id: {}", userIdLong);
+                    logger.info("Attempting to find user with id: {} for booking {}", userIdLong, booking.getId());
                     user = usersRepo.findById(userIdLong)
                         .orElseGet(() -> {
-                            logger.warn("User with id {} not found, creating default", userIdLong);
+                            logger.warn("User with id {} not found for booking {}, creating default", userIdLong, booking.getId());
                             return new Users();
                         });
                 } catch (NumberFormatException e) {
-                    logger.error("Failed to parse userId {}: {}", userId, e.getMessage());
+                    logger.error("Failed to parse userId {} for booking {}: {}", userId, booking.getId(), e.getMessage());
                     user = new Users();
                 }
-                logger.info("Mapped booking {} to userId: {}, username: {}", booking.getId(), userId, user.getUsername());
+                String username = user.getUsername() != null ? user.getUsername() : "Unknown";
+                logger.info("Mapped booking {} to userId: {}, username: {}", booking.getId(), userId, username);
                 return new BookingResponse(
                     booking.getId(),
                     booking.getMovieTitle(),
@@ -94,7 +95,7 @@ public class AdminController {
                     seats.stream().map(BookingSeats::getSeat).collect(Collectors.toList()),
                     room != null ? room.getRoomName() : null,
                     userId,
-                    user.getUsername() != null ? user.getUsername() : "Unknown"
+                    username
                 );
             })
             .collect(Collectors.toList());
