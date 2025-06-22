@@ -97,6 +97,7 @@ export default {
 
 <style scoped>
 .manage-bookings {
+  max-width: 100%;
   padding: 20px;
 }
 
@@ -109,6 +110,7 @@ export default {
 .bookings-list {
   display: grid;
   gap: 20px;
+  max-width: 100%;
 }
 
 .booking-card {

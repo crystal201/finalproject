@@ -14,7 +14,9 @@
         </nav>
       </aside>
       <main class="main-content">
-        <router-view />
+        <div class="content-wrapper">
+          <router-view />
+        </div>
       </main>
     </div>
   </div>
@@ -72,12 +74,15 @@ export default {
 .dashboard-content {
   display: flex;
   flex: 1;
+  overflow: hidden;
 }
 
 .sidebar {
   width: 250px;
   background-color: #333;
   padding-top: 20px;
+  position: relative;
+  min-height: calc(100vh - 60px); /* Điều chỉnh dựa trên height header */
 }
 
 .sidebar-nav {
@@ -105,5 +110,10 @@ export default {
   padding: 20px;
   background-color: #1a1a1a;
   overflow-y: auto;
+}
+
+.content-wrapper {
+  max-width: 100%;
+  padding: 0 20px;
 }
 </style>

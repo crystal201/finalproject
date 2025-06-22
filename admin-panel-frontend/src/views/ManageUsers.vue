@@ -41,6 +41,8 @@ export default {
 <style scoped>
 .manage-users {
   padding: 20px;
+    max-width: 100%;
+
 }
 
 .section-title {
@@ -52,6 +54,8 @@ export default {
 .users-list {
   display: grid;
   gap: 15px;
+  max-width: 100%;
+
 }
 
 .user-card {

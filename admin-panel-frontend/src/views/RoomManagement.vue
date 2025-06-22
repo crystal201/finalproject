@@ -219,6 +219,7 @@ export default {
 
 <style scoped>
 .room-management {
+  max-width: 100%;
   padding: 20px;
 }
 
@@ -231,6 +232,8 @@ export default {
 .rooms-list {
   display: grid;
   gap: 15px;
+  max-width: 100%;
+
 }
 
 .room-card {

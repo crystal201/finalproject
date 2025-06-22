@@ -41,6 +41,7 @@ export default {
 
 <style scoped>
 .manage-seats {
+  max-width: 100%;
   padding: 20px;
 }
 
@@ -53,6 +54,7 @@ export default {
 .seats-list {
   display: grid;
   gap: 15px;
+  max-width: 100%;
 }
 
 .seat-card {
