@@ -210,6 +210,10 @@
                   <i class="fas fa-user"></i>
                   {{ booking.username || "Guest" }}
                 </div>
+                <div class="booking-movie">
+                  <i class="fas fa-film"></i>
+                  {{ booking.movieName || "N/A" }}
+                </div>
                 <div class="booking-seat">
                   <i class="fas fa-chair"></i>
                   <span
@@ -357,6 +361,7 @@ export default {
           showtime: booking.showtime,
           username: booking.username,
           seats: booking.seats,
+          movieName: booking.movieName || "N/A", // Thêm trường movieName
         }));
         this.showBookingsModal = true;
       } catch (error) {
@@ -415,7 +420,7 @@ export default {
   border-radius: 6px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -432,7 +437,7 @@ export default {
   border-radius: 6px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -794,21 +799,25 @@ export default {
 
 .booking-details {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 5px;
   font-size: 0.85rem;
   color: var(--gray);
 }
 
 .booking-user,
+.booking-movie,
 .booking-seat {
   display: flex;
   align-items: center;
   gap: 6px;
 }
+
 .booking-seat .removed {
   color: var(--danger);
   font-style: italic;
 }
+
 @media (max-width: 768px) {
   .page-header {
     flex-direction: column;
@@ -829,13 +838,16 @@ export default {
     max-width: 100%;
   }
 }
+
 .status-badge.unknown {
   background: rgba(128, 128, 128, 0.1);
   color: #808080;
 }
+
 .seat-item {
   margin-right: 5px;
 }
+
 .seat-item.removed {
   color: var(--danger);
   font-style: italic;
