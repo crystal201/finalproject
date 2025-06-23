@@ -37,16 +37,6 @@
               <td>
                 <span class="role-badge" :class="user.role.toLowerCase()">{{ user.role }}</span>
               </td>
-              <td>
-                <div class="action-buttons">
-                  <button class="action-btn edit" @click="editUser(user)">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button class="action-btn delete" @click="confirmDeleteUser(user)">
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
-                </div>
-              </td>
             </tr>
           </tbody>
         </table>
@@ -68,25 +58,6 @@
       </div>
     </div>
     
-    <!-- Delete Confirmation Modal -->
-    <div v-if="showDeleteModal" class="modal-overlay">
-      <div class="modal">
-        <div class="modal-header">
-          <h3>Confirm Deletion</h3>
-          <button class="close-modal" @click="showDeleteModal = false">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <div class="modal-body">
-          <p>Are you sure you want to delete user <strong>{{ userToDelete.username }}</strong>?</p>
-          <p>This action cannot be undone.</p>
-        </div>
-        <div class="modal-footer">
-          <button class="cancel-btn" @click="showDeleteModal = false">Cancel</button>
-          <button class="confirm-btn" @click="deleteUser">Delete</button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -95,8 +66,6 @@ export default {
   data() {
     return {
       users: [],
-      showDeleteModal: false,
-      userToDelete: null,
       loading: false
     }
   },
@@ -113,25 +82,7 @@ export default {
         this.loading = false;
       }
     },
-    editUser(user) {
-      // Implement edit functionality
-      console.log("Edit user:", user);
-    },
-    confirmDeleteUser(user) {
-      this.userToDelete = user;
-      this.showDeleteModal = true;
-    },
-    async deleteUser() {
-      try {
-        await this.axios.delete(`/api/users/${this.userToDelete.id}`);
-        this.$toast.success('User deleted successfully');
-        this.fetchUsers();
-      } catch (error) {
-        this.$toast.error('Error deleting user: ' + (error.response?.data?.message || error.message));
-      } finally {
-        this.showDeleteModal = false;
-      }
-    }
+
   },
   mounted() {
     this.fetchUsers();
@@ -286,24 +237,6 @@ export default {
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-}
-
-.action-btn.edit {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
-}
-
-.action-btn.edit:hover {
-  background: rgba(59, 130, 246, 0.2);
-}
-
-.action-btn.delete {
-  background: rgba(239, 68, 68, 0.1);
-  color: var(--danger);
-}
-
-.action-btn.delete:hover {
-  background: rgba(239, 68, 68, 0.2);
 }
 
 .table-footer {

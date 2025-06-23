@@ -246,8 +246,14 @@ export default {
         await this.fetchRooms();
         this.closeAddRoomModal();
       } catch (error) {
-        this.$toast.error('Failed to add room: ' + (error.response?.data?.message || error.message));
-      } finally {
+  let errorMessage = 'Failed to add room';
+  if (error.response && error.response.data && error.response.data.message) {
+    errorMessage += ': ' + error.response.data.message;
+  } else {
+    errorMessage += ': ' + error.message;
+  }
+  this.$toast.error(errorMessage);
+}finally {
         this.addingRoom = false;
       }
     },
