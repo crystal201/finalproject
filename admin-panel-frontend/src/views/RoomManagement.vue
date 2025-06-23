@@ -132,7 +132,7 @@
           </button>
         </div>
         <div class="modal-body">
-          <p>Are you sure you want to delete <strong>{{ roomToDelete?.roomName }}</strong>?</p>
+          <p>Are you sure you want to delete <strong>{{ roomToDelete ? roomToDelete.roomName : '' }}</strong>?</p>
           <p>This action cannot be undone.</p>
         </div>
         <div class="modal-footer">
