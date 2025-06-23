@@ -212,9 +212,14 @@
                 </div>
                 <div class="booking-seat">
                   <i class="fas fa-chair"></i>
-                  <span :class="{ removed: booking.seat === 'removed' }">{{
-                    booking.seat
-                  }}</span>
+                  <span
+                    v-for="(seat, index) in booking.seats"
+                    :key="index"
+                    :class="{ removed: seat === 'removed' }"
+                    class="seat-item"
+                  >
+                    {{ seat }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -351,7 +356,7 @@ export default {
           date: booking.date,
           showtime: booking.showtime,
           username: booking.username,
-          seats: booking.seats.join(", "),
+          seats: booking.seats,
         }));
         this.showBookingsModal = true;
       } catch (error) {
@@ -827,5 +832,12 @@ export default {
 .status-badge.unknown {
   background: rgba(128, 128, 128, 0.1);
   color: #808080;
+}
+.seat-item {
+  margin-right: 5px;
+}
+.seat-item.removed {
+  color: var(--danger);
+  font-style: italic;
 }
 </style>

@@ -13,7 +13,7 @@
       <div class="search-filter">
         <div class="search-input">
           <i class="fas fa-search"></i>
-          <input v-model="searchQuery" placeholder="Search seats...">
+          <input v-model="searchQuery" placeholder="Search seats..." />
         </div>
         <div class="filter-group">
           <label>Filter by:</label>
@@ -26,27 +26,41 @@
       </div>
       
       <div class="seats-grid">
-        <div v-for="seat in filteredSeats" :key="seat.id" class="seat-card">
+        <div
+          v-for="booking in filteredBookings"
+          :key="`${booking.roomId}-${booking.date}-${booking.showtime}`"
+          class="seat-card"
+        >
           <div class="seat-header">
-            <h3>Seat {{ seat.seat }}</h3>
-            <span class="status-badge" :class="getStatusClass(seat)">{{ getStatusText(seat) }}</span>
+            <h3>Booking for Room {{ booking.roomId }}</h3>
+            <span class="status-badge" :class="getStatusClass(booking)">{{ getStatusText(booking) }}</span>
           </div>
           <div class="seat-details">
             <div class="detail-item">
-              <i class="fas fa-door-open"></i>
-              <span>Room {{ seat.roomId }}</span>
-            </div>
-            <div class="detail-item">
               <i class="fas fa-calendar-day"></i>
-              <span>{{ formatDate(seat.date) }}</span>
+              <span>{{ formatDate(booking.date) }}</span>
             </div>
             <div class="detail-item">
               <i class="fas fa-clock"></i>
-              <span>{{ seat.showtime }}</span>
+              <span>{{ booking.showtime }}</span>
+            </div>
+            <div class="detail-item">
+              <i class="fas fa-user"></i>
+              <span>{{ booking.username || "Guest" }}</span>
+            </div>
+          </div>
+          <div class="seat-list">
+            <div
+              v-for="(seat, index) in booking.seats"
+              :key="index"
+              class="seat-item"
+            >
+              <i class="fas fa-chair"></i>
+              <span :class="{ removed: seat === 'removed' }">{{ seat }}</span>
             </div>
           </div>
           <div class="seat-actions">
-            <button class="action-btn view" @click="viewBookingDetails(seat)">
+            <button class="action-btn view" @click="viewBookingDetails(booking)">
               <i class="fas fa-eye"></i> Details
             </button>
           </div>
@@ -71,44 +85,43 @@ export default {
       occupiedSeats: [],
       searchQuery: '',
       filterBy: 'all',
-      loading: false
-    }
+      loading: false,
+    };
   },
   computed: {
-    filteredSeats() {
+    filteredBookings() {
       let filtered = this.occupiedSeats;
-      
-      // Apply search filter
+
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
-        filtered = filtered.filter(seat => 
-          seat.seat.toLowerCase().includes(query) ||
-          seat.roomId.toString().includes(query) ||
-          seat.date.toLowerCase().includes(query) ||
-          seat.showtime.toLowerCase().includes(query)
+        filtered = filtered.filter((booking) =>
+          booking.seats.some((seat) => seat.toLowerCase().includes(query)) ||
+          booking.roomId.toString().includes(query) ||
+          booking.date.toLowerCase().includes(query) ||
+          booking.showtime.toLowerCase().includes(query) ||
+          (booking.username || '').toLowerCase().includes(query)
         );
       }
-      
-      // Apply time filter
+
       if (this.filterBy === 'today') {
         const today = dayjs().format('YYYY-MM-DD');
-        filtered = filtered.filter(seat => seat.date === today);
+        filtered = filtered.filter((booking) => booking.date === today);
       } else if (this.filterBy === 'upcoming') {
         const today = dayjs().format('YYYY-MM-DD');
-        filtered = filtered.filter(seat => seat.date >= today);
+        filtered = filtered.filter((booking) => booking.date >= today);
       }
-      
+
       return filtered;
-    }
+    },
   },
   methods: {
     async fetchOccupiedSeats() {
       this.loading = true;
       try {
-        const response = await this.axios.get('/api/bookings/occupied-seats');
+        const response = await axios.get('/api/bookings/occupied-seats');
         this.occupiedSeats = response.data;
       } catch (error) {
-        console.error("API Error:", error);
+        console.error('API Error:', error);
         this.$toast.error('Failed to fetch occupied seats');
         this.occupiedSeats = [];
       } finally {
@@ -118,27 +131,26 @@ export default {
     formatDate(date) {
       return dayjs(date).format('DD/MM/YYYY');
     },
-    getStatusClass(seat) {
+    getStatusClass(booking) {
       const today = dayjs().format('YYYY-MM-DD');
-      if (seat.date < today) return 'past';
-      if (seat.date === today) return 'current';
+      if (booking.date < today) return 'past';
+      if (booking.date === today) return 'current';
       return 'upcoming';
     },
-    getStatusText(seat) {
+    getStatusText(booking) {
       const today = dayjs().format('YYYY-MM-DD');
-      if (seat.date < today) return 'Past';
-      if (seat.date === today) return 'Today';
+      if (booking.date < today) return 'Past';
+      if (booking.date === today) return 'Today';
       return 'Upcoming';
     },
-    viewBookingDetails(seat) {
-      // Implement view details functionality
-      console.log("View seat details:", seat);
-    }
+    viewBookingDetails(booking) {
+      console.log('View booking details:', booking);
+    },
   },
   mounted() {
     this.fetchOccupiedSeats();
-  }
-}
+  },
+};
 </script>
 
 <style scoped>
@@ -321,6 +333,27 @@ export default {
 .detail-item i {
   width: 16px;
   text-align: center;
+}
+
+.seat-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 10px 0;
+}
+
+.seat-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.seat-item .removed {
+  color: var(--danger);
+  font-style: italic;
 }
 
 .seat-actions {
