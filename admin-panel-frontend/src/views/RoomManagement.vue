@@ -280,20 +280,18 @@ export default {
     async addRoom() {
       this.addingRoom = true;
       try {
-        await axios.post("/api/rooms", this.newRoom);
-        this.$toast.success("Room added successfully");
+        await axios.post('/api/rooms', this.newRoom);
+        this.$toast.success('Room added successfully');
         await this.fetchRooms();
         this.closeAddRoomModal();
       } catch (error) {
-        let errorMessage = "Failed to add room";
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.message
-        ) {
-          errorMessage += ": " + error.response.data.message;
+        let errorMessage = 'Failed to add room';
+        if (error.response && error.response.data && error.response.data.message) {
+          errorMessage += ': ' + error.response.data.message;
+        } else if (error.message) {
+          errorMessage += ': ' + error.message;
         } else {
-          errorMessage += ": " + error.message;
+          errorMessage += ': An unexpected error occurred';
         }
         this.$toast.error(errorMessage);
       } finally {
@@ -314,19 +312,17 @@ export default {
       this.deletingRoom = true;
       try {
         await axios.delete(`/api/rooms/${this.roomToDelete.id}`);
-        this.$toast.success("Room deleted successfully");
+        this.$toast.success('Room deleted successfully');
         await this.fetchRooms();
         this.closeDeleteConfirmModal();
       } catch (error) {
-        let errorMessage = "Failed to delete room";
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.message
-        ) {
-          errorMessage += ": " + error.response.data.message;
+        let errorMessage = 'Failed to delete room';
+        if (error.response && error.response.data && error.response.data.message) {
+          errorMessage += ': ' + error.response.data.message;
+        } else if (error.message) {
+          errorMessage += ': ' + error.message;
         } else {
-          errorMessage += ": " + error.message;
+          errorMessage += ': An unexpected error occurred';
         }
         this.$toast.error(errorMessage);
       } finally {
