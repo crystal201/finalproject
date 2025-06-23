@@ -311,6 +311,15 @@ export default {
       if (!this.roomToDelete) return;
       this.deletingRoom = true;
       try {
+        const response = await axios.get('/api/bookings/occupied-seats', {
+          params: { roomId: this.roomToDelete.id }
+        });
+        const bookings = response.data;
+        if (bookings.length > 0) {
+          this.$toast.error('Cannot delete room with existing bookings.');
+          this.deletingRoom = false;
+          return;
+        }
         await axios.delete(`/api/rooms/${this.roomToDelete.id}`);
         this.$toast.success('Room deleted successfully');
         await this.fetchRooms();
