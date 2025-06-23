@@ -11,7 +11,7 @@
         </button>
       </div>
     </div>
-    
+
     <div class="card">
       <div class="table-responsive">
         <table class="rooms-table">
@@ -38,16 +38,25 @@
               </td>
               <td>{{ room.capacity }} seats</td>
               <td>
-                <span class="status-badge" :class="room.status.toLowerCase()">
-                  {{ room.status }}
+                <span
+                  class="status-badge"
+                  :class="room.status ? room.status.toLowerCase() : 'unknown'"
+                >
+                  {{ room.status || "Unknown" }}
                 </span>
               </td>
               <td>
                 <div class="action-buttons">
-                  <button @click="showRoomBookings(room.id)" class="action-btn view">
+                  <button
+                    @click="showRoomBookings(room.id)"
+                    class="action-btn view"
+                  >
                     <i class="fas fa-calendar-alt"></i> Bookings
                   </button>
-                  <button @click="confirmDeleteRoom(room.id)" class="action-btn delete">
+                  <button
+                    @click="confirmDeleteRoom(room.id)"
+                    class="action-btn delete"
+                  >
                     <i class="fas fa-trash-alt"></i>
                   </button>
                 </div>
@@ -56,7 +65,7 @@
           </tbody>
         </table>
       </div>
-      
+
       <div v-if="rooms.length === 0" class="empty-state">
         <i class="fas fa-door-open"></i>
         <p>No rooms found</p>
@@ -64,7 +73,7 @@
           <i class="fas fa-plus"></i> Add Your First Room
         </button>
       </div>
-      
+
       <div class="table-footer">
         <div class="table-info">
           Showing {{ rooms.length }} of {{ rooms.length }} rooms
@@ -80,7 +89,7 @@
         </div>
       </div>
     </div>
-    
+
     <!-- Add Room Modal -->
     <div v-if="showAddRoomModal" class="modal-overlay">
       <div class="modal">
@@ -94,11 +103,22 @@
           <form @submit.prevent="addRoom">
             <div class="form-group">
               <label>Room Name</label>
-              <input v-model="newRoom.roomName" type="text" required placeholder="Enter room name">
+              <input
+                v-model="newRoom.roomName"
+                type="text"
+                required
+                placeholder="Enter room name"
+              />
             </div>
             <div class="form-group">
               <label>Capacity</label>
-              <input v-model.number="newRoom.capacity" type="number" required placeholder="Enter capacity" min="1">
+              <input
+                v-model.number="newRoom.capacity"
+                type="number"
+                required
+                placeholder="Enter capacity"
+                min="1"
+              />
             </div>
             <div class="form-group">
               <label>Status</label>
@@ -109,7 +129,11 @@
               </select>
             </div>
             <div class="modal-footer">
-              <button type="button" @click="closeAddRoomModal" class="cancel-btn">
+              <button
+                type="button"
+                @click="closeAddRoomModal"
+                class="cancel-btn"
+              >
                 Cancel
               </button>
               <button type="submit" :disabled="addingRoom" class="confirm-btn">
@@ -121,7 +145,7 @@
         </div>
       </div>
     </div>
-    
+
     <!-- Delete Confirmation Modal -->
     <div v-if="showDeleteConfirmModal" class="modal-overlay">
       <div class="modal">
@@ -132,21 +156,29 @@
           </button>
         </div>
         <div class="modal-body">
-          <p>Are you sure you want to delete <strong>{{ roomToDelete ? roomToDelete.roomName : '' }}</strong>?</p>
+          <p>
+            Are you sure you want to delete
+            <strong>{{ roomToDelete ? roomToDelete.roomName : "" }}</strong
+            >?
+          </p>
           <p>This action cannot be undone.</p>
         </div>
         <div class="modal-footer">
           <button @click="closeDeleteConfirmModal" class="cancel-btn">
             Cancel
           </button>
-          <button @click="deleteRoom" :disabled="deletingRoom" class="confirm-btn danger">
+          <button
+            @click="deleteRoom"
+            :disabled="deletingRoom"
+            class="confirm-btn danger"
+          >
             <span v-if="deletingRoom" class="loading-spinner"></span>
             <span v-else>Delete</span>
           </button>
         </div>
       </div>
     </div>
-    
+
     <!-- Bookings Modal -->
     <div v-if="showBookingsModal" class="modal-overlay">
       <div class="modal">
@@ -158,7 +190,11 @@
         </div>
         <div class="modal-body">
           <div v-if="roomBookings.length > 0" class="bookings-list">
-            <div v-for="booking in roomBookings" :key="booking.id" class="booking-item">
+            <div
+              v-for="booking in roomBookings"
+              :key="booking.id"
+              class="booking-item"
+            >
               <div class="booking-header">
                 <div class="booking-date">
                   <i class="fas fa-calendar-day"></i>
@@ -172,11 +208,13 @@
               <div class="booking-details">
                 <div class="booking-user">
                   <i class="fas fa-user"></i>
-                  {{ booking.username || 'Guest' }}
+                  {{ booking.username || "Guest" }}
                 </div>
                 <div class="booking-seat">
                   <i class="fas fa-chair"></i>
-                  {{ booking.seat }}
+                  <span :class="{ removed: booking.seat === 'removed' }">{{
+                    booking.seat
+                  }}</span>
                 </div>
               </div>
             </div>
@@ -187,9 +225,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button @click="closeBookingsModal" class="cancel-btn">
-            Close
-          </button>
+          <button @click="closeBookingsModal" class="cancel-btn">Close</button>
         </div>
       </div>
     </div>
@@ -197,7 +233,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 
 export default {
   data() {
@@ -206,33 +242,36 @@ export default {
       showAddRoomModal: false,
       addingRoom: false,
       newRoom: {
-        roomName: '',
+        roomName: "",
         capacity: null,
-        status: 'Available'
+        status: "Available",
       },
       showDeleteConfirmModal: false,
       deletingRoom: false,
       roomToDelete: null,
       showBookingsModal: false,
       roomBookings: [],
-      selectedRoomName: '',
+      selectedRoomName: "",
       selectedRoomId: null,
     };
   },
   methods: {
     async fetchRooms() {
       try {
-        const response = await axios.get('/api/rooms');
-        this.rooms = response.data;
+        const response = await axios.get("/api/rooms");
+        this.rooms = response.data.map((room) => ({
+          ...room,
+          status: room.status || "Available",
+        }));
       } catch (error) {
         console.error("API Error:", error);
-        this.$toast.error('Failed to fetch rooms');
+        this.$toast.error("Failed to fetch rooms");
         this.rooms = [];
       }
     },
     openAddRoomModal() {
       this.showAddRoomModal = true;
-      this.newRoom = { roomName: '', capacity: null, status: 'Available' };
+      this.newRoom = { roomName: "", capacity: null, status: "Available" };
     },
     closeAddRoomModal() {
       this.showAddRoomModal = false;
@@ -241,24 +280,28 @@ export default {
     async addRoom() {
       this.addingRoom = true;
       try {
-        await axios.post('/api/rooms', this.newRoom);
-        this.$toast.success('Room added successfully');
+        await axios.post("/api/rooms", this.newRoom);
+        this.$toast.success("Room added successfully");
         await this.fetchRooms();
         this.closeAddRoomModal();
       } catch (error) {
-  let errorMessage = 'Failed to add room';
-  if (error.response && error.response.data && error.response.data.message) {
-    errorMessage += ': ' + error.response.data.message;
-  } else {
-    errorMessage += ': ' + error.message;
-  }
-  this.$toast.error(errorMessage);
-}finally {
+        let errorMessage = "Failed to add room";
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.message
+        ) {
+          errorMessage += ": " + error.response.data.message;
+        } else {
+          errorMessage += ": " + error.message;
+        }
+        this.$toast.error(errorMessage);
+      } finally {
         this.addingRoom = false;
       }
     },
     confirmDeleteRoom(roomId) {
-      this.roomToDelete = this.rooms.find(room => room.id === roomId);
+      this.roomToDelete = this.rooms.find((room) => room.id === roomId);
       this.showDeleteConfirmModal = true;
     },
     closeDeleteConfirmModal() {
@@ -271,15 +314,19 @@ export default {
       this.deletingRoom = true;
       try {
         await axios.delete(`/api/rooms/${this.roomToDelete.id}`);
-        this.$toast.success('Room deleted successfully');
+        this.$toast.success("Room deleted successfully");
         await this.fetchRooms();
         this.closeDeleteConfirmModal();
       } catch (error) {
-        let errorMessage = 'Failed to delete room';
-        if (error.response && error.response.data && error.response.data.message) {
-          errorMessage += ': ' + error.response.data.message;
+        let errorMessage = "Failed to delete room";
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.message
+        ) {
+          errorMessage += ": " + error.response.data.message;
         } else {
-          errorMessage += ': ' + error.message;
+          errorMessage += ": " + error.message;
         }
         this.$toast.error(errorMessage);
       } finally {
@@ -288,18 +335,21 @@ export default {
     },
     async showRoomBookings(roomId) {
       this.selectedRoomId = roomId;
-      const room = this.rooms.find(r => r.id === roomId);
-      this.selectedRoomName = room ? room.roomName : 'Unknown Room';
+      const room = this.rooms.find((r) => r.id === roomId);
+      this.selectedRoomName = room ? room.roomName : "Unknown Room";
       try {
-        const response = await axios.get('/api/bookings/occupied-seats', {
-          params: { roomId: roomId }
+        const response = await axios.get("/api/bookings/occupied-seats", {
+          params: { roomId: roomId },
         });
-        this.roomBookings = response.data.map(booking => ({
-          id: booking.roomId + '-' + booking.date + '-' + booking.showtime,
+        this.roomBookings = response.data.map((booking) => ({
+          id: booking.roomId + "-" + booking.date + "-" + booking.showtime,
           date: booking.date,
           showtime: booking.showtime,
           username: booking.username,
-          seat: booking.seat
+          seat:
+            booking.seats && booking.seats.length > 0
+              ? booking.seats.join(", ")
+              : "Removed",
         }));
         this.showBookingsModal = true;
       } catch (error) {
@@ -312,7 +362,7 @@ export default {
       this.showBookingsModal = false;
       this.roomBookings = [];
       this.selectedRoomId = null;
-      this.selectedRoomName = '';
+      this.selectedRoomName = "";
     },
   },
   mounted() {
@@ -701,7 +751,9 @@ export default {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .bookings-list {
@@ -746,25 +798,32 @@ export default {
   align-items: center;
   gap: 6px;
 }
-
+.booking-seat .removed {
+  color: var(--danger);
+  font-style: italic;
+}
 @media (max-width: 768px) {
   .page-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 15px;
   }
-  
+
   .header-actions {
     width: 100%;
     justify-content: flex-end;
   }
-  
+
   .action-btn.view span {
     display: none;
   }
-  
+
   .modal {
     max-width: 100%;
   }
+}
+.status-badge.unknown {
+  background: rgba(128, 128, 128, 0.1);
+  color: #808080;
 }
 </style>

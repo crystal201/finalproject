@@ -17,7 +17,6 @@
               <th>User</th>
               <th>Email</th>
               <th>Role</th>
-              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -112,11 +111,6 @@ export default {
 
 .page-header h2 i {
   color: var(--primary);
-}
-
-.header-actions {
-  display: flex;
-  gap: 10px;
 }
 
 .refresh-btn {
@@ -220,23 +214,6 @@ export default {
 .role-badge.user {
   background: rgba(16, 185, 129, 0.1);
   color: var(--success);
-}
-
-.action-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.action-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .table-footer {

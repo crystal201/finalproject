@@ -31,7 +31,7 @@
                   </div>
                   <div class="movie-details">
                     <strong>{{ booking.movieTitle }}</strong>
-                    <span>Room {{ booking.roomName }}</span>
+                    <span>{{ booking.roomName }}</span>
                   </div>
                 </div>
               </td>
