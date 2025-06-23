@@ -361,7 +361,7 @@ export default {
           showtime: booking.showtime,
           username: booking.username,
           seats: booking.seats,
-          movieName: booking.movieName || "N/A", // Thêm trường movieName
+          movieName: booking.movieTitle || "N/A",
         }));
         this.showBookingsModal = true;
       } catch (error) {
