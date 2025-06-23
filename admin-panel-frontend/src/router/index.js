@@ -20,33 +20,32 @@ const routes = [
     component: Login
   },
   {
-    path: '/',
-    redirect: '/dashboard'
-  },
-  {
     path: '/dashboard',
     name: 'Dashboard',
-    component: Dashboard
-  },
-  {
-    path: '/rooms',
-    name: 'RoomManagement',
-    component: RoomManagement
-  },
-  {
-    path: '/users',
-    name: 'ManageUsers',
-    component: ManageUsers
-  },
-  {
-    path: '/bookings',
-    name: 'ManageBookings',
-    component: ManageBookings
-  },
-  {
-    path: '/occupied-seats',
-    name: 'ManageSeats',
-    component: ManageSeats
+    component: Dashboard,
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: 'rooms',
+        name: 'RoomManagement',
+        component: RoomManagement
+      },
+      {
+        path: 'users',
+        name: 'ManageUsers',
+        component: ManageUsers
+      },
+      {
+        path: 'bookings',
+        name: 'ManageBookings',
+        component: ManageBookings
+      },
+      {
+        path: 'occupied-seats',
+        name: 'ManageSeats',
+        component: ManageSeats
+      }
+    ]
   }
 ]
 

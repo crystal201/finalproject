@@ -7,10 +7,10 @@
     <div class="dashboard-content">
       <aside class="sidebar">
         <nav class="sidebar-nav">
-          <router-link to="/rooms" class="nav-item">Manage Rooms</router-link>
-          <router-link to="/users" class="nav-item">Manage Users</router-link>
-          <router-link to="/bookings" class="nav-item">Manage Bookings</router-link>
-          <router-link to="/occupied-seats" class="nav-item">Manage Seats</router-link>
+          <router-link to="/dashboard/rooms" class="nav-item">Manage Rooms</router-link>
+          <router-link to="/dashboard/users" class="nav-item">Manage Users</router-link>
+          <router-link to="/dashboard/bookings" class="nav-item">Manage Bookings</router-link>
+          <router-link to="/dashboard/occupied-seats" class="nav-item">Manage Seats</router-link>
         </nav>
       </aside>
       <main class="main-content">
