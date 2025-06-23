@@ -103,6 +103,7 @@ export default {
   transition: all 0.3s ease;
   position: relative;
   z-index: 10;
+  border-right: 1px solid hsla(0,0%,100%,.1);
 }
 
 .sidebar.collapsed {
@@ -222,6 +223,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  height: 69.5px;
 }
 
 .header-left {

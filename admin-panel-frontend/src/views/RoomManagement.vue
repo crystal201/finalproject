@@ -351,10 +351,7 @@ export default {
           date: booking.date,
           showtime: booking.showtime,
           username: booking.username,
-          seat:
-            booking.seats && booking.seats.length > 0
-              ? booking.seats.join(", ")
-              : "Removed",
+          seats: booking.seats.join(", "),
         }));
         this.showBookingsModal = true;
       } catch (error) {
