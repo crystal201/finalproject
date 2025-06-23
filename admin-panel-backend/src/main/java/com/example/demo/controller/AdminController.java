@@ -104,7 +104,7 @@ public class AdminController {
             .collect(Collectors.toList());
     }
 
-   @GetMapping("/bookings/occupied-seats")
+        @GetMapping("/bookings/occupied-seats")
         public List<GroupedOccupiedSeatResponse> getOccupiedSeats(
                 @RequestParam(required = false) Long roomId,
                 @RequestParam(required = false) String date,
@@ -148,7 +148,8 @@ public class AdminController {
                         Bookings booking = bookingsRepo.findByRoomIdAndDateAndShowtimeAndUserId(
                                 key.getRoomId(), key.getDate(), key.getShowtime(), key.getUserId()
                         ).orElse(null);
-                        String movieTitle = (booking != null) ? booking.getMovieTitle() : "N/A";
+                        String movieTitle = (booking != null && booking.getMovieTitle() != null) ? booking.getMovieTitle() : "N/A";
+                        logger.info("Booking for roomId: {}, date: {}, showtime: {}, movieTitle: {}", key.getRoomId(), key.getDate(), key.getShowtime(), movieTitle);
 
                         return new GroupedOccupiedSeatResponse(
                                 key.getRoomId(),
@@ -162,7 +163,6 @@ public class AdminController {
                     })
                     .collect(Collectors.toList());
         }
-
     @PostMapping("/bookings/accept/{id}")
     public ResponseEntity<Map<String, Object>> acceptBooking(@PathVariable Long id) {
         Bookings booking = bookingsRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Booking not found"));
