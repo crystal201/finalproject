@@ -3,6 +3,7 @@ import App from './App.vue'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 import 'vue-toastification/dist/index.css';
+import Toast from 'vue-toastification';
 import router from './router/index'
 
 const axiosInstance = axios.create({
