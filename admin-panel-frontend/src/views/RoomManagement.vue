@@ -275,7 +275,13 @@ export default {
         await this.fetchRooms();
         this.closeDeleteConfirmModal();
       } catch (error) {
-        this.$toast.error('Failed to delete room: ' + (error.response?.data?.message || error.message));
+        let errorMessage = 'Failed to delete room';
+        if (error.response && error.response.data && error.response.data.message) {
+          errorMessage += ': ' + error.response.data.message;
+        } else {
+          errorMessage += ': ' + error.message;
+        }
+        this.$toast.error(errorMessage);
       } finally {
         this.deletingRoom = false;
       }
