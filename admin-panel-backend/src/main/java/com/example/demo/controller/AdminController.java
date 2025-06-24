@@ -61,6 +61,7 @@ public class AdminController {
                 user.getUsername(),
                 user.getEmail(),
                 user.getPhone(),
+                user.getIsVerified() != null && user.getIsVerified(),                
                 user.getRole()
             ))
             .collect(Collectors.toList());
@@ -105,65 +106,71 @@ public class AdminController {
     }
 
         @GetMapping("/bookings/occupied-seats")
-public List<GroupedOccupiedSeatResponse> getOccupiedSeats(
-        @RequestParam(required = false) Long roomId,
-        @RequestParam(required = false) String date,
-        @RequestParam(required = false) String showtime) {
-    return bookingsRepo.findAll().stream()
-            .filter(b -> "ACTIVE".equalsIgnoreCase(b.getStatus()))
-            .filter(b -> roomId == null || b.getRoomId().equals(roomId))
-            .filter(b -> date == null || b.getDate().equals(date))
-            .filter(b -> showtime == null || b.getShowtime().equals(showtime))
-            .collect(Collectors.groupingBy(
-                    booking -> new GroupedOccupiedSeatKey(
-                            booking.getRoomId(),
-                            booking.getDate(),
-                            booking.getShowtime(),
-                            booking.getUserId()
-                    )
-            ))
-            .entrySet().stream()
-            .map(entry -> {
-                GroupedOccupiedSeatKey key = entry.getKey();
-                // Lấy tất cả bookings khớp với key
-                List<Bookings> bookings = bookingsRepo.findAll().stream()
-                        .filter(b -> b.getRoomId().equals(key.getRoomId())
-                                && b.getDate().equals(key.getDate())
-                                && b.getShowtime().equals(key.getShowtime())
-                                && b.getUserId().equals(key.getUserId())
-                                && "ACTIVE".equalsIgnoreCase(b.getStatus()))
-                        .collect(Collectors.toList());
-                List<BookingSeats> seats = bookings.stream()
-                        .flatMap(b -> bookingSeatsRepo.findByBookingId(b.getId()).stream())
-                        .collect(Collectors.toList());
-                Users user = null;
-                try {
-                    long userIdLong = Long.parseLong(key.getUserId());
-                    user = usersRepo.findById(userIdLong)
-                            .orElseGet(() -> {
-                                logger.warn("User with id {} not found, creating default", userIdLong);
-                                return new Users();
-                            });
-                } catch (NumberFormatException e) {
-                    logger.error("Failed to parse userId {}: {}", key.getUserId(), e.getMessage());
-                    user = new Users();
-                }
-                // Lấy movieTitle từ booking đầu tiên nếu có
-                String movieTitle = bookings.isEmpty() ? "N/A" : (bookings.get(0).getMovieTitle() != null ? bookings.get(0).getMovieTitle() : "N/A");
-                logger.info("Key: roomId={}, date={}, showtime={}, userId={}, bookings found: {}, movieTitle: {}",
-                        key.getRoomId(), key.getDate(), key.getShowtime(), key.getUserId(), bookings.size(), movieTitle);
+    public List<GroupedOccupiedSeatResponse> getOccupiedSeats(
+            @RequestParam(required = false) Long roomId,
+            @RequestParam(required = false) String date,
+            @RequestParam(required = false) String showtime) {
+        List<Bookings> allBookings = bookingsRepo.findAll();
+        logger.info("Total bookings found: {}", allBookings.size());
 
-                return new GroupedOccupiedSeatResponse(
-                        key.getRoomId(),
-                        seats.stream().map(BookingSeats::getSeat).collect(Collectors.toList()),
-                        key.getDate(),
-                        key.getShowtime(),
-                        key.getUserId(),
-                        user.getUsername() != null ? user.getUsername() : "Unknown",
-                        movieTitle
-                );
-            })
-            .collect(Collectors.toList());
+        return allBookings.stream()
+                .filter(b -> "ACTIVE".equalsIgnoreCase(b.getStatus()))
+                .filter(b -> roomId == null || b.getRoomId().equals(roomId))
+                .filter(b -> date == null || b.getDate().equals(date))
+                .filter(b -> showtime == null || b.getShowtime().equals(showtime))
+                .collect(Collectors.groupingBy(
+                        booking -> new GroupedOccupiedSeatKey(
+                                booking.getRoomId(),
+                                booking.getDate(),
+                                booking.getShowtime(),
+                                booking.getUserId()
+                        )
+                ))
+                .entrySet().stream()
+                .map(entry -> {
+                    GroupedOccupiedSeatKey key = entry.getKey();
+                    List<Bookings> matchedBookings = allBookings.stream()
+                            .filter(b -> b.getRoomId().equals(key.getRoomId())
+                                    && b.getDate().equals(key.getDate())
+                                    && b.getShowtime().equals(key.getShowtime())
+                                    && b.getUserId().equals(key.getUserId())
+                                    && "ACTIVE".equalsIgnoreCase(b.getStatus()))
+                            .collect(Collectors.toList());
+                    logger.info("Key: roomId={}, date={}, showtime={}, userId={}, matched bookings: {}",
+                            key.getRoomId(), key.getDate(), key.getShowtime(), key.getUserId(), matchedBookings.size());
+
+                    List<BookingSeats> seats = matchedBookings.stream()
+                            .flatMap(b -> bookingSeatsRepo.findByBookingId(b.getId()).stream())
+                            .collect(Collectors.toList());
+                    Users user = null;
+                    try {
+                        long userIdLong = Long.parseLong(key.getUserId());
+                        user = usersRepo.findById(userIdLong)
+                                .orElseGet(() -> {
+                                    logger.warn("User with id {} not found, creating default", userIdLong);
+                                    return new Users();
+                                });
+                    } catch (NumberFormatException e) {
+                        logger.error("Failed to parse userId {}: {}", key.getUserId(), e.getMessage());
+                        user = new Users();
+                    }
+                    String movieTitle = matchedBookings.isEmpty() ? "N/A" : 
+                            (matchedBookings.get(0).getMovieTitle() != null ? matchedBookings.get(0).getMovieTitle() : "N/A");
+                    logger.info("MovieTitle for key {}: {}", key, movieTitle);
+
+                    GroupedOccupiedSeatResponse response = new GroupedOccupiedSeatResponse(
+                            key.getRoomId(),
+                            seats.stream().map(BookingSeats::getSeat).collect(Collectors.toList()),
+                            key.getDate(),
+                            key.getShowtime(),
+                            key.getUserId(),
+                            user.getUsername() != null ? user.getUsername() : "Unknown",
+                            movieTitle
+                    );
+                    logger.info("Response created: roomId={}, movieTitle={}", response.getRoomId(), response.getMovieTitle());
+                    return response;
+                })
+                .collect(Collectors.toList());
     }
     @PostMapping("/bookings/accept/{id}")
     public ResponseEntity<Map<String, Object>> acceptBooking(@PathVariable Long id) {
@@ -249,13 +256,15 @@ class UserResponse {
     private String username;
     private String email;
     private String phone;
+    private Boolean isVerified;
     private String role;
 
-    public UserResponse(Long id, String username, String email, String phone, String role) {
+    public UserResponse(Long id, String username, String email, String phone, Boolean isVerified, String role) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.phone = phone;
+        this.isVerified = isVerified;
         this.role = role;
     }
 
@@ -264,6 +273,7 @@ class UserResponse {
     public String getUsername() { return username; }
     public String getEmail() { return email; }
     public String getPhone() { return phone; }
+    public Boolean getIsVerified() { return isVerified; }
     public String getRole() { return role; }
 }
 
@@ -378,6 +388,7 @@ class GroupedOccupiedSeatResponse {
     private final String userId;
     @JsonProperty("username")
     private final String username;
+    @JsonProperty("movieTitle")
     private final String movieTitle;
 
     public GroupedOccupiedSeatResponse(Long roomId, List<String> seats, String date, String showtime, String userId, String username, String movieTitle) {

@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,6 +16,7 @@ public class Users {
     private String avatar;
     private String email;
     private Boolean enabled;
+    @Column(name = "is_verified")
     private Boolean isVerified;
     private String password;
     private String phone;
@@ -25,5 +27,6 @@ public class Users {
     public String getUsername() { return username; }
     public String getEmail() { return email; }
     public String getPhone() { return phone; }
+    public Boolean getIsVerified() { return isVerified; }
     public String getRole() { return role; }
 }

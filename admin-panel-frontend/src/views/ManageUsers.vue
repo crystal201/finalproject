@@ -16,6 +16,8 @@
             <tr>
               <th>User</th>
               <th>Email</th>
+              <th>Phone Number</th>
+              <th>Verified</th>
               <th>Role</th>
             </tr>
           </thead>
@@ -33,6 +35,12 @@
                 </div>
               </td>
               <td>{{ user.email }}</td>
+              <td>{{ user.phone || 'N/A' }}</td>
+              <td>
+                <span class="status-badge" :class="{ 'verified': user.is_verified === true, 'unverified': user.is_verified === false }">
+                  {{ user.is_verified === true ? 'Yes' : 'No' }}
+                </span>
+              </td>
               <td>
                 <span class="role-badge" :class="user.role.toLowerCase()">{{ user.role }}</span>
               </td>
@@ -73,7 +81,10 @@ export default {
       this.loading = true;
       try {
         const response = await this.axios.get('/api/users');
-        this.users = response.data;
+        this.users = response.data.map(user => ({
+          ...user,
+          is_verified: user.is_verified === 1 || user.is_verified === true // Chuyển bit(1) thành boolean
+        }));
       } catch (error) {
         console.error("API Error:", error.response ? error.response.data : error.message);
         this.users = [];
@@ -81,7 +92,6 @@ export default {
         this.loading = false;
       }
     },
-
   },
   mounted() {
     this.fetchUsers();
@@ -214,6 +224,24 @@ export default {
 .role-badge.user {
   background: rgba(16, 185, 129, 0.1);
   color: var(--success);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge.verified {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+}
+
+.status-badge.unverified {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
 }
 
 .table-footer {
