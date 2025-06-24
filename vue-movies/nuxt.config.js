@@ -89,6 +89,7 @@ export default {
         rel: "stylesheet",
         href: "//fonts.googleapis.com/css?family=Roboto:300,400,500",
       },
+      { rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css' },
     ],
   },
 
