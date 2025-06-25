@@ -390,13 +390,13 @@ export default {
     },
     getStatusLabel(status) {
       switch (status) {
-        case 'WAITING_BOOKING': return 'Đang chờ xác nhận đặt vé';
-        case 'ACTIVE': return 'Đang hoạt động';
-        case 'WAITING_CANCEL': return 'Đang chờ xác nhận hủy vé';
-        case 'CANCELLED': return 'Đã hủy';
-        case 'EXPIRED': return 'Hết hiệu lực';
-        case 'REJECTED': return 'Đã từ chối';
-        default: return 'Không xác định';
+        case 'WAITING_BOOKING': return 'Waiting for accept booking';
+        case 'ACTIVE': return 'Active';
+        case 'WAITING_CANCEL': return 'Waiting for cancelation';
+        case 'CANCELLED': return 'Canceled';
+        case 'EXPIRED': return 'Expired';
+        case 'REJECTED': return 'Reject';
+        default: return 'UnIdentify';
       }
     },
   }
