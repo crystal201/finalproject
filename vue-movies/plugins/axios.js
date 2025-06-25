@@ -1,6 +1,6 @@
 export default function ({ $axios, store, redirect }) {
   $axios.defaults.withCredentials = false;
-  $axios.defaults.timeout = 30000;
+  $axios.defaults.timeout = 120000;
 
   $axios.onRequest(config => {
     console.log(" Calling API: ", config.url, config.method, config.headers, "BaseURL:", $axios.defaults.baseURL);
